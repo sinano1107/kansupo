@@ -6,6 +6,7 @@ from commands.click import ClickCommand
 from commands.command import Command
 from commands.index import ENABLED_COMMANDS
 from login import login
+from targets import GAME_START
 
 
 class ThreadJob(threading.Thread):
@@ -30,7 +31,7 @@ class ThreadJob(threading.Thread):
                 .content_frame.locator("canvas")
             )
 
-            ClickCommand(x_range=(700, 1100), y_range=(560, 640)).run(canvas=self.canvas)
+            ClickCommand(GAME_START).run(canvas=self.canvas)
 
             page.wait_for_timeout(10000)
 
