@@ -5,6 +5,7 @@ from queue import Queue
 from commands.click import ClickCommand
 from commands.command import Command
 from commands.index import ENABLED_COMMANDS
+from commands.wait import WaitCommand
 from login import login
 from targets import GAME_START
 
@@ -24,7 +25,7 @@ class ThreadJob(threading.Thread):
 
             login(page)
 
-            page.wait_for_timeout(15000)
+            WaitCommand(15).run()
             self.canvas = (
                 page.locator('iframe[name="game_frame"]')
                 .content_frame.locator("#htmlWrap")
@@ -33,7 +34,7 @@ class ThreadJob(threading.Thread):
 
             ClickCommand(GAME_START).run(canvas=self.canvas)
 
-            page.wait_for_timeout(10000)
+            WaitCommand(10).run()
 
             while True:
                 if not self.queue.empty():
