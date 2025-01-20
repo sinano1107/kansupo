@@ -13,7 +13,6 @@ from targets import GAME_START
 class ThreadJob(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self, daemon=True)
-        self.kill_flag = False
         self.queue: Queue[Command] = Queue()
         self.canvas: Locator = None
 
