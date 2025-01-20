@@ -12,7 +12,10 @@ def login(page: Page):
     page.goto("http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854")
     page.get_by_role("textbox").nth(0).fill(email)
     page.get_by_role("textbox").nth(1).fill(password)
+    page.get_by_role("checkbox", name="ログインしたままにする").check()
     page.get_by_role("button", name="ログイン").click()
+    page.wait_for_timeout(5000)
+    page.context.storage_state(path="login_account.json")
     print("ログインしました")
 
 

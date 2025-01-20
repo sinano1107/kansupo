@@ -20,19 +20,18 @@ class ThreadJob(threading.Thread):
         with sync_playwright() as playwright:
             chromium = playwright.chromium
             browser = chromium.launch(headless=False)
-            page = browser.new_page()
-
-            login(page)
-
-            WaitCommand(15).run()
+            context = browser.new_context(storage_state="login_account.json")
+            page = context.new_page()
+            page.goto("http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854")
+            
             self.canvas = (
                 page.locator('iframe[name="game_frame"]')
                 .content_frame.locator("#htmlWrap")
                 .content_frame.locator("canvas")
             )
-
+            
+            WaitCommand(10).run()
             ClickCommand(GAME_START).run(canvas=self.canvas)
-
             WaitCommand(10).run()
 
             while True:
