@@ -47,7 +47,12 @@ with sync_playwright() as playwright:
     t.start()
 
     while True:
-        input_line = input()
+        try:
+            input_line = input()
+        except KeyboardInterrupt:
+            print("終了します")
+            exit()
+        
         input_array = input_line.split()
         command_type = ENABLED_COMMANDS.get(input_array[0])
         
