@@ -1,8 +1,9 @@
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Locator
 import threading
 import time
-import queue
-from datetime import datetime
+from queue import Queue
+from commands.command import Command
+from commands.index import ENABLED_COMMANDS
 from login import login
 from click import click
 
@@ -11,8 +12,8 @@ class ThreadJob(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self, daemon=True)
         self.kill_flag = False
-        self.queue = queue.Queue()
-        self.canvas = None
+        self.queue: Queue[Command] = Queue()
+        self.canvas: Locator = None
 
     def run(self):
         with sync_playwright() as playwright:
@@ -36,28 +37,24 @@ class ThreadJob(threading.Thread):
             while True:
                 if not self.queue.empty():
                     command = self.queue.get()
-                    if command == "screenshot":
-                        self.screenshot()
+                    command.run(canvas=self.canvas)
                 time.sleep(1)
 
     def click(self, x_range: tuple[float, float], y_range: tuple[float, float]):
         click(self.canvas, x_range, y_range)
 
-    def screenshot(self):
-        if self.canvas == None:
-            print("canvasがNoneなのでスクリーンショットを取得できません")
-        else:
-            self.canvas.screenshot(path="screenshots/{}.png".format(datetime.now()))
-
 
 with sync_playwright() as playwright:
     t = ThreadJob()
     t.start()
+    
+    command_dict = { command.get_name(): command for command in ENABLED_COMMANDS }
 
     while True:
-        command = input()
-        if command == "screenshot":
-            t.queue.put("screenshot")
-            print("screenshotをqueueに追加しました")
+        input_line = input()
+        command = command_dict.get(input_line)
+        
+        if command == None:
+            print("不明なコマンドです {}".format(input_line))
         else:
-            print("不明なコマンドです {}".format(command))
+            t.queue.put(command)
