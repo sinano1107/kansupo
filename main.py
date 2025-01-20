@@ -54,5 +54,10 @@ with sync_playwright() as playwright:
         if command_type == None:
             print("不明なコマンドです {}".format(input_line))
         else:
-            command = command_type.instantiate(input_array[1:])
+            try:
+                command = command_type.instantiate(input_array[1:])
+            except ValueError as e:
+                print("<エラー発生>")
+                print(e)
+                continue
             t.queue.put(command)

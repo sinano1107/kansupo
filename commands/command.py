@@ -6,8 +6,8 @@ from playwright.sync_api import Locator
 class Command(metaclass=ABCMeta):
     @staticmethod
     def instantiate(args: list[str]) -> Self:
-        raise Exception("instantiateメソッドがオーバーライドされていない")
+        raise ValueError("instantiateメソッドがオーバーライドされていない")
     
     @abstractmethod
     def run(self, canvas: Locator):
-        raise Exception("runメソッドがオーバーライドされていない")
+        raise ValueError("runメソッドがオーバーライドされていない")
