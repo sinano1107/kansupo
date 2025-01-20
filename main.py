@@ -6,13 +6,14 @@ from commands.click import ClickCommand
 from commands.command import Command
 from commands.index import ENABLED_COMMANDS
 from commands.wait import WaitCommand
-from login import login
 from targets import GAME_START
 
 
 class ThreadJob(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self, daemon=True)
+        self.pause = False
+        self.interrupt_task: function = None
         self.queue: Queue[Command] = Queue()
         self.canvas: Locator = None
 
@@ -35,7 +36,10 @@ class ThreadJob(threading.Thread):
             WaitCommand(10).run()
 
             while True:
-                if not self.queue.empty():
+                if self.interrupt_task != None:
+                    self.interrupt_task()
+                    self.interrupt_task = None
+                elif not self.pause and not self.queue.empty():
                     command = self.queue.get()
                     command.run(canvas=self.canvas)
                 time.sleep(1)
@@ -53,15 +57,27 @@ with sync_playwright() as playwright:
             exit()
         
         input_array = input_line.split()
-        command_type = ENABLED_COMMANDS.get(input_array[0])
         
-        if command_type == None:
-            print("不明なコマンドです {}".format(input_line))
+        if input_array[0] == "pause":
+            def pause():
+                t.pause = True
+                print("中断しました")
+            t.interrupt_task = pause
+        elif input_array[0] == "resume":
+            def resume():
+                t.pause = False
+                print("再開しました")
+            t.interrupt_task = resume
         else:
-            try:
-                command = command_type.instantiate(input_array[1:])
-            except ValueError as e:
-                print("<エラー発生>")
-                print(e)
-                continue
-            t.queue.put(command)
+            command_type = ENABLED_COMMANDS.get(input_array[0])
+            
+            if command_type == None:
+                print("不明なコマンドです {}".format(input_line))
+            else:
+                try:
+                    command = command_type.instantiate(input_array[1:])
+                except ValueError as e:
+                    print("<エラー発生>")
+                    print(e)
+                    continue
+                t.queue.put(command)
