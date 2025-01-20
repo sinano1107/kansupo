@@ -1,12 +1,13 @@
 from abc import ABCMeta, abstractmethod
+from typing import Self
 from playwright.sync_api import Locator
 
 
 class Command(metaclass=ABCMeta):
-    @abstractmethod
-    def get_name(self) -> str:
-        pass
+    @staticmethod
+    def instantiate(args: list[str]) -> Self:
+        raise Exception("instantiateメソッドがオーバーライドされていない")
     
     @abstractmethod
     def run(self, canvas: Locator):
-        pass
+        raise Exception("runメソッドがオーバーライドされていない")

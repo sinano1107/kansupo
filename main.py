@@ -2,10 +2,10 @@ from playwright.sync_api import sync_playwright, Locator
 import threading
 import time
 from queue import Queue
+from commands.click import ClickCommand
 from commands.command import Command
 from commands.index import ENABLED_COMMANDS
 from login import login
-from click import click
 
 
 class ThreadJob(threading.Thread):
@@ -30,7 +30,7 @@ class ThreadJob(threading.Thread):
                 .content_frame.locator("canvas")
             )
 
-            self.click(x_range=(700, 1100), y_range=(560, 640))
+            ClickCommand(x_range=(700, 1100), y_range=(560, 640)).run(canvas=self.canvas)
 
             page.wait_for_timeout(10000)
 
@@ -40,21 +40,18 @@ class ThreadJob(threading.Thread):
                     command.run(canvas=self.canvas)
                 time.sleep(1)
 
-    def click(self, x_range: tuple[float, float], y_range: tuple[float, float]):
-        click(self.canvas, x_range, y_range)
-
 
 with sync_playwright() as playwright:
     t = ThreadJob()
     t.start()
-    
-    command_dict = { command.get_name(): command for command in ENABLED_COMMANDS }
 
     while True:
         input_line = input()
-        command = command_dict.get(input_line)
+        input_array = input_line.split()
+        command_type = ENABLED_COMMANDS.get(input_array[0])
         
-        if command == None:
+        if command_type == None:
             print("不明なコマンドです {}".format(input_line))
         else:
+            command = command_type.instantiate(input_array[1:])
             t.queue.put(command)
