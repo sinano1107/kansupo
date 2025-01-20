@@ -1,4 +1,4 @@
-from playwright.sync_api import sync_playwright, Page
+from playwright.sync_api import Page
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,6 +17,8 @@ def login(page: Page):
 
 
 if __name__ == "__main__":
+    from playwright.sync_api import sync_playwright
+
     with sync_playwright() as playwright:
         chromium = playwright.chromium
         browser = chromium.launch(headless=False)
