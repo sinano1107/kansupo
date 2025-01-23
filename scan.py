@@ -22,4 +22,4 @@ def scan(canvas: Locator, target: ScanTarget):
     )
     _, max_val, _, _ = cv2.minMaxLoc(similarity)
     # print("similarity: ", max_val)
-    return max_val > 0.95
+    return max_val > 0.9
