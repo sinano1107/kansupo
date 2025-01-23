@@ -6,7 +6,7 @@ from typing import Callable
 from playwright.sync_api import sync_playwright, Locator
 
 from access import access
-from scan_targets.index import GAME_START_SCAN_TARGET
+from scan_targets.index import GAME_START_SCAN_TARGET, SETTING_SCAN_TARGET
 from targets import GAME_START
 from wait_until_find import wait_until_find
 
@@ -23,7 +23,7 @@ class MainThread(threading.Thread):
         with sync_playwright() as playwright:
             self.canvas = access(playwright)
 
-            # 1秒ごとにスタートボタンが出現したかを確認する
+            # スタートボタンが出現するまで待機
             wait_until_find(self.canvas, GAME_START_SCAN_TARGET)
 
             # 0~5秒待つ
@@ -32,6 +32,11 @@ class MainThread(threading.Thread):
             # スタートボタンをクリック
             x, y = GAME_START.random_point()
             self.canvas.click(position={"x": x, "y": y})
+
+            # 設定ボタンが出現(=母港画面に遷移完了)するまで待機
+            wait_until_find(self.canvas, SETTING_SCAN_TARGET)
+
+            print("母港に到達しました")
 
             while True:
                 if self.command != None:
