@@ -1,6 +1,9 @@
-import asyncio
+from datetime import datetime
 from random import random
-from playwright.async_api import async_playwright, Playwright
+import threading
+from time import sleep
+from typing import Callable
+from playwright.sync_api import sync_playwright, Locator
 
 from access import access
 from scan_targets.index import GAME_START_SCAN_TARGET
@@ -8,24 +11,46 @@ from targets import GAME_START
 from wait_until_find import wait_until_find
 
 
-async def run(playwright: Playwright):
-    canvas = await access(playwright)
+class MainThread(threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self, daemon=True)
+        # 実行時に与えられたコマンドを格納する変数
+        self.command: Callable = None
+        # キャンバス要素
+        self.canvas: Locator = None
 
-    # 1秒ごとにスタートボタンが出現したかを確認する
-    await wait_until_find(canvas, GAME_START_SCAN_TARGET)
+    def run(self):
+        with sync_playwright() as playwright:
+            self.canvas = access(playwright)
 
-    # 0~5秒待つ
-    await asyncio.sleep(random() * 5)
+            # 1秒ごとにスタートボタンが出現したかを確認する
+            wait_until_find(self.canvas, GAME_START_SCAN_TARGET)
 
-    # スタートボタンをクリック
-    x, y = GAME_START.randam_point()
-    await canvas.click(position={"x": x, "y": y})
+            # 0~5秒待つ
+            sleep(random() * 5)
+
+            # スタートボタンをクリック
+            x, y = GAME_START.random_point()
+            self.canvas.click(position={"x": x, "y": y})
+
+            while True:
+                if self.command != None:
+                    self.command()
+                    self.command = None
+                else:
+                    sleep(0.01)
+
+
+with sync_playwright():
+    main_thread = MainThread()
+    main_thread.start()
 
     while True:
-        await asyncio.sleep(1)
-
-async def main():
-    async with async_playwright() as playwright:
-        await run(playwright)
-
-asyncio.run(main())
+        try:
+            command = input("<コマンドを待機中>\n")
+            if command == "screenshot":
+                main_thread.command = lambda: main_thread.canvas.screenshot(
+                    path="screenshots/{}.png".format(datetime.now())
+                )
+        except KeyboardInterrupt:
+            break
