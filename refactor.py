@@ -36,8 +36,6 @@ class MainThread(threading.Thread):
             # 設定ボタンが出現(=母港画面に遷移完了)するまで待機
             wait_until_find(self.canvas, SETTING_SCAN_TARGET)
 
-            print("母港に到達しました")
-
             while True:
                 if self.command != None:
                     self.command()
