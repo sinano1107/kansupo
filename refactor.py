@@ -1,11 +1,11 @@
 from datetime import datetime
-from random import random
 import threading
 from time import sleep
 from typing import Callable
 from playwright.sync_api import sync_playwright, Locator
 
 from access import access
+from random_sleep import random_sleep
 from scan_targets.index import (
     GAME_START_SCAN_TARGET,
     SEA_AREA_SELECT_SCAN_TARGET,
@@ -39,8 +39,7 @@ class MainThread(threading.Thread):
             print("スタートボタン待機中")
             wait_until_find(self.canvas, GAME_START_SCAN_TARGET)
 
-            # 0~5秒待つ
-            sleep(1 + random())
+            random_sleep()
 
             # スタートボタンをクリック
             print("スタートボタンをクリック")
@@ -82,7 +81,7 @@ with sync_playwright():
                     def sortie_1_1():
                         print("1-1に出撃します")
 
-                        sleep(1 + random())
+                        random_sleep()
 
                         print("出撃ボタンを押下します")
                         x, y = SORTIE.random_point()
@@ -92,7 +91,7 @@ with sync_playwright():
                         wait_until_find(main_thread.canvas, SORTIE_SELECT_SCAN_TARGET)
                         print("出撃画面が出現しました")
 
-                        sleep(1 + random())
+                        random_sleep()
 
                         print("出撃を選択します")
                         x, y = SORTIE_SELECT.random_point()
@@ -102,13 +101,13 @@ with sync_playwright():
                         wait_until_find(main_thread.canvas, SEA_AREA_SELECT_SCAN_TARGET)
                         print("海域選択画面が出現しました")
 
-                        sleep(1 + random())
+                        random_sleep()
 
                         print("左上の海域を選択します")
                         x, y = SEA_AREA_LEFT_TOP.random_point()
                         main_thread.canvas.click(position={"x": x, "y": y})
 
-                        sleep(1 + random())
+                        random_sleep()
 
                         print("決定します")
                         x, y = SEA_AREA_SELECT_DECIDE.random_point()
@@ -118,7 +117,7 @@ with sync_playwright():
                         wait_until_find(main_thread.canvas, SORTIE_START_SCAN_TARGET)
                         print("出撃開始ボタンが出現しました")
 
-                        sleep(1 + random())
+                        random_sleep()
 
                         print("出撃開始ボタンを押下します")
                         x, y = SORTIE_START_SCAN_TARGET.RECTANGLE.random_point()
