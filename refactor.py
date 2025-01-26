@@ -20,12 +20,10 @@ from scan_targets.index import (
     WITHDRAWAL_SCAN_TARGET,
 )
 from targets import (
-    GAME_START,
     SEA_AREA_LEFT_TOP,
     SEA_AREA_SELECT_DECIDE,
     SELECT_SINGLE_LINE,
     SORTIE,
-    SORTIE_SELECT,
 )
 from wait_until_find import wait_until_find
 
@@ -50,8 +48,7 @@ class MainThread(threading.Thread):
 
             # スタートボタンをクリック
             print("スタートボタンをクリック")
-            x, y = GAME_START.random_point()
-            self.canvas.click(position={"x": x, "y": y})
+            click(self.canvas, GAME_START_SCAN_TARGET.RECTANGLE)
 
             # 設定ボタンが出現(=母港画面に遷移完了)するまで待機
             print("設定ボタン（母港到達）待機中")
@@ -91,8 +88,7 @@ with sync_playwright():
                         random_sleep()
 
                         print("出撃ボタンを押下します")
-                        x, y = SORTIE.random_point()
-                        main_thread.canvas.click(position={"x": x, "y": y})
+                        click(main_thread.canvas, SORTIE)
 
                         print("出撃画面が出現するまで待機します")
                         wait_until_find(main_thread.canvas, SORTIE_SELECT_SCAN_TARGET)
@@ -101,8 +97,7 @@ with sync_playwright():
                         random_sleep()
 
                         print("出撃を選択します")
-                        x, y = SORTIE_SELECT.random_point()
-                        main_thread.canvas.click(position={"x": x, "y": y})
+                        click(main_thread.canvas, SORTIE_SELECT_SCAN_TARGET.RECTANGLE)
 
                         print("海域選択画面が出現するまで待機します")
                         wait_until_find(main_thread.canvas, SEA_AREA_SELECT_SCAN_TARGET)
@@ -111,14 +106,12 @@ with sync_playwright():
                         random_sleep()
 
                         print("左上の海域を選択します")
-                        x, y = SEA_AREA_LEFT_TOP.random_point()
-                        main_thread.canvas.click(position={"x": x, "y": y})
+                        click(main_thread.canvas, SEA_AREA_LEFT_TOP)
 
                         random_sleep()
 
                         print("決定します")
-                        x, y = SEA_AREA_SELECT_DECIDE.random_point()
-                        main_thread.canvas.click(position={"x": x, "y": y})
+                        click(main_thread.canvas, SEA_AREA_SELECT_DECIDE)
 
                         print("出撃開始ボタンが出現するまで待機します")
                         wait_until_find(main_thread.canvas, SORTIE_START_SCAN_TARGET)
@@ -127,8 +120,7 @@ with sync_playwright():
                         random_sleep()
 
                         print("出撃開始ボタンを押下します")
-                        x, y = SORTIE_START_SCAN_TARGET.RECTANGLE.random_point()
-                        main_thread.canvas.click(position={"x": x, "y": y})
+                        click(main_thread.canvas, SORTIE_START_SCAN_TARGET.RECTANGLE)
 
                         print("単縦陣選択ボタンが出現するまで待機します")
                         wait_until_find(main_thread.canvas, TAN)
@@ -137,8 +129,7 @@ with sync_playwright():
                         random_sleep()
 
                         print("単縦陣選択ボタンを押下します")
-                        x, y = SELECT_SINGLE_LINE.random_point()
-                        main_thread.canvas.click(position={"x": x, "y": y})
+                        click(main_thread.canvas, SELECT_SINGLE_LINE)
                         print("単縦陣を選択しました")
 
                         random_sleep()
