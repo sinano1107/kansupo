@@ -247,26 +247,6 @@ with sync_playwright():
                                 print("母港に帰還しました")
                                 return
 
-                        # print(
-                        #     "帰るボタンが出現(=艦娘ドロップ)、もしくは帰還ボタンが出現するまで待機します"
-                        # )
-                        # while True:
-                        #     sleep(1)
-                        #     if scan(main_thread.canvas, GO_BACK_SCAN_TARGET):
-                        #         print("帰るボタンが表示されました")
-                        #         random_sleep()
-                        #         print("クリックします")
-                        #         click(main_thread.canvas)
-                        #         wait_until_find(
-                        #             main_thread.canvas, WITHDRAWAL_SCAN_TARGET
-                        #         )
-                        #         random_sleep()
-                        #         break
-                        #     elif scan(main_thread.canvas, WITHDRAWAL_SCAN_TARGET):
-                        #         print("撤退ボタンが表示されました")
-                        #         random_sleep()
-                        #         break
-
                     sortie_command = sortie_1_1
                 else:
                     print("{}は不明な海域です".format(command[1]))
