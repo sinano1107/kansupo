@@ -36,6 +36,9 @@ GO_BACK = Rectangle(x_range=(1120, 1160), y_range=(637, 682))
 # 「撤退」ボタン
 WITHDRAWAL = Rectangle(x_range=(705, 815), y_range=(325, 405))
 
+# 「進撃」ボタン
+ATTACK = Rectangle(x_range=(375, 485), y_range=(325, 405))
+
 ENABLED_TARGETS: dict[str, Rectangle] = {
     "sortie": SORTIE,
 }

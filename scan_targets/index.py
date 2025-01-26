@@ -32,3 +32,8 @@ NEXT_SCAN_TARGET = ScanTarget(NEXT, ROOT + "next.png")
 GO_BACK_SCAN_TARGET = ScanTarget(GO_BACK, ROOT + "go_back.png")
 
 WITHDRAWAL_SCAN_TARGET = ScanTarget(WITHDRAWAL, ROOT + "withdrawal.png")
+
+# 羅針盤
+COMPASS = ScanTarget(
+    Rectangle(x_range=(450, 750), y_range=(210, 510)), ROOT + "compass.png"
+)

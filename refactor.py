@@ -6,9 +6,11 @@ from playwright.sync_api import sync_playwright, Locator
 
 from access import access
 from click import click
+from detect_huge_damage import detect_huge_damage
 from random_sleep import random_sleep
 from scan import scan
 from scan_targets.index import (
+    COMPASS,
     GAME_START_SCAN_TARGET,
     GO_BACK_SCAN_TARGET,
     NEXT_SCAN_TARGET,
@@ -20,6 +22,7 @@ from scan_targets.index import (
     WITHDRAWAL_SCAN_TARGET,
 )
 from targets import (
+    ATTACK,
     SEA_AREA_LEFT_TOP,
     SEA_AREA_SELECT_DECIDE,
     SELECT_SINGLE_LINE,
@@ -132,7 +135,7 @@ with sync_playwright():
                         click(main_thread.canvas, SELECT_SINGLE_LINE)
                         print("単縦陣を選択しました")
 
-                        random_sleep()
+                        sleep(10)
 
                         print("戦闘終了まで待機します")
                         wait_until_find(main_thread.canvas, NEXT_SCAN_TARGET)
@@ -146,7 +149,14 @@ with sync_playwright():
 
                         print("次へボタンが表示されるまで待機します")
                         wait_until_find(main_thread.canvas, NEXT_SCAN_TARGET)
-                        print("次へボタンが表示されました")
+
+                        print("大破艦がいるか確認します")
+                        huge_damage = detect_huge_damage(main_thread.canvas)
+                        should_withdrawal = len(huge_damage) > 0
+                        if should_withdrawal and 0 in huge_damage:
+                            print("旗艦が大破しています")
+                            print("この場合の処理は未記述のため、処理を終了します")
+                            return
 
                         click(main_thread.canvas)
 
@@ -170,11 +180,92 @@ with sync_playwright():
                                 random_sleep()
                                 break
 
-                        click(main_thread.canvas, WITHDRAWAL_SCAN_TARGET.RECTANGLE)
+                        if should_withdrawal:
+                            print("撤退ボタンをクリックします")
+                            click(main_thread.canvas, WITHDRAWAL_SCAN_TARGET.RECTANGLE)
 
-                        print("母港に戻るまで待機します")
-                        wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
-                        print("母港に戻りました")
+                            print("母港に戻るまで待機します")
+                            wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
+                            print("母港に戻りました")
+                            return
+
+                        print("進撃ボタンをクリックします")
+                        click(main_thread.canvas, ATTACK)
+                        print("進撃ボタンをクリックしました")
+
+                        print("羅針盤出現まで待機します")
+                        wait_until_find(main_thread.canvas, COMPASS)
+                        print("羅針盤が出現しました")
+
+                        print("クリックします")
+                        click(main_thread.canvas)
+                        print("クリックしました")
+
+                        print("単縦陣選択ボタンが出現するまで待機します")
+                        wait_until_find(main_thread.canvas, TAN)
+                        print("単縦陣選択ボタンが出現しました")
+
+                        random_sleep()
+
+                        print("単縦陣選択ボタンを押下します")
+                        click(main_thread.canvas, SELECT_SINGLE_LINE)
+                        print("単縦陣を選択しました")
+
+                        sleep(10)
+
+                        print("戦闘終了まで待機します")
+                        wait_until_find(main_thread.canvas, NEXT_SCAN_TARGET)
+                        print("戦闘終了しました")
+
+                        random_sleep()
+
+                        print("次へ進みます")
+                        click(main_thread.canvas)
+                        print("次へ進みました")
+
+                        print("次へボタンが表示されるまで待機します")
+                        wait_until_find(main_thread.canvas, NEXT_SCAN_TARGET)
+                        print("次へボタンが表示されました")
+                        click(main_thread.canvas)
+                        print("次へボタンをクリックしました")
+
+                        print(
+                            "帰るボタンか設定ボタンが表示される(=母港へ帰還)まで待機します"
+                        )
+                        while True:
+                            sleep(1)
+                            if scan(main_thread.canvas, GO_BACK_SCAN_TARGET):
+                                print("帰るボタンが表示されました")
+                                random_sleep()
+                                print("クリックします")
+                                click(main_thread.canvas)
+                                print("母港に帰還するまで待機します")
+                                wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
+                                print("母港に帰還しました")
+                                break
+                            elif scan(main_thread.canvas, SETTING_SCAN_TARGET):
+                                print("母港に帰還しました")
+                                return
+
+                        # print(
+                        #     "帰るボタンが出現(=艦娘ドロップ)、もしくは帰還ボタンが出現するまで待機します"
+                        # )
+                        # while True:
+                        #     sleep(1)
+                        #     if scan(main_thread.canvas, GO_BACK_SCAN_TARGET):
+                        #         print("帰るボタンが表示されました")
+                        #         random_sleep()
+                        #         print("クリックします")
+                        #         click(main_thread.canvas)
+                        #         wait_until_find(
+                        #             main_thread.canvas, WITHDRAWAL_SCAN_TARGET
+                        #         )
+                        #         random_sleep()
+                        #         break
+                        #     elif scan(main_thread.canvas, WITHDRAWAL_SCAN_TARGET):
+                        #         print("撤退ボタンが表示されました")
+                        #         random_sleep()
+                        #         break
 
                     sortie_command = sortie_1_1
                 else:
