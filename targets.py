@@ -6,8 +6,17 @@ GAME_START = Rectangle(x_range=(700, 1100), y_range=(560, 640))
 # 設定ボタン
 SETTING = Rectangle(x_range=(1143, 1176), y_range=(655, 685))
 
+# 母港ボタン(補給画面、改装画面などで左に表示される四角のもの)
+HOME_PORT = Rectangle(x_range=(90, 130), y_range=(335, 435))
+
 # 出撃ボタン(母港)
 SORTIE = Rectangle(x_range=(240, 340), y_range=(350, 430))
+
+# 補給ボタン(母港)
+SUPPLY = Rectangle(x_range=(75, 155), y_range=(295, 375))
+
+# 艦隊全補給
+FULL_FLEET_SUPPLY = Rectangle(x_range=(1070, 1180), y_range=(605, 630))
 
 # 出撃選択ボタン(出撃選択画面)
 SORTIE_SELECT = Rectangle(x_range=(219, 464), y_range=(264, 466))

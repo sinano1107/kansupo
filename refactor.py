@@ -23,10 +23,13 @@ from scan_targets.index import (
 )
 from targets import (
     ATTACK,
+    FULL_FLEET_SUPPLY,
+    HOME_PORT,
     SEA_AREA_LEFT_TOP,
     SEA_AREA_SELECT_DECIDE,
     SELECT_SINGLE_LINE,
     SORTIE,
+    SUPPLY,
 )
 from wait_until_find import wait_until_find
 
@@ -57,11 +60,14 @@ class MainThread(threading.Thread):
             print("設定ボタン（母港到達）待機中")
             wait_until_find(self.canvas, SETTING_SCAN_TARGET)
 
+            random_sleep()
+
             print("処理の実行を開始")
             while True:
                 if self.command != None:
                     self.command()
                     self.command = None
+                    random_sleep()
                 else:
                     sleep(0.01)
 
@@ -87,8 +93,6 @@ with sync_playwright():
 
                     def sortie_1_1():
                         print("1-1に出撃します")
-
-                        random_sleep()
 
                         print("出撃ボタンを押下します")
                         click(main_thread.canvas, SORTIE)
@@ -253,6 +257,18 @@ with sync_playwright():
                     continue
 
                 main_thread.command = sortie_command
+            elif command[0] == "supply":
+
+                def supply():
+                    print("補給します")
+                    click(main_thread.canvas, SUPPLY)
+                    random_sleep()
+                    click(main_thread.canvas, FULL_FLEET_SUPPLY)
+                    random_sleep()
+                    click(main_thread.canvas, HOME_PORT)
+                    wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
+
+                main_thread.command = supply
             else:
                 print("{}は不明なコマンドです".format(command[0]))
         except KeyboardInterrupt:
