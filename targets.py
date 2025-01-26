@@ -24,6 +24,18 @@ SEA_AREA_SELECT_DECIDE = Rectangle(x_range=(900, 1130), y_range=(645, 690))
 # 出撃開始ボタン
 SORTIE_START = Rectangle(x_range=(815, 1030), y_range=(645, 690))
 
+# 単縦陣選択ボタン
+SELECT_SINGLE_LINE = Rectangle(x_range=(600, 740), y_range=(260, 295))
+
+# 「次」ボタン
+NEXT = Rectangle(x_range=(1110, 1150), y_range=(625, 670))
+
+# 「帰]ボタン
+GO_BACK = Rectangle(x_range=(1120, 1160), y_range=(637, 682))
+
+# 「撤退」ボタン
+WITHDRAWAL = Rectangle(x_range=(705, 815), y_range=(325, 405))
+
 ENABLED_TARGETS: dict[str, Rectangle] = {
     "sortie": SORTIE,
 }
