@@ -21,6 +21,7 @@ if TYPE_CHECKING:
 
 
 class ExpeditionManageThread(threading.Thread):
+    DELAY = 10
     SAVE_DATA_PATH = "save_data/expedition_end_time.txt"
     SAVE_DATA_FORMAT = "%Y-%m-%d %H:%M:%S"
 
@@ -79,8 +80,8 @@ class ExpeditionManageThread(threading.Thread):
 
                 self.MAIN_THREAD.priority_commands.put(check_res)
                 self.end_time = None
-            # 10秒ごとにチェック
-            sleep(10)
+            # DELAY秒ごとにチェック
+            sleep(self.DELAY)
 
     def save(self):
         if self.end_time is not None:
@@ -107,6 +108,8 @@ class ExpeditionManageThread(threading.Thread):
     # このminutesは遠征にかかる時間を代入する
     def set_end_time(self, minutes: int):
         # 40分の遠征は39分で帰還するので、-1している
-        # 回収タスクの追加前に帰還して、他のタスクのクリックによって回収されないように、さらに20秒前に設定している。
-        self.end_time = datetime.now() + timedelta(minutes=minutes - 1, seconds=-20)
+        # 回収タスクの追加前に帰還して、他のタスクのクリックによって回収されないように、さらにDELAY*2秒前に設定している。
+        self.end_time = datetime.now() + timedelta(
+            minutes=minutes - 1, seconds=-self.DELAY * 2
+        )
         print("遠征の帰還予定時刻は{}です".format(self.end_time))
