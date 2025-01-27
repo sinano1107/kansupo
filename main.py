@@ -32,7 +32,9 @@ from wait_until_find import wait_until_find
 class MainThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self, daemon=True)
-        # コマンドを格納する変数
+        # 優先コマンドを格納するキュー
+        self.priority_commands = Queue()
+        # コマンドを格納するキュー
         self.commands = Queue()
         # キャンバス要素
         self.canvas: Locator = None
@@ -59,11 +61,14 @@ class MainThread(threading.Thread):
 
             print("処理の実行を開始")
             while True:
-                if not self.commands.empty():
+                if not self.priority_commands.empty():
+                    self.priority_commands.get()()
+                    random_sleep()
+                elif not self.commands.empty():
                     self.commands.get()()
                     random_sleep()
                 else:
-                    sleep(0.01)
+                    sleep(1)
 
 
 if __name__ == "__main__":

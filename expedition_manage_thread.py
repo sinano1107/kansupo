@@ -71,7 +71,7 @@ class ExpeditionManageThread(threading.Thread):
                     wait_until_find(self.MAIN_THREAD.canvas, SETTING_SCAN_TARGET)
                     print("母港画面に戻りました")
 
-                self.MAIN_THREAD.commands.put(check_res)
+                self.MAIN_THREAD.priority_commands.put(check_res)
                 self.end_time = None
             # 10秒ごとにチェック
             sleep(10)
