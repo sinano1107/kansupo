@@ -31,7 +31,7 @@ from targets import (
     SORTIE,
     SUPPLY,
 )
-from wait_until_find import wait_until_find
+from wait_until_find import wait_until_find, wait_until_find_any
 
 
 class MainThread(threading.Thread):
@@ -167,22 +167,23 @@ with sync_playwright():
                         print(
                             "帰るボタンが出現(=艦娘ドロップ)、もしくは帰還ボタンが出現するまで待機します"
                         )
-                        while True:
-                            sleep(1)
-                            if scan(main_thread.canvas, GO_BACK_SCAN_TARGET):
-                                print("帰るボタンが表示されました")
-                                random_sleep()
-                                print("クリックします")
-                                click(main_thread.canvas)
-                                wait_until_find(
-                                    main_thread.canvas, WITHDRAWAL_SCAN_TARGET
-                                )
-                                random_sleep()
-                                break
-                            elif scan(main_thread.canvas, WITHDRAWAL_SCAN_TARGET):
-                                print("撤退ボタンが表示されました")
-                                random_sleep()
-                                break
+                        res = wait_until_find_any(
+                            main_thread.canvas,
+                            [GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET],
+                        )
+                        if res == 0:
+                            print("帰るボタンが表示されました")
+                            random_sleep()
+                            print("クリックします")
+                            click(main_thread.canvas)
+                            wait_until_find(main_thread.canvas, WITHDRAWAL_SCAN_TARGET)
+                            random_sleep()
+                        elif res == 1:
+                            print("撤退ボタンが表示されました")
+                            random_sleep()
+                        else:
+                            print("不明なケースです\r処理を終了します", res)
+                            return
 
                         if should_withdrawal:
                             print("撤退ボタンをクリックします")
@@ -236,20 +237,23 @@ with sync_playwright():
                         print(
                             "帰るボタンか設定ボタンが表示される(=母港へ帰還)まで待機します"
                         )
-                        while True:
-                            sleep(1)
-                            if scan(main_thread.canvas, GO_BACK_SCAN_TARGET):
-                                print("帰るボタンが表示されました")
-                                random_sleep()
-                                print("クリックします")
-                                click(main_thread.canvas)
-                                print("母港に帰還するまで待機します")
-                                wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
-                                print("母港に帰還しました")
-                                break
-                            elif scan(main_thread.canvas, SETTING_SCAN_TARGET):
-                                print("母港に帰還しました")
-                                return
+                        res = wait_until_find_any(
+                            main_thread.canvas,
+                            [GO_BACK_SCAN_TARGET, SETTING_SCAN_TARGET],
+                        )
+                        if res == 0:
+                            print("帰るボタンが表示されました")
+                            random_sleep()
+                            print("クリックします")
+                            click(main_thread.canvas)
+                            print("母港に帰還するまで待機します")
+                            wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
+                            print("母港に帰還しました")
+                        elif res == 1:
+                            print("母港に帰還しました")
+                        else:
+                            print("不明なケースです\r処理を終了します", res)
+                            return
 
                     sortie_command = sortie_1_1
                 else:
