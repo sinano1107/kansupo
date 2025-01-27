@@ -27,6 +27,9 @@ EXPEDITION_SELECT = Rectangle(x_range=(893, 1138), y_range=(264, 466))
 # 遠征先選択一番上
 EXPEDITION_DESTINATION_SELECT_TOP = Rectangle(x_range=(300, 700), y_range=(245, 275))
 
+# 遠征先選択5番目
+EXPEDITION_DESTINATION_SELECT_5 = Rectangle(x_range=(300, 700), y_range=(425, 455))
+
 # 遠征先選択決定
 EXPEDITION_DESTINATION_SELECT_DECIDE = Rectangle(
     x_range=(915, 1145), y_range=(645, 695)
