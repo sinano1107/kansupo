@@ -47,7 +47,3 @@ WITHDRAWAL = Rectangle(x_range=(705, 815), y_range=(325, 405))
 
 # 「進撃」ボタン
 ATTACK = Rectangle(x_range=(375, 485), y_range=(325, 405))
-
-ENABLED_TARGETS: dict[str, Rectangle] = {
-    "sortie": SORTIE,
-}
