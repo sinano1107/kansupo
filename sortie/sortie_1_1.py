@@ -10,7 +10,6 @@ from scan_targets.index import (
     SEA_AREA_SELECT_SCAN_TARGET,
     SETTING_SCAN_TARGET,
     SORTIE_SELECT_SCAN_TARGET,
-    SORTIE_START_SCAN_TARGET,
     TAN,
     WITHDRAWAL_SCAN_TARGET,
 )
@@ -20,6 +19,7 @@ from targets import (
     SEA_AREA_SELECT_DECIDE,
     SELECT_SINGLE_LINE,
     SORTIE,
+    SORTIE_START,
 )
 from wait_until_find import wait_until_find, wait_until_find_any
 
@@ -53,14 +53,12 @@ def sortie_1_1(canvas: Locator):
     print("決定します")
     click(canvas, SEA_AREA_SELECT_DECIDE)
 
-    print("出撃開始ボタンが出現するまで待機します")
-    wait_until_find(canvas, SORTIE_START_SCAN_TARGET)
-    print("出撃開始ボタンが出現しました")
-
     random_sleep()
 
     print("出撃開始ボタンを押下します")
-    click(canvas, SORTIE_START_SCAN_TARGET.RECTANGLE)
+    click(canvas, SORTIE_START)
+
+    sleep(5)
 
     print("単縦陣選択ボタンが出現するまで待機します")
     wait_until_find(canvas, TAN)
@@ -72,7 +70,7 @@ def sortie_1_1(canvas: Locator):
     click(canvas, SELECT_SINGLE_LINE)
     print("単縦陣を選択しました")
 
-    sleep(10)
+    sleep(15)
 
     print("戦闘終了まで待機します")
     wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
@@ -136,6 +134,8 @@ def sortie_1_1(canvas: Locator):
     print("クリックします")
     click(canvas)
     print("クリックしました")
+
+    sleep(5)
 
     print("単縦陣選択ボタンが出現するまで待機します")
     wait_until_find(canvas, TAN)

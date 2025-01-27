@@ -33,8 +33,6 @@ EXPEDITION_DESTINATION_SELECT_SCAN_TARGET = ScanTarget(
 
 EXPEDITION_NEXT_SCAN_TARGET = ScanTarget(EXPEDITION_NEXT, ROOT + "expedition_next.png")
 
-SORTIE_START_SCAN_TARGET = ScanTarget(SORTIE_START, ROOT + "sortie_start.png")
-
 # 「単縦陣」選択ボタンの「単」
 TAN = ScanTarget(Rectangle(x_range=(637, 659), y_range=(266, 290)), ROOT + "tan.png")
 
