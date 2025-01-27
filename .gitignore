@@ -1,4 +1,5 @@
 .env
 *.pyc
 screenshots/*
+save_data/*
 login_account.json
