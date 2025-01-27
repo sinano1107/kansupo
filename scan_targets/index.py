@@ -3,6 +3,7 @@ from scan import ScanTarget
 from targets import (
     GAME_START,
     GO_BACK,
+    HOME_PORT,
     NEXT,
     SEA_AREA_SELECT,
     SETTING,
@@ -18,9 +19,16 @@ GAME_START_SCAN_TARGET = ScanTarget(GAME_START, ROOT + "game_start.png")
 
 SETTING_SCAN_TARGET = ScanTarget(SETTING, ROOT + "setting.png")
 
+HOME_PORT_SCAN_TARGET = ScanTarget(HOME_PORT, ROOT + "home_port.png")
+
 SORTIE_SELECT_SCAN_TARGET = ScanTarget(SORTIE_SELECT, ROOT + "sortie_select.png")
 
 SEA_AREA_SELECT_SCAN_TARGET = ScanTarget(SEA_AREA_SELECT, ROOT + "sea_area_select.png")
+
+EXPEDITION_DESTINATION_SELECT_SCAN_TARGET = ScanTarget(
+    Rectangle(x_range=(180, 265), y_range=(110, 135)),
+    ROOT + "expedition_destination_select.png",
+)
 
 SORTIE_START_SCAN_TARGET = ScanTarget(SORTIE_START, ROOT + "sortie_start.png")
 

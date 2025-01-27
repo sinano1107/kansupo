@@ -1,4 +1,3 @@
-from datetime import datetime
 from queue import Queue
 import threading
 from time import sleep
@@ -9,13 +8,21 @@ from access import access
 from click import click
 from random_sleep import random_sleep
 from scan_targets.index import (
+    EXPEDITION_DESTINATION_SELECT_SCAN_TARGET,
     GAME_START_SCAN_TARGET,
+    HOME_PORT_SCAN_TARGET,
     SETTING_SCAN_TARGET,
+    SORTIE_SELECT_SCAN_TARGET,
 )
 from sortie.sortie_1_1 import sortie_1_1
 from targets import (
+    EXPEDITION_DESTINATION_SELECT_DECIDE,
+    EXPEDITION_DESTINATION_SELECT_TOP,
+    EXPEDITION_SELECT,
+    EXPEDITION_START,
     FULL_FLEET_SUPPLY,
     HOME_PORT,
+    SORTIE,
     SUPPLY,
 )
 from wait_until_find import wait_until_find
@@ -90,6 +97,77 @@ if __name__ == "__main__":
                         wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
 
                     main_thread.commands.put(supply)
+                elif command[0] == "expedition":
+                    expedition_command: Callable = None
+
+                    if len(command) <= 1 or command[1] == "":
+                        print("遠征先が指定されていません")
+                        continue
+                    elif command[1] == "1-1":
+
+                        def expedition_1_1():
+                            print("1-1に遠征します")
+
+                            print("出撃ボタンを押します")
+                            click(main_thread.canvas, SORTIE)
+
+                            print("出撃ボタンが出るまで待機します")
+                            wait_until_find(
+                                main_thread.canvas, SORTIE_SELECT_SCAN_TARGET
+                            )
+                            print("出撃画面が出現しました")
+
+                            random_sleep()
+
+                            print("遠征を選択します")
+                            click(main_thread.canvas, EXPEDITION_SELECT)
+
+                            print("遠征先選択画面が出現するまで待機します")
+                            wait_until_find(
+                                main_thread.canvas,
+                                EXPEDITION_DESTINATION_SELECT_SCAN_TARGET,
+                            )
+                            print("遠征先選択画面が出現しました")
+
+                            random_sleep()
+
+                            print("一番上の海域を選択します")
+                            click(main_thread.canvas, EXPEDITION_DESTINATION_SELECT_TOP)
+
+                            random_sleep()
+
+                            print("決定します")
+                            click(
+                                main_thread.canvas, EXPEDITION_DESTINATION_SELECT_DECIDE
+                            )
+
+                            random_sleep()
+
+                            print("遠征開始ボタンを押します")
+                            click(
+                                main_thread.canvas,
+                                EXPEDITION_START,
+                            )
+
+                            sleep(2)
+
+                            print("母港ボタンが出現するまで待機します")
+                            wait_until_find(main_thread.canvas, HOME_PORT_SCAN_TARGET)
+                            print("母港ボタンが出現しました")
+
+                            random_sleep()
+
+                            print("母港ボタンを押します")
+                            click(main_thread.canvas, HOME_PORT)
+                            wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
+                            print("母港画面に戻りました")
+
+                        expedition_command = expedition_1_1
+                    else:
+                        print("{}は不明な遠征先です".format(command[1]))
+                        continue
+
+                    main_thread.commands.put(expedition_command)
                 else:
                     print("{}は不明なコマンドです".format(command[0]))
             except KeyboardInterrupt:

@@ -21,6 +21,20 @@ FULL_FLEET_SUPPLY = Rectangle(x_range=(1070, 1180), y_range=(605, 630))
 # 出撃選択ボタン(出撃選択画面)
 SORTIE_SELECT = Rectangle(x_range=(219, 464), y_range=(264, 466))
 
+# 遠征選択ボタン（出撃選択画面）
+EXPEDITION_SELECT = Rectangle(x_range=(893, 1138), y_range=(264, 466))
+
+# 遠征先選択一番上
+EXPEDITION_DESTINATION_SELECT_TOP = Rectangle(x_range=(300, 700), y_range=(245, 275))
+
+# 遠征先選択決定
+EXPEDITION_DESTINATION_SELECT_DECIDE = Rectangle(
+    x_range=(915, 1145), y_range=(645, 695)
+)
+
+# 遠征開始ボタン
+EXPEDITION_START = Rectangle(x_range=(800, 1040), y_range=(645, 690))
+
 # 海域選択画面
 SEA_AREA_SELECT = Rectangle(x_range=(190, 650), y_range=(155, 200))
 
