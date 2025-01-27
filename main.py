@@ -1,4 +1,5 @@
 from datetime import datetime
+from queue import Queue
 import threading
 from time import sleep
 from typing import Callable
@@ -23,8 +24,8 @@ from wait_until_find import wait_until_find
 class MainThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self, daemon=True)
-        # 実行時に与えられたコマンドを格納する変数
-        self.command: Callable = None
+        # コマンドを格納する変数
+        self.commands = Queue()
         # キャンバス要素
         self.canvas: Locator = None
 
@@ -50,9 +51,8 @@ class MainThread(threading.Thread):
 
             print("処理の実行を開始")
             while True:
-                if self.command != None:
-                    self.command()
-                    self.command = None
+                if not self.commands.empty():
+                    self.commands.get()()
                     random_sleep()
                 else:
                     sleep(0.01)
@@ -81,7 +81,7 @@ with sync_playwright():
                     print("{}は不明な海域です".format(command[1]))
                     continue
 
-                main_thread.command = sortie_command
+                main_thread.commands.put(sortie_command)
             elif command[0] == "supply":
 
                 def supply():
@@ -93,7 +93,7 @@ with sync_playwright():
                     click(main_thread.canvas, HOME_PORT)
                     wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
 
-                main_thread.command = supply
+                main_thread.commands.put(supply)
             else:
                 print("{}は不明なコマンドです".format(command[0]))
         except KeyboardInterrupt:
