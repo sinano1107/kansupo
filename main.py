@@ -58,43 +58,44 @@ class MainThread(threading.Thread):
                     sleep(0.01)
 
 
-with sync_playwright():
-    main_thread = MainThread()
-    main_thread.start()
+if __name__ == "__main__":
+    with sync_playwright():
+        main_thread = MainThread()
+        main_thread.start()
 
-    while True:
-        try:
-            command = input("<コマンドを待機中>\n").split(" ")
-            if command[0] == "screenshot":
-                main_thread.command = lambda: main_thread.canvas.screenshot(
-                    path="screenshots/{}.png".format(datetime.now())
-                )
-            elif command[0] == "sortie":
-                sortie_command: Callable = None
+        while True:
+            try:
+                command = input("<コマンドを待機中>\n").split(" ")
+                if command[0] == "screenshot":
+                    main_thread.command = lambda: main_thread.canvas.screenshot(
+                        path="screenshots/{}.png".format(datetime.now())
+                    )
+                elif command[0] == "sortie":
+                    sortie_command: Callable = None
 
-                if len(command) <= 1 or command[1] == "":
-                    print("海域が指定されていません")
-                    continue
-                if command[1] == "1-1":
-                    sortie_command = lambda: sortie_1_1(main_thread.canvas)
+                    if len(command) <= 1 or command[1] == "":
+                        print("海域が指定されていません")
+                        continue
+                    if command[1] == "1-1":
+                        sortie_command = lambda: sortie_1_1(main_thread.canvas)
+                    else:
+                        print("{}は不明な海域です".format(command[1]))
+                        continue
+
+                    main_thread.commands.put(sortie_command)
+                elif command[0] == "supply":
+
+                    def supply():
+                        print("補給します")
+                        click(main_thread.canvas, SUPPLY)
+                        random_sleep()
+                        click(main_thread.canvas, FULL_FLEET_SUPPLY)
+                        random_sleep()
+                        click(main_thread.canvas, HOME_PORT)
+                        wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
+
+                    main_thread.commands.put(supply)
                 else:
-                    print("{}は不明な海域です".format(command[1]))
-                    continue
-
-                main_thread.commands.put(sortie_command)
-            elif command[0] == "supply":
-
-                def supply():
-                    print("補給します")
-                    click(main_thread.canvas, SUPPLY)
-                    random_sleep()
-                    click(main_thread.canvas, FULL_FLEET_SUPPLY)
-                    random_sleep()
-                    click(main_thread.canvas, HOME_PORT)
-                    wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
-
-                main_thread.commands.put(supply)
-            else:
-                print("{}は不明なコマンドです".format(command[0]))
-        except KeyboardInterrupt:
-            break
+                    print("{}は不明なコマンドです".format(command[0]))
+            except KeyboardInterrupt:
+                break
