@@ -6,7 +6,7 @@ from random_sleep import random_sleep
 from scan_targets.index import (
     COMPASS,
     GO_BACK_SCAN_TARGET,
-    NEXT_SCAN_TARGET,
+    SORTIE_NEXT_SCAN_TARGET,
     SEA_AREA_SELECT_SCAN_TARGET,
     SETTING_SCAN_TARGET,
     SORTIE_SELECT_SCAN_TARGET,
@@ -75,7 +75,7 @@ def sortie_1_1(canvas: Locator):
     sleep(10)
 
     print("戦闘終了まで待機します")
-    wait_until_find(canvas, NEXT_SCAN_TARGET)
+    wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
     print("戦闘終了しました")
 
     random_sleep()
@@ -85,7 +85,7 @@ def sortie_1_1(canvas: Locator):
     print("次へ進みました")
 
     print("次へボタンが表示されるまで待機します")
-    wait_until_find(canvas, NEXT_SCAN_TARGET)
+    wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
 
     print("大破艦がいるか確認します")
     huge_damage = detect_huge_damage(canvas)
@@ -150,7 +150,7 @@ def sortie_1_1(canvas: Locator):
     sleep(10)
 
     print("戦闘終了まで待機します")
-    wait_until_find(canvas, NEXT_SCAN_TARGET)
+    wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
     print("戦闘終了しました")
 
     random_sleep()
@@ -160,7 +160,7 @@ def sortie_1_1(canvas: Locator):
     print("次へ進みました")
 
     print("次へボタンが表示されるまで待機します")
-    wait_until_find(canvas, NEXT_SCAN_TARGET)
+    wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
     print("次へボタンが表示されました")
     click(canvas)
     print("次へボタンをクリックしました")

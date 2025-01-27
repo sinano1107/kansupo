@@ -35,6 +35,9 @@ EXPEDITION_DESTINATION_SELECT_DECIDE = Rectangle(
 # 遠征開始ボタン
 EXPEDITION_START = Rectangle(x_range=(800, 1040), y_range=(645, 690))
 
+# 遠征帰還「次」ボタン
+EXPEDITION_NEXT = Rectangle(x_range=(1125, 1170), y_range=(643, 688))
+
 # 海域選択画面
 SEA_AREA_SELECT = Rectangle(x_range=(190, 650), y_range=(155, 200))
 
@@ -50,8 +53,8 @@ SORTIE_START = Rectangle(x_range=(815, 1030), y_range=(645, 690))
 # 単縦陣選択ボタン
 SELECT_SINGLE_LINE = Rectangle(x_range=(600, 740), y_range=(260, 295))
 
-# 「次」ボタン
-NEXT = Rectangle(x_range=(1110, 1150), y_range=(625, 670))
+# 出撃時「次」ボタン
+SORTIE_NEXT = Rectangle(x_range=(1110, 1150), y_range=(625, 670))
 
 # 「帰]ボタン
 GO_BACK = Rectangle(x_range=(1120, 1160), y_range=(637, 682))

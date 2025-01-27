@@ -6,6 +6,7 @@ from playwright.sync_api import sync_playwright, Locator
 
 from access import access
 from click import click
+from expedition_manage_thread import ExpeditionManageThread
 from random_sleep import random_sleep
 from scan_targets.index import (
     EXPEDITION_DESTINATION_SELECT_SCAN_TARGET,
@@ -68,7 +69,9 @@ class MainThread(threading.Thread):
 if __name__ == "__main__":
     with sync_playwright():
         main_thread = MainThread()
+        expedition_manage_thread = ExpeditionManageThread(main_thread=main_thread)
         main_thread.start()
+        expedition_manage_thread.start()
 
         while True:
             try:
@@ -154,6 +157,8 @@ if __name__ == "__main__":
                             print("母港ボタンが出現するまで待機します")
                             wait_until_find(main_thread.canvas, HOME_PORT_SCAN_TARGET)
                             print("母港ボタンが出現しました")
+
+                            expedition_manage_thread.set_end_time(15)
 
                             random_sleep()
 

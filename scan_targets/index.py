@@ -1,10 +1,11 @@
 from rectangle import Rectangle
 from scan import ScanTarget
 from targets import (
+    EXPEDITION_NEXT,
     GAME_START,
     GO_BACK,
     HOME_PORT,
-    NEXT,
+    SORTIE_NEXT,
     SEA_AREA_SELECT,
     SETTING,
     SORTIE_SELECT,
@@ -30,12 +31,14 @@ EXPEDITION_DESTINATION_SELECT_SCAN_TARGET = ScanTarget(
     ROOT + "expedition_destination_select.png",
 )
 
+EXPEDITION_NEXT_SCAN_TARGET = ScanTarget(EXPEDITION_NEXT, ROOT + "expedition_next.png")
+
 SORTIE_START_SCAN_TARGET = ScanTarget(SORTIE_START, ROOT + "sortie_start.png")
 
 # 「単縦陣」選択ボタンの「単」
 TAN = ScanTarget(Rectangle(x_range=(637, 659), y_range=(266, 290)), ROOT + "tan.png")
 
-NEXT_SCAN_TARGET = ScanTarget(NEXT, ROOT + "next.png")
+SORTIE_NEXT_SCAN_TARGET = ScanTarget(SORTIE_NEXT, ROOT + "sortie_next.png")
 
 GO_BACK_SCAN_TARGET = ScanTarget(GO_BACK, ROOT + "go_back.png")
 
@@ -44,4 +47,9 @@ WITHDRAWAL_SCAN_TARGET = ScanTarget(WITHDRAWAL, ROOT + "withdrawal.png")
 # 羅針盤
 COMPASS = ScanTarget(
     Rectangle(x_range=(450, 750), y_range=(210, 510)), ROOT + "compass.png"
+)
+
+EXPEDITION_RETURN_MESSAGE = ScanTarget(
+    Rectangle(x_range=(855, 1075), y_range=(40, 65)),
+    ROOT + "expedition_return_message.png",
 )
