@@ -66,11 +66,7 @@ if __name__ == "__main__":
         while True:
             try:
                 command = input("<コマンドを待機中>\n").split(" ")
-                if command[0] == "screenshot":
-                    main_thread.command = lambda: main_thread.canvas.screenshot(
-                        path="screenshots/{}.png".format(datetime.now())
-                    )
-                elif command[0] == "sortie":
+                if command[0] == "sortie":
                     sortie_command: Callable = None
 
                     if len(command) <= 1 or command[1] == "":
@@ -84,7 +80,6 @@ if __name__ == "__main__":
 
                     main_thread.commands.put(sortie_command)
                 elif command[0] == "supply":
-
                     def supply():
                         print("補給します")
                         click(main_thread.canvas, SUPPLY)
