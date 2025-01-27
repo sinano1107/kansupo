@@ -1,15 +1,26 @@
 import cv2 as cv
+import numpy as np
+from cv2.typing import MatLike
 from playwright.sync_api import Locator
 
 
-def detect_huge_damage(canvas: Locator):
-    path = "screenshots/use-for-detect-huge-damage.png"
-    canvas.screenshot(path=path)
-    return detect_huge_damage_without_screenshot(path=path)
+def detect_huge_damage(canvas: Locator, log=False):
+    screenshot = canvas.screenshot()
+    return detect_huge_damage_from_bytes(screenshot=screenshot, log=log)
 
 
-def detect_huge_damage_without_screenshot(path: str, log=False):
+def detect_huge_damage_from_bytes(screenshot: bytes, log=False):
+    image = np.frombuffer(screenshot, dtype=np.uint8)
+    image = cv.imdecode(image, cv.IMREAD_COLOR)
+    return detect_huge_damage_core(image, log=log)
+
+
+def detect_huge_damage_from_path(path: str, log=False):
     img = cv.imread(path)
+    return detect_huge_damage_core(img, log=log)
+
+
+def detect_huge_damage_core(img: MatLike, log=False):
     template = cv.imread("scan_targets/images/huge_damage.png")
     res: list[int] = []
     for i in range(6):
@@ -33,4 +44,4 @@ if __name__ == "__main__":
         "test/detect_huge_damage/6.png",
     ]
     for path in paths:
-        print(detect_huge_damage_without_screenshot(path, log=True))
+        print(detect_huge_damage_from_path(path, log=True))

@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 from playwright.sync_api import Locator
 
 from rectangle import Rectangle
@@ -11,8 +12,9 @@ class ScanTarget:
 
 
 def scan(canvas: Locator, targets: list[ScanTarget], log=False) -> int:
-    canvas.screenshot(path="screenshots/use-for-scan.png")
-    image = cv2.imread("screenshots/use-for-scan.png")
+    screenshot = canvas.screenshot()
+    image = np.frombuffer(screenshot, dtype=np.uint8)
+    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
     for i, target in enumerate(targets):
         cropped = image[
             target.RECTANGLE.Y_RANGE[0] : target.RECTANGLE.Y_RANGE[1],
