@@ -1,14 +1,20 @@
-from datetime import datetime, timedelta
+from copy import copy
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 import threading
 from time import sleep
 
+from dataclasses_json import dataclass_json
+
 from click import click
+from expedition.handle import handle_expedition
 from random_sleep import random_sleep
 from scan import scan
 from scan_targets.index import (
     EXPEDITION_NEXT_SCAN_TARGET,
     EXPEDITION_RETURN_MESSAGE,
     SETTING_SCAN_TARGET,
+    SORTIE_SELECT_SCAN_TARGET,
 )
 
 from typing import TYPE_CHECKING
@@ -20,25 +26,36 @@ if TYPE_CHECKING:
     from main import MainThread
 
 
+@dataclass_json
+@dataclass(frozen=True)
+class ExpeditioningData:
+    name: str
+    end_time: datetime
+
+
 class ExpeditionManageThread(threading.Thread):
+    SHOULD_ROOP = True
     DELAY = 10
-    SAVE_DATA_PATH = "save_data/expedition_end_time.txt"
-    SAVE_DATA_FORMAT = "%Y-%m-%d %H:%M:%S"
+    SAVE_DATA_PATH = "save_data/expedition.txt"
 
     def __init__(self, main_thread: "MainThread"):
         threading.Thread.__init__(self, daemon=True)
         # メインスレッドのインスタンスを格納する変数
         self.MAIN_THREAD = main_thread
-        # 出撃中の遠征の終了時刻を格納する変数
-        self.end_time: datetime = None
+        # 出撃中の遠征の情報を格納する変数
+        self.expeditioning_data: ExpeditioningData = None
         # セーブデータの読み込み
         self.load()
 
     def run(self):
         while True:
-            if self.end_time is not None and self.end_time <= datetime.now():
+            if (
+                self.expeditioning_data is not None
+                and self.expeditioning_data.end_time
+                <= datetime.now(timezone(timedelta(hours=9)))
+            ):
 
-                def check_res():
+                def check_res(name: str):
                     print("母港画面にいることを確認します")
                     wait_until_find(self.MAIN_THREAD.canvas, SETTING_SCAN_TARGET)
 
@@ -53,8 +70,14 @@ class ExpeditionManageThread(threading.Thread):
                                 "遠征帰還メッセージが表示されていないためリロードします"
                             )
                             click(self.MAIN_THREAD.canvas, SORTIE)
+                            wait_until_find(
+                                self.MAIN_THREAD.canvas, SORTIE_SELECT_SCAN_TARGET
+                            )
                             random_sleep()
                             click(self.MAIN_THREAD.canvas, HOME_PORT)
+                            wait_until_find(
+                                self.MAIN_THREAD.canvas, SETTING_SCAN_TARGET
+                            )
                             random_sleep()
                         else:
                             break
@@ -78,38 +101,49 @@ class ExpeditionManageThread(threading.Thread):
                     wait_until_find(self.MAIN_THREAD.canvas, SETTING_SCAN_TARGET)
                     print("母港画面に戻りました")
 
-                self.MAIN_THREAD.priority_commands.put(check_res)
-                self.end_time = None
+                    if self.SHOULD_ROOP:
+                        print("ループします")
+                        handle_expedition(name)(self.MAIN_THREAD.canvas, self)
+
+                name = copy(self.expeditioning_data.name)
+                self.MAIN_THREAD.priority_commands.put(lambda: check_res(name))
+                self.expeditioning_data = None
             # DELAY秒ごとにチェック
             sleep(self.DELAY)
 
     def save(self):
-        if self.end_time is not None:
-            print("帰還待機中の遠征の日時を保存します")
+        if self.expeditioning_data is not None:
+            print("帰還待機中の遠征の情報を保存します")
             with open(self.SAVE_DATA_PATH, "w") as f:
-                f.write(self.end_time.strftime(self.SAVE_DATA_FORMAT))
+                data = self.expeditioning_data.to_json(
+                    indent=4,
+                )
+                f.write(data)
 
     def load(self):
         try:
             with open(self.SAVE_DATA_PATH, "r") as f:
                 data = f.read()
                 if data != "":
-                    self.end_time = datetime.strptime(data, self.SAVE_DATA_FORMAT)
-                    print(
-                        "セーブデータをロードしました 帰還予定時刻は{}".format(
-                            self.end_time
-                        )
-                    )
+                    self.expeditioning_data = ExpeditioningData.from_json(data)
+                    print("セーブデータをロードしました", self.expeditioning_data)
             with open(self.SAVE_DATA_PATH, "w") as f:
                 f.write("")
         except FileNotFoundError:
             print("セーブデータが存在しません")
 
     # このminutesは遠征にかかる時間を代入する
-    def set_end_time(self, minutes: int):
-        # 40分の遠征は39分で帰還するので、-1している
-        # 回収タスクの追加前に帰還して、他のタスクのクリックによって回収されないように、さらにDELAY*2秒前に設定している。
-        self.end_time = datetime.now() + timedelta(
-            minutes=minutes - 1, seconds=-self.DELAY * 2
+    def start_wait(self, name: str, minutes: int):
+        self.expeditioning_data = ExpeditioningData(
+            name=name,
+            # 40分の遠征は39分で帰還するので、-1している
+            # 回収タスクの追加前に帰還して、他のタスクのクリックによって回収されないように、さらにDELAY*2秒前に設定している。
+            end_time=datetime.now(timezone(timedelta(hours=9)))
+            + timedelta(minutes=minutes - 1, seconds=-self.DELAY * 2),
         )
-        print("遠征の帰還予定時刻は{}です".format(self.end_time))
+        print(
+            "遠征{}の帰還予定時刻は{}です".format(
+                self.expeditioning_data.name,
+                self.expeditioning_data.end_time.strftime("%Y-%m-%d %H:%M:%S"),
+            )
+        )

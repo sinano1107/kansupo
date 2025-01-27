@@ -2,30 +2,36 @@ from expedition_manage_thread import ExpeditionManageThread
 
 
 def test_save_and_load():
-    # 生成時はend_timeがNoneであることを確認
-    expedition_manage_thread = ExpeditionManageThread(None)
-    assert expedition_manage_thread.end_time == None
+    # テスト前にファイルが空であることを確認
+    try:
+        with open(ExpeditionManageThread.SAVE_DATA_PATH, "r") as f:
+            assert f.read() == ""
+    except FileNotFoundError:
+        print("ファイルが存在しない")
 
-    # set_end_timeでend_timeが設定されることを確認
-    expedition_manage_thread.set_end_time(15)
-    assert expedition_manage_thread.end_time != None
+    # 生成時はexpeditioning_dataがNoneであることを確認
+    expedition_manage_thread = ExpeditionManageThread(None)
+    assert expedition_manage_thread.expeditioning_data == None
+
+    # start_waitでexpeditioning_dataが設定されることを確認
+    expedition_manage_thread.start_wait("test", 15)
+    assert expedition_manage_thread.expeditioning_data != None
+    assert expedition_manage_thread.expeditioning_data.name == "test"
 
     # saveでend_timeが保存されることを確認
-    prev_load_end_time = expedition_manage_thread.end_time
+    prev_data = expedition_manage_thread.expeditioning_data
     expedition_manage_thread.save()
-    with open("save_data/expedition_end_time.txt", "r") as f:
+    with open(ExpeditionManageThread.SAVE_DATA_PATH, "r") as f:
         assert f.read() != ""
 
     # 読み込みのためにリセット
-    expedition_manage_thread.end_time = None
-    assert expedition_manage_thread.end_time == None
+    expedition_manage_thread.expeditioning_data = None
+    assert expedition_manage_thread.expeditioning_data == None
 
     # loadでend_timeが読み込まれることを確認
     expedition_manage_thread.load()
-    expedition_manage_thread.end_time == prev_load_end_time
+    expedition_manage_thread.expeditioning_data == prev_data
 
     # load後はsave_dataが空になることを確認
-    with open("save_data/expedition_end_time.txt", "r") as f:
+    with open(ExpeditionManageThread.SAVE_DATA_PATH, "r") as f:
         assert f.read() == ""
-
-    pass
