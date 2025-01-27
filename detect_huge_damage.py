@@ -36,12 +36,12 @@ def detect_huge_damage_core(img: MatLike, log=False):
 
 if __name__ == "__main__":
     paths = [
-        "test/detect_huge_damage/1.png",
-        "test/detect_huge_damage/2.png",
-        "test/detect_huge_damage/3.png",
-        "test/detect_huge_damage/4.png",
-        "test/detect_huge_damage/5.png",
-        "test/detect_huge_damage/6.png",
+        "tests/detect_huge_damage/1.png",
+        "tests/detect_huge_damage/2.png",
+        "tests/detect_huge_damage/3.png",
+        "tests/detect_huge_damage/4.png",
+        "tests/detect_huge_damage/5.png",
+        "tests/detect_huge_damage/6.png",
     ]
     for path in paths:
         print(detect_huge_damage_from_path(path, log=True))
