@@ -87,20 +87,16 @@ if __name__ == "__main__":
                     elif command[0] == "supply":
                         main_thread.commands.put(lambda: supply(main_thread.canvas))
                     elif command[0] == "expedition":
-                        expedition_command: Callable = None
-
                         if len(command) <= 1 or command[1] == "":
                             print("遠征先が指定されていません")
                             continue
 
-                        expedition_command = handle_expedition(command[1])
-
-                        if expedition_command is not None:
-                            main_thread.commands.put(
-                                lambda: expedition_command(
-                                    main_thread.canvas, expedition_manage_thread
-                                )
+                        main_thread.commands.put(
+                            handle_expedition(
+                                command[1],
+                                expedition_manage_thread=expedition_manage_thread,
                             )
+                        )
                     else:
                         print("{}は不明なコマンドです".format(command[0]))
                 except KeyboardInterrupt:

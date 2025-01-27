@@ -1,7 +1,7 @@
 from time import sleep
 from typing import TYPE_CHECKING
 from click import click
-from playwright.sync_api import Locator
+from expedition.destinations import ExpeditionDestination
 from random_sleep import random_sleep
 from scan_targets.index import (
     EXPEDITION_DESTINATION_SELECT_SCAN_TARGET,
@@ -12,7 +12,6 @@ from scan_targets.index import (
 from supply import supply
 from targets import (
     EXPEDITION_DESTINATION_SELECT_DECIDE,
-    EXPEDITION_DESTINATION_SELECT_TOP,
     EXPEDITION_SELECT,
     EXPEDITION_START,
     HOME_PORT,
@@ -24,8 +23,13 @@ if TYPE_CHECKING:
     from expedition_manage_thread import ExpeditionManageThread
 
 
-def expedition_1_1(canvas: Locator, expedition_manage_thread: "ExpeditionManageThread"):
-    print("1-1に遠征します")
+def go_expedition(
+    expedition_manage_thread: "ExpeditionManageThread",
+    destination: ExpeditionDestination,
+):
+    canvas = expedition_manage_thread.MAIN_THREAD.canvas
+
+    print("{}に遠征します".format(destination.name))
 
     supply(canvas, 2)
 
@@ -50,11 +54,8 @@ def expedition_1_1(canvas: Locator, expedition_manage_thread: "ExpeditionManageT
 
     random_sleep()
 
-    print("一番上の海域を選択します")
-    click(
-        canvas,
-        EXPEDITION_DESTINATION_SELECT_TOP,
-    )
+    # 遠征先クラスに移譲
+    destination.select(canvas)
 
     random_sleep()
 
@@ -78,7 +79,7 @@ def expedition_1_1(canvas: Locator, expedition_manage_thread: "ExpeditionManageT
     wait_until_find(canvas, HOME_PORT_SCAN_TARGET)
     print("母港ボタンが出現しました")
 
-    expedition_manage_thread.start_wait("1-1", 15)
+    expedition_manage_thread.start_wait(destination.name, destination.minutes)
 
     random_sleep()
 

@@ -103,7 +103,9 @@ class ExpeditionManageThread(threading.Thread):
 
                     if self.SHOULD_ROOP:
                         print("ループします")
-                        handle_expedition(name)(self.MAIN_THREAD.canvas, self)
+                        self.MAIN_THREAD.priority_commands.put(
+                            handle_expedition(name, self)
+                        )
 
                 name = copy(self.expeditioning_data.name)
                 self.MAIN_THREAD.priority_commands.put(lambda: check_res(name))
