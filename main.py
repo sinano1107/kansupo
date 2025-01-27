@@ -16,15 +16,14 @@ from scan_targets.index import (
     SORTIE_SELECT_SCAN_TARGET,
 )
 from sortie.sortie_1_1 import sortie_1_1
+from supply import supply
 from targets import (
     EXPEDITION_DESTINATION_SELECT_DECIDE,
     EXPEDITION_DESTINATION_SELECT_TOP,
     EXPEDITION_SELECT,
     EXPEDITION_START,
-    FULL_FLEET_SUPPLY,
     HOME_PORT,
     SORTIE,
-    SUPPLY,
 )
 from wait_until_find import wait_until_find
 
@@ -96,17 +95,7 @@ if __name__ == "__main__":
 
                         main_thread.commands.put(sortie_command)
                     elif command[0] == "supply":
-
-                        def supply():
-                            print("補給します")
-                            click(main_thread.canvas, SUPPLY)
-                            random_sleep()
-                            click(main_thread.canvas, FULL_FLEET_SUPPLY)
-                            random_sleep()
-                            click(main_thread.canvas, HOME_PORT)
-                            wait_until_find(main_thread.canvas, SETTING_SCAN_TARGET)
-
-                        main_thread.commands.put(supply)
+                        main_thread.commands.put(lambda: supply(main_thread.canvas))
                     elif command[0] == "expedition":
                         expedition_command: Callable = None
 
