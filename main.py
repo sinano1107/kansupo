@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import json
+import operator
 from queue import Queue
 import threading
 from time import sleep
@@ -30,7 +31,7 @@ class MainThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self, daemon=True)
         # 艦の情報を格納する辞書
-        self.ships: dict[[int]: Ship] = None
+        self.ships: dict[int, Ship] = None
         # 優先コマンドを格納するキュー
         self.priority_commands = Queue()
         # コマンドを格納するキュー
@@ -59,9 +60,24 @@ class MainThread(threading.Thread):
                     
                     data = data[:end_index]
                     
+                    # 保存用コード
+                    # with open("docs/ship.json", "w") as f:
+                    #     json.dump(data, f, ensure_ascii=False, indent=4)
+                    
                     self.ships = { ship.id: ship for ship in [Ship(d.get("api_id"), d.get("api_name")) for d in data]}
                     
                     print("艦の情報を取得しました")
+                elif res.url.startswith("http://w14h.kancolle-server.com/kcsapi/api_port/port"):
+                    data = json.loads(res.text()[7:])
+                    
+                    if data.get("api_result") != 1:
+                        raise ValueError("portAPIが失敗したようです")
+                    
+                    ships = data.get("api_data").get("api_ship")
+                    
+                    ships_of_sorted_by_ndock_time = reversed(sorted(filter(lambda ship: ship.get("api_ndock_time") != 0, ships), key=operator.itemgetter("api_ndock_time")))
+                    
+                    print("入渠時間が短い順", [self.ships.get(ship.get("api_ship_id")).name for ship in ships_of_sorted_by_ndock_time])
             
             self.canvas = access(playwright, handle_response=handle_response)
 
