@@ -70,7 +70,8 @@ if __name__ == "__main__":
         try:
             while True:
                 try:
-                    command = input("<コマンドを待機中>\n").split(" ")
+                    input_line = input("<コマンドを待機中>\n")
+                    command = input_line.split(" ")
                     if command[0] == "sortie":
                         sortie_command: Callable = None
 
@@ -97,6 +98,15 @@ if __name__ == "__main__":
                                 expedition_manage_thread=expedition_manage_thread,
                             )
                         )
+                    elif command[0] == "loop":
+                        if len(command) <= 1 or command[1] == "":
+                            print("ループさせます")
+                            expedition_manage_thread.should_loop = True
+                        elif command[1] == "stop":
+                            print("ループを停止します")
+                            expedition_manage_thread.should_loop = False
+                        else:
+                            print("{} は不明なコマンドです".format(input_line))
                     else:
                         print("{}は不明なコマンドです".format(command[0]))
                 except KeyboardInterrupt:

@@ -34,9 +34,9 @@ class ExpeditioningData:
 
 
 class ExpeditionManageThread(threading.Thread):
-    SHOULD_ROOP = True
     DELAY = 10
     SAVE_DATA_PATH = "save_data/expedition.txt"
+    should_loop = True
 
     def __init__(self, main_thread: "MainThread"):
         threading.Thread.__init__(self, daemon=True)
@@ -101,7 +101,7 @@ class ExpeditionManageThread(threading.Thread):
                     wait_until_find(self.MAIN_THREAD.canvas, SETTING_SCAN_TARGET)
                     print("母港画面に戻りました")
 
-                    if self.SHOULD_ROOP:
+                    if self.should_loop:
                         print("ループします")
                         self.MAIN_THREAD.priority_commands.put(
                             handle_expedition(name, self)
