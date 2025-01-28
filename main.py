@@ -1,8 +1,10 @@
+from dataclasses import dataclass
+import json
 from queue import Queue
 import threading
 from time import sleep
 from typing import Callable
-from playwright.sync_api import sync_playwright, Locator
+from playwright.sync_api import sync_playwright, Locator, Response
 
 from access import access
 from click import click
@@ -18,9 +20,17 @@ from supply import supply
 from wait_until_find import wait_until_find
 
 
+@dataclass
+class Ship:
+    id: int
+    name: str
+
+
 class MainThread(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self, daemon=True)
+        # 艦の情報を格納する辞書
+        self.ships: dict[[int]: Ship] = None
         # 優先コマンドを格納するキュー
         self.priority_commands = Queue()
         # コマンドを格納するキュー
@@ -30,7 +40,30 @@ class MainThread(threading.Thread):
 
     def run(self):
         with sync_playwright() as playwright:
-            self.canvas = access(playwright)
+            def handle_response(res: Response):
+                if res.url.startswith("http://w14h.kancolle-server.com/kcsapi/api_start2/getData"):
+                    data = json.loads(res.text()[7:])
+                    
+                    if data.get("api_result") != 1:
+                        raise ValueError("getDataAPIが失敗したようです")
+                    
+                    data = data.get("api_data").get("api_mst_ship")
+                    
+                    # 駆逐艦イ級以前に味方艦の情報が格納されているので、それのインデックスを取得する
+                    end_index = None
+                    # 開発時点でのイ級のインデックス以降を探索する
+                    for i in range(792, len(data)):
+                        if data[i].get("api_id") == 1501:
+                            end_index = i
+                            break
+                    
+                    data = data[:end_index]
+                    
+                    self.ships = { ship.id: ship for ship in [Ship(d.get("api_id"), d.get("api_name")) for d in data]}
+                    
+                    print("艦の情報を取得しました")
+            
+            self.canvas = access(playwright, handle_response=handle_response)
 
             # スタートボタンが出現するまで待機
             print("スタートボタン待機中")
