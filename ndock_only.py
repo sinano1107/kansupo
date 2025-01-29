@@ -39,7 +39,6 @@ if __name__ == "__main__":
         
         # 母港到達まで待機します
         while page == Page.START:
-            print("母港到達待機中")
             sleep(0.1)
         random_sleep()
         
