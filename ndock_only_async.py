@@ -3,17 +3,21 @@ from enum import Enum
 import json
 import operator
 from random import random
+from typing import Callable, Coroutine
 from playwright.async_api import async_playwright, Response, Locator
 
 from rectangle import Rectangle
-from targets import GAME_START
+from targets import GAME_START, HOME_PORT, REPAIR, REPAIR_START, REPAIR_START_CONFIRM, repair_dock_button, repair_ship
 
 class Page(Enum):
     WAITING_START = "WAITING_START"
     START = "START"
     PORT = "PORT"
+    NDOCK = "NDOCK"
 
 page: Page = Page.WAITING_START
+canvas: Locator = None
+handle_in_ndock_page: Callable[[], Coroutine] = lambda: asyncio.sleep(0)
 
 async def random_sleep(base = 1, buffer = 1):
     await asyncio.sleep(base + random() * buffer)
@@ -44,9 +48,35 @@ async def handle_response(res: Response):
                 return
             
             print("入渠の必要がある艦がいます")
+            
+            await random_sleep(3)
+            
+            # 次に入渠ページに訪れたときの処理を設定
+            async def _handle_in_ndock_page():
+                await random_sleep()
+                await click(canvas, repair_dock_button(0))
+                await random_sleep()
+                await click(canvas, repair_ship(0))
+                await random_sleep()
+                await click(canvas, REPAIR_START)
+                await random_sleep()
+                await click(canvas, REPAIR_START_CONFIRM)
+                await random_sleep()
+                await click(canvas, HOME_PORT)
+            global handle_in_ndock_page
+            handle_in_ndock_page = lambda: _handle_in_ndock_page()
+            
+            # 入渠ボタンをクリック
+            await click(canvas, REPAIR)
+    elif res.url == "http://w14h.kancolle-server.com/kcsapi/api_get_member/ndock":
+        print("入渠ドックに到達しました")
+        page = Page.NDOCK
+        await handle_in_ndock_page()
+        handle_in_ndock_page = lambda: asyncio.sleep(0)
 
 async def main():
     async with async_playwright() as p:
+        global canvas
         browser = await p.chromium.launch(headless=False)
         context = await browser.new_context(storage_state="login_account.json")
         p_page = await context.new_page()

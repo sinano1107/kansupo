@@ -15,6 +15,25 @@ SORTIE = Rectangle(x_range=(240, 340), y_range=(350, 430))
 # 補給ボタン(母港)
 SUPPLY = Rectangle(x_range=(75, 155), y_range=(295, 375))
 
+# 入渠ボタン(母港)
+REPAIR = Rectangle(x_range=(145, 225), y_range=(505, 585))
+
+# 入渠ドックのn番目(0~3)
+def repair_dock_button(n: int):
+    y_start = 122.5 * n + 225
+    return Rectangle(x_range=(280, 480), y_range=(y_start, y_start + 25))
+
+# 入渠の上からn番目の艦(0~9)
+def repair_ship(n: int):
+    y_start = 46 * n + 190
+    return Rectangle(x_range=(600, 1100), y_range=(y_start, y_start + 39))
+
+# 入渠開始
+REPAIR_START = Rectangle(x_range=(925, 1125), y_range=(630, 680))
+
+# 入渠開始確認
+REPAIR_START_CONFIRM = Rectangle(x_range=(690, 825), y_range=(591, 621))
+
 # 艦隊全補給
 FULL_FLEET_SUPPLY = Rectangle(x_range=(1070, 1180), y_range=(605, 630))
 
