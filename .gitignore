@@ -2,4 +2,5 @@
 *.pyc
 screenshots/*
 save_data/*
+responses/*
 login_account.json
