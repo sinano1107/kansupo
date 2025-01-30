@@ -1,0 +1,26 @@
+{
+    "api_result": 1,
+    "api_result_msg": "\u6210\u529f",
+    "api_data": {
+        "api_map_info": [
+            {
+                "api_id": 11,
+                "api_cleared": 1
+            },
+            {
+                "api_id": 12,
+                "api_cleared": 1
+            },
+            {
+                "api_id": 13,
+                "api_cleared": 0
+            }
+        ],
+        "api_air_base_expanded_info": [
+            {
+                "api_area_id": 59,
+                "api_maintenance_level": 0
+            }
+        ]
+    }
+}
