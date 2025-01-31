@@ -7,7 +7,7 @@ from playwright.async_api import async_playwright, Response, Locator
 from ndock_only_async import Page, click, random_sleep, scan, wait_until_find
 from record_response import record_response
 from scan_targets.index import SEA_AREA_SELECT_SCAN_TARGET, SETTING_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET
-from targets import GAME_START, SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, SUPPLY
+from targets import GAME_START, SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, SUPPLY, ATTACK
 from scan_targets.index import COMPASS, TAN
 
 
@@ -51,7 +51,7 @@ def calc_remaining_hp():
         at_e_flag_list = hougeki_data.get("api_at_eflag")
         df_list = hougeki_data.get("api_df_list")
         damage_list = hougeki_data.get("api_damage")
-        for i, at_e_flag in enumerate(at_e_flag_list[:6]):
+        for i, at_e_flag in enumerate(at_e_flag_list):
             index = df_list[i][0]
             damage = damage_list[i][0]
             
@@ -73,11 +73,11 @@ def calc_remaining_hp():
         fdam = raigeki.get("api_fdam")
         edam = raigeki.get("api_edam")
         
-        for i, f in enumerate(fdam):
+        for i, f in enumerate(fdam[:6]):
             print(f"味方の{i+1}隻目に{f}ダメージ")
             total_friend_damage_list[i] += f
 
-        for i, e in enumerate(edam):
+        for i, e in enumerate(edam[:6]):
             print(f"敵の{i+1}隻目に{e}ダメージ")
             total_enemy_damage_list[i] += e
     else:
@@ -121,10 +121,11 @@ async def sortie_1_1():
     print("左上の海域を選択します")
     await click(canvas, SEA_AREA_LEFT_TOP)
 
-    await random_sleep(2)
+    await random_sleep()
 
     print("決定します")
     await click(canvas, SEA_AREA_SELECT_DECIDE)
+    print("決定しました")
     
     await random_sleep()
     
@@ -138,111 +139,120 @@ async def sortie_1_1():
     
     # これ以降はおそらくループで処理することで一般化できる
     
-    # 次のセルから派生しているセルの個数
-    next = response.get("api_next")
-    
-    # 次がボスマスかどうか確認する
-    # is_next_boss = response.get("api_event_id") == 5
-    
-    # 羅針盤が表示されるか確認する
-    rashin_flag = response.get("api_rashin_flg")
-    if rashin_flag == 1:
-        print("羅針盤が表示されるまで待機します")
-        await wait_until_find(canvas, COMPASS)
-        print("羅針盤が表示されました")
-        await random_sleep()
-        print("画面をクリックします")
-        await click(canvas)
-        print("画面をクリックしました")
-        await random_sleep()
-    
-    print("単縦陣選択画面が表示されるまで待機します")
-    await wait_until_find(canvas, TAN)
-    print("単縦陣選択ボタンが表示されました")
-    await random_sleep()
-    
-    print("単縦陣選択ボタンをクリックします")
-    await click(canvas, SELECT_SINGLE_LINE)
-    print("単縦陣を選択しました")
-    
-    print("戦闘開始まで待機します")
-    while page != Page.BATTLE:
-        await asyncio.sleep(1)
-    print("戦闘が開始されました")
-    
-    friend_remaining_hp_list, enemy_remaining_hp_list = calc_remaining_hp()
-    
-    can_midnight_battle = any(hp > 0 for hp in enemy_remaining_hp_list)
-    if can_midnight_battle:
-        print("夜戦を行えます<未実装>")
-        return
-        # if is_next_boss:
-        #     print("ボスマスなので夜戦を行います")
-        # else:
-        #     print("ボスマスではないので、夜戦を行いません")
+    while True:
+        # 次のセルから派生しているセルの個数
+        next = response.get("api_next")
         
-        # print("夜戦選択画面が表示されるまで待機します")
-        # await wait_until_find(canvas, )
-    else:
-        print("夜戦を行うことができません<未実装>")
-    
-    huge_damage_list = [remaining_hp <= max // 4 for remaining_hp, max in zip(friend_remaining_hp_list, response.get("api_f_maxhps"))]
-    
-    print("戦闘終了まで待機します")
-    while page != Page.BATTLE_RESULT:
-        await asyncio.sleep(1)
-    print("戦闘終了しました")
-    
-    print("次へボタンが表示されるまで待機します(1)")
-    await wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
-    print("次へボタンが表示されました(1)")
-    
-    await random_sleep()
-    
-    print("次へ進みます(1)")
-    await click(canvas)
-    print("次へ進みました(1)")
-    
-    await random_sleep()
-    
-    print("次へボタンが表示されるまで待機します(2)")
-    await wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
-    print("次へボタンが表示されました(2)")
-    
-    await random_sleep()
-    
-    print("次へ進みます(2)")
-    await click(canvas)
-    print("次へ進みました(2)")
-    
-    await random_sleep()
-    
-    get_flag = response.get("api_get_flag")
-    if get_flag[1] == 1:
-        get_ship = response.get("api_get_ship")
-        print(f"艦娘を取得しました: {get_ship.get('api_ship_name')}")
-        print("帰るボタンが表示されるまで待機します")
-        await wait_until_find(canvas, GO_BACK_SCAN_TARGET)
+        # 次がボスマスかどうか確認する
+        # is_next_boss = response.get("api_event_id") == 5
+        
+        # 羅針盤が表示されるか確認する
+        rashin_flag = response.get("api_rashin_flg")
+        if rashin_flag == 1:
+            print("羅針盤が表示されるまで待機します")
+            await wait_until_find(canvas, COMPASS)
+            print("羅針盤が表示されました")
+            await random_sleep()
+            print("画面をクリックします")
+            await click(canvas)
+            print("画面をクリックしました")
+            await random_sleep()
+        else:
+            print("羅針盤は表示されません")
+        
+        print("単縦陣選択画面が表示されるまで待機します")
+        await wait_until_find(canvas, TAN)
+        print("単縦陣選択ボタンが表示されました")
         await random_sleep()
-        print("画面をクリックします")
+        
+        print("単縦陣選択ボタンをクリックします")
+        await click(canvas, SELECT_SINGLE_LINE)
+        print("単縦陣を選択しました")
+        
+        print("戦闘開始まで待機します")
+        while page != Page.BATTLE:
+            await asyncio.sleep(1)
+        print("戦闘が開始されました")
+        
+        friend_remaining_hp_list, enemy_remaining_hp_list = calc_remaining_hp()
+        
+        can_midnight_battle = any(hp > 0 for hp in enemy_remaining_hp_list)
+        if can_midnight_battle:
+            print("夜戦を行えます<未実装>")
+            return
+            # if is_next_boss:
+            #     print("ボスマスなので夜戦を行います")
+            # else:
+            #     print("ボスマスではないので、夜戦を行いません")
+            
+            # print("夜戦選択画面が表示されるまで待機します")
+            # await wait_until_find(canvas, )
+        else:
+            print("敵を倒し切ったので夜戦を行うことができません")
+        
+        huge_damage_list = [remaining_hp <= max // 4 for remaining_hp, max in zip(friend_remaining_hp_list, response.get("api_f_maxhps"))]
+        
+        print("戦闘終了まで待機します")
+        while page != Page.BATTLE_RESULT:
+            await asyncio.sleep(1)
+        print("戦闘終了しました")
+        
+        print("次へボタンが表示されるまで待機します(1)")
+        await wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
+        print("次へボタンが表示されました(1)")
+        
+        await random_sleep(2)
+        
+        print("次へ進みます(1)")
         await click(canvas)
-    
-    if next == 0:
-        print("行き止まりなので終了")
-        return
-    
-    print("撤退ボタンが表示されるまで待機します")
-    await wait_until_find(canvas, WITHDRAWAL_SCAN_TARGET)
-    print("撤退ボタンが表示されました")
-    
-    await random_sleep()
-    
-    if any(huge_damage_list):
-        print("大破艦がいるので撤退します")
-        await click(canvas, WITHDRAWAL_SCAN_TARGET.RECTANGLE)
-        return
-    
-    print("進撃ボタンをクリックします(未実装)")
+        print("次へ進みました(1)")
+        
+        await random_sleep()
+        
+        print("次へボタンが表示されるまで待機します(2)")
+        await wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
+        print("次へボタンが表示されました(2)")
+        
+        await random_sleep()
+        
+        print("次へ進みます(2)")
+        await click(canvas)
+        print("次へ進みました(2)")
+        
+        await random_sleep()
+        
+        get_flag = response.get("api_get_flag")
+        if get_flag[1] == 1:
+            get_ship = response.get("api_get_ship")
+            print(f"艦娘を取得しました: {get_ship.get('api_ship_name')}")
+            print("帰るボタンが表示されるまで待機します")
+            await wait_until_find(canvas, GO_BACK_SCAN_TARGET)
+            await random_sleep()
+            print("画面をクリックします")
+            await click(canvas)
+        
+        if next == 0:
+            print("行き止まりなので終了")
+            return
+        
+        print("撤退ボタンが表示されるまで待機します")
+        await wait_until_find(canvas, WITHDRAWAL_SCAN_TARGET)
+        print("撤退ボタンが表示されました")
+        
+        await random_sleep()
+        
+        if any(huge_damage_list):
+            print("大破艦がいるので撤退します")
+            await click(canvas, WITHDRAWAL_SCAN_TARGET.RECTANGLE)
+            return
+        
+        print("進撃ボタンをクリックします")
+        await click(canvas, ATTACK)
+        
+        print("次のセルへ向かうレスポンスが帰ってくるまで待機します")
+        while page != Page.GOING_TO_NEXT_CELL:
+            await asyncio.sleep(1)
+        print("次のセルへ向かうレスポンスが帰ってきました")
 
 
 async def handle_response(res: Response):
@@ -296,6 +306,10 @@ async def handle_response(res: Response):
         print("戦闘結果レスポンスを受け取りました")
         response = json.loads((await res.body())[7:]).get("api_data")
         page = Page.BATTLE_RESULT
+    elif url.endswith("/api_req_map/next"):
+        print("次のセルへ向かうレスポンスを受け取りました")
+        response = json.loads((await res.body())[7:]).get("api_data")
+        page = Page.GOING_TO_NEXT_CELL
     else:
         print("ハンドラの設定されていないレスポンスを受け取りました")
 
@@ -305,7 +319,7 @@ async def main():
     async with async_playwright() as p:
         global canvas, sortie
         browser = await p.chromium.launch(headless=False)
-        context = await browser.new_context(storage_state="login_account.json", record_video_dir=f"responses/{name}")
+        context = await browser.new_context(storage_state="login_account.json", record_video_dir=f"responses/{name}", viewport={"width": 1300, "height": 900})
         p_page = await context.new_page()
         p_page.on("response", handle_response)
         p_page.on("response", lambda res: record_response(res, name))
