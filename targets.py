@@ -86,3 +86,9 @@ WITHDRAWAL = Rectangle(x_range=(705, 815), y_range=(325, 405))
 
 # 「進撃」ボタン
 ATTACK = Rectangle(x_range=(375, 485), y_range=(325, 405))
+
+# 「追撃せず」ボタン(夜戦選択画面)
+NO_MIDNIGHT_BATTLE = Rectangle(x_range=(380, 480), y_range=(325, 405))
+
+# 「夜戦突入」ボタン
+DO_MIDNIGHT_BATTLE = Rectangle(x_range=(705, 805), y_range=(325, 405))

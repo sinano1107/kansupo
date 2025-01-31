@@ -51,3 +51,8 @@ EXPEDITION_RETURN_MESSAGE = ScanTarget(
     Rectangle(x_range=(855, 1075), y_range=(40, 65)),
     ROOT + "expedition_return_message.png",
 )
+
+# 夜戦選択画面
+MIDNIGHT_BATTLE_SELECT_PAGE = ScanTarget(
+    Rectangle(x_range=(60, 190), y_range=(45, 80)), ROOT + "midnight_battle_select_page.png"
+)

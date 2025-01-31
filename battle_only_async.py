@@ -6,8 +6,8 @@ from playwright.async_api import async_playwright, Response, Locator
 
 from ndock_only_async import Page, click, random_sleep, scan, wait_until_find
 from record_response import record_response
-from scan_targets.index import SEA_AREA_SELECT_SCAN_TARGET, SETTING_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET
-from targets import GAME_START, SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, SUPPLY, ATTACK
+from scan_targets.index import SEA_AREA_SELECT_SCAN_TARGET, SETTING_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET, MIDNIGHT_BATTLE_SELECT_PAGE
+from targets import GAME_START, SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, SUPPLY, ATTACK, DO_MIDNIGHT_BATTLE, NO_MIDNIGHT_BATTLE
 from scan_targets.index import COMPASS, TAN
 
 
@@ -52,20 +52,18 @@ def calc_remaining_hp():
         df_list = hougeki_data.get("api_df_list")
         damage_list = hougeki_data.get("api_damage")
         for i, at_e_flag in enumerate(at_e_flag_list):
-            index = df_list[i][0]
-            damage = damage_list[i][0]
-            
-            # 庇った場合はdamage+0.1になるのでそれを処理する
-            is_protected = damage % 1 == 0.1
-            damage //= 1
-            
-            # ダメージを記録
-            if at_e_flag == 1:
-                print(f"味方の{index + 1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
-                total_friend_damage_list[index] += damage
-            else:
-                print(f"敵の{index + 1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
-                total_enemy_damage_list[index] += damage
+            for index, damage in zip(df_list[i], damage_list[i]):
+                # 庇った場合はdamage+0.1になるのでそれを処理する
+                is_protected = damage % 1 == 0.1
+                damage //= 1
+                
+                # ダメージを記録
+                if at_e_flag == 1:
+                    print(f"味方の{index + 1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
+                    total_friend_damage_list[index] += damage
+                else:
+                    print(f"敵の{index + 1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
+                    total_enemy_damage_list[index] += damage
     
     # 雷撃戦の情報を取得する
     if hourai_flag[3] == 1:
@@ -74,11 +72,17 @@ def calc_remaining_hp():
         edam = raigeki.get("api_edam")
         
         for i, f in enumerate(fdam[:6]):
-            print(f"味方の{i+1}隻目に{f}ダメージ")
+            # 庇った場合はdamage+0.1になるのでそれを処理する
+            is_protected = f % 1 == 0.1
+            f //= 1
+            print(f"味方の{i+1}隻目に{f}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
             total_friend_damage_list[i] += f
 
         for i, e in enumerate(edam[:6]):
-            print(f"敵の{i+1}隻目に{e}ダメージ")
+            # 庇った場合はdamage+0.1になるのでそれを処理する
+            is_protected = e % 1 == 0.1
+            e //= 1
+            print(f"敵の{i+1}隻目に{e}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
             total_enemy_damage_list[i] += e
     else:
         print("<雷撃戦は発生しませんでした>")
@@ -144,7 +148,7 @@ async def sortie_1_1():
         next = response.get("api_next")
         
         # 次がボスマスかどうか確認する
-        # is_next_boss = response.get("api_event_id") == 5
+        is_next_boss = response.get("api_event_id") == 5
         
         # 羅針盤が表示されるか確認する
         rashin_flag = response.get("api_rashin_flg")
@@ -160,11 +164,11 @@ async def sortie_1_1():
         else:
             print("羅針盤は表示されません")
         
+        # FIXME 4隻未満のとき、陣形選択ができないので、この処理をスキップする
         print("単縦陣選択画面が表示されるまで待機します")
         await wait_until_find(canvas, TAN)
         print("単縦陣選択ボタンが表示されました")
         await random_sleep()
-        
         print("単縦陣選択ボタンをクリックします")
         await click(canvas, SELECT_SINGLE_LINE)
         print("単縦陣を選択しました")
@@ -178,24 +182,55 @@ async def sortie_1_1():
         
         can_midnight_battle = any(hp > 0 for hp in enemy_remaining_hp_list)
         if can_midnight_battle:
-            print("夜戦を行えます<未実装>")
-            return
-            # if is_next_boss:
-            #     print("ボスマスなので夜戦を行います")
-            # else:
-            #     print("ボスマスではないので、夜戦を行いません")
+            print("夜戦選択画面が表示されるまで待機します")
+            await wait_until_find(canvas, MIDNIGHT_BATTLE_SELECT_PAGE)
+            print("夜戦選択画面が表示されました")
             
-            # print("夜戦選択画面が表示されるまで待機します")
-            # await wait_until_find(canvas, )
+            await random_sleep()
+            
+            if is_next_boss:
+                print("ボスマスなので夜戦を行います")
+                await click(canvas, DO_MIDNIGHT_BATTLE)
+                
+                print("夜戦開始まで待機します")
+                while page != Page.MIDNIGHT_BATTLE:
+                    await asyncio.sleep(1)
+                print("夜戦が開始されました")
+                
+                hougeki = response.get("api_hougeki")
+                at_e_flag_list = hougeki.get("api_at_eflag")
+                
+                if at_e_flag_list is None:
+                    print("夜戦が発生しませんでした")
+                else:
+                    now_hp_list = response.get("api_f_nowhps")
+                    df_list = hougeki.get("api_df_list")
+                    damage_list = hougeki.get("api_damage")
+                    total_friend_damage_list = [0] * 6
+                    
+                    for i, at_e_flag in enumerate(at_e_flag_list):
+                        if at_e_flag == 1:
+                            for index, damage in zip(df_list[i], damage_list[i]):
+                                # 庇った場合はdamage+0.1になるのでそれを処理する
+                                is_protected = damage % 1 == 0.1
+                                damage //= 1
+                                
+                                print(f"味方の{index+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
+                                total_friend_damage_list[index] += damage
+                    
+                    friend_remaining_hp_list = [now - damage for now, damage in zip(now_hp_list, total_friend_damage_list)]
+            else:
+                print("ボスマスではないので、夜戦を行いません")
+                await click(canvas, NO_MIDNIGHT_BATTLE)
         else:
             print("敵を倒し切ったので夜戦を行うことができません")
         
         huge_damage_list = [remaining_hp <= max // 4 for remaining_hp, max in zip(friend_remaining_hp_list, response.get("api_f_maxhps"))]
         
-        print("戦闘終了まで待機します")
+        print("戦闘終了画面に遷移するまで待機します")
         while page != Page.BATTLE_RESULT:
             await asyncio.sleep(1)
-        print("戦闘終了しました")
+        print("戦闘終了画面に遷移しました")
         
         print("次へボタンが表示されるまで待機します(1)")
         await wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
@@ -302,6 +337,10 @@ async def handle_response(res: Response):
         print("戦闘開始レスポンスを受け取りました")
         response = json.loads((await res.body())[7:]).get("api_data")
         page = Page.BATTLE
+    elif url.endswith("/api_req_battle_midnight/battle"):
+        print("夜戦開始レスポンスを受け取りました")
+        response = json.loads((await res.body())[7:]).get("api_data")
+        page = Page.MIDNIGHT_BATTLE
     elif url.endswith("/api_req_sortie/battleresult"):
         print("戦闘結果レスポンスを受け取りました")
         response = json.loads((await res.body())[7:]).get("api_data")
