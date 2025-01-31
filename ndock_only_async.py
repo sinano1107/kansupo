@@ -44,7 +44,7 @@ async def click(canvas: Locator, target=Rectangle(x_range=(0, 1200), y_range=(0,
     x, y = target.random_point()
     await canvas.click(position={"x": x, "y": y})
 
-async def start_repair():
+async def start_repair(should_use_dock_index_list: list[int], repairing_ship_count: int):
     """
     入渠させる処理
     母港画面で実行されることを前提としている
@@ -60,24 +60,25 @@ async def start_repair():
         await asyncio.sleep(0.1)
     
     # 入渠ページに到達したら処理を実行
-    print("入渠ページに遷移したので、入居させます")
+    print("入渠ページに遷移したので、入渠させます")
     await random_sleep()
     
-    print("一つ目のドックをクリックします")
-    await click(canvas, repair_dock_button(0))
-    await random_sleep()
-    
-    print("一番上の艦をクリックします")
-    await click(canvas, repair_ship(0))
-    await random_sleep()
-    
-    print("入渠開始ボタンをクリックします")
-    await click(canvas, REPAIR_START)
-    await random_sleep()
-    
-    print("入渠開始確認ボタンをクリックします")
-    await click(canvas, REPAIR_START_CONFIRM)
-    await random_sleep()
+    for i, dock_index in enumerate(should_use_dock_index_list):
+        print("ドック{}を使用して入渠させます".format(dock_index + 1))
+        await click(canvas, repair_dock_button(dock_index))
+        await random_sleep()
+        
+        print(f"上から{i + repairing_ship_count}番目の艦をクリックします")
+        await click(canvas, repair_ship(i + repairing_ship_count))
+        await random_sleep()
+        
+        print("入渠開始ボタンをクリックします")
+        await click(canvas, REPAIR_START)
+        await random_sleep()
+        
+        print("入渠開始確認ボタンをクリックします")
+        await click(canvas, REPAIR_START_CONFIRM)
+        await random_sleep()
     
     print("母港画面に戻ります")
     await click(canvas, HOME_PORT)
@@ -111,6 +112,7 @@ async def wait_until_find(canvas: Locator, target: ScanTarget, delay=1):
         if await scan(canvas, [target]) == 0:
             break
 
+# FIXME 1分未満で入渠が完了する場合の考慮が未実装
 async def handle_response(res: Response):
     if not res.url.startswith("http://w14h.kancolle-server.com/kcsapi/"):
         return
@@ -123,24 +125,39 @@ async def handle_response(res: Response):
         
         svdata: dict = json.loads((await res.body())[7:])
         data: dict = svdata.get("api_data")
-        ndock = data.get("api_ndock")
+        ndock_list = data.get("api_ndock")
+        is_ndock_empty_list = [ndock.get("api_state") == 0 for ndock in ndock_list]
         
-        if ndock[0].get("api_state") == 0:
-            print("一番ドックが空いています")
-            
+        if any(is_ndock_empty_list):
             ships = data.get("api_ship")
+            # MEMO 将来的に入渠時間が短い艦から入渠させたいので、入渠時間でソートしている
             ships_of_sorted_by_ndock_time = sorted(filter(lambda ship: ship.get("api_ndock_time") != 0, ships), key=operator.itemgetter("api_ndock_time"))
-            if len(ships_of_sorted_by_ndock_time) == 0:
+            print(len(ships_of_sorted_by_ndock_time), "隻の艦が入渠可能です")
+            
+            # 使用する入渠ドックのリストを作成する
+            can_repair_count = min(is_ndock_empty_list.count(True), len(ships_of_sorted_by_ndock_time))
+            index = -1
+            should_use_dock_index_list: list[int] = []
+            for _ in range(can_repair_count):
+                # 前回に発見したTrueの次の要素から検索する
+                index = is_ndock_empty_list.index(True, index + 1)
+                should_use_dock_index_list.append(index)
+            
+            if len(should_use_dock_index_list) == 0:
                 return
             
-            print("入渠の必要がある艦がいます")
+            print("入渠を実施します")
             
             # 入渠させる処理を代入
-            repair = start_repair
+            repair = lambda: start_repair(should_use_dock_index_list, repairing_ship_count=[ndock.get("api_state") for ndock in ndock_list].count(1))
         else:
             print("入渠ドックが埋まっているので待機します")
-            complete_time = ndock[0].get("api_complete_time")
-            wait_seconds = complete_time / 1000 - time()
+            using_dock_list = list(filter(lambda dock: dock.get("api_state") == 1, ndock_list))
+            using_docks_complete_time_list = [dock.get("api_complete_time") for dock in using_dock_list]
+            min_complete_time = min(using_docks_complete_time_list)
+            min_dock_index = using_dock_list[using_docks_complete_time_list.index(min_complete_time)].get("api_id") - 1
+            
+            wait_seconds = min_complete_time / 1000 - time()
             wait_seconds -= 60 # 入渠ページに遷移することで1分短縮できるので、1分引く
             
             # 待ってから入渠させる処理
@@ -149,7 +166,7 @@ async def handle_response(res: Response):
                 print("{}まで待機してから、入渠させます".format(datetime.now() + timedelta(seconds=wait_seconds)))
                 await asyncio.sleep(wait_seconds)
                 print("入渠完了時刻になったので、入渠タスクを代入します")
-                repair = start_repair
+                repair = lambda: start_repair([min_dock_index], repairing_ship_count=len(using_dock_list) - 1)
             
             # 待ってから入渠させる処理のタスクを作成
             # 一応Noneチェックをして、前のタスクが残っていたらキャンセルする
