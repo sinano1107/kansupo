@@ -164,6 +164,12 @@ async def sortie_1_1():
         else:
             print("羅針盤は表示されません")
         
+        event_id = response.get("api_event_id")
+        
+        # 「気のせいだった」の時はスキップする
+        if event_id == 6:
+            continue
+        
         # FIXME 4隻未満のとき、陣形選択ができないので、この処理をスキップする
         print("単縦陣選択画面が表示されるまで待機します")
         await wait_until_find(canvas, TAN)
