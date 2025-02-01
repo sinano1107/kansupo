@@ -64,7 +64,10 @@ EXPEDITION_NEXT = Rectangle(x_range=(1125, 1170), y_range=(643, 688))
 SEA_AREA_SELECT = Rectangle(x_range=(190, 650), y_range=(155, 200))
 
 # 海域選択左上
-SEA_AREA_LEFT_TOP = Rectangle(x_range=(210, 540), y_range=(230, 390))
+SEA_AREA_LEFT_TOP = Rectangle(x_range=(210, 640), y_range=(230, 390))
+
+# 海域選択左下
+SEA_AREA_LEFT_BOTTOM = Rectangle(x_range=(210, 640), y_range=(445, 605))
 
 # 海域選択決定
 SEA_AREA_SELECT_DECIDE = Rectangle(x_range=(900, 1130), y_range=(645, 690))
