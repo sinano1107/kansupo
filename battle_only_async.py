@@ -9,6 +9,7 @@ from record_response import record_response
 from scan_targets.index import SEA_AREA_SELECT_SCAN_TARGET, SETTING_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET, MIDNIGHT_BATTLE_SELECT_PAGE
 from targets import GAME_START, SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, SUPPLY, ATTACK, DO_MIDNIGHT_BATTLE, NO_MIDNIGHT_BATTLE
 from scan_targets.index import COMPASS, TAN
+from ships.ships import ships_map
 
 
 page: Page = Page.START
@@ -100,7 +101,7 @@ def calc_remaining_hp():
     return (friend_remaining_hp_list, enemy_remaining_hp_list)
 
 async def sortie_1_1():
-    await asyncio.to_thread(input, "<補給済みですか？Enterで出撃します>")
+    await random_sleep()
     
     print("1-1に出撃します")
     
@@ -316,24 +317,44 @@ async def handle_response(res: Response):
         
         # 所持艦船リスト
         ship_list = data.get("api_ship")
-        # 所持艦船のID: 受けているダメージの辞書
-        ship_damage_map = {ship.get("api_id"): ship.get("api_maxhp") - ship.get("api_nowhp") for ship in ship_list}
+        # 所持艦船のID: 受けているダメージ、所持燃料数/弾薬数の辞書
+        ship_data_map = {
+            ship.get("api_id"):  {
+                "ship_id": ship.get("api_ship_id"),
+                "damage": ship.get("api_maxhp") - ship.get("api_nowhp"),
+                "fuel": ship.get("api_fuel"),
+                "bull": ship.get("api_bull"),
+            }
+        for ship in ship_list}
         
         # 現在編成中の艦隊
         deck_port = data.get("api_deck_port")
         
-        # 第一艦隊の損害を確認
+        # 第一艦隊の損害/補給状況を確認
         for ship_id in deck_port[0].get("api_ship"):
             if ship_id == -1:
                 # 飛ばし飛ばしで編成することはできないので、からのスロットがあり次第ループを離脱
                 break
+            
+            ship_data = ship_data_map.get(ship_id)
         
-            if ship_damage_map[ship_id] > 0:
+            # 損害を確認
+            if ship_data.get("damage") > 0:
                 print("第一艦隊に損傷艦が含まれています\n編成を行なってください")
+                return
+            
+            mst_ship_data = ships_map.get(ship_data.get("ship_id"))
+            if mst_ship_data is None:
+                print(f"艦の情報が取得できませんでした {ship_id=}")
+                return
+            
+            # 補給状況を確認
+            if mst_ship_data.fuel_max > ship_data.get("fuel") or mst_ship_data.bull_max > ship_data.get("bull"):
+                print("第一艦隊の補給が必要です")
                 return
         
         # 第一艦隊に損害がないので、出撃する
-        print("第一艦隊に損害がないので、出撃コルーチンを代入します")
+        print("第一艦隊の出撃に支障がないので、出撃コルーチンを代入します")
         sortie = sortie_1_1
     elif url.endswith("api_req_map/start"):
         print("出撃開始レスポンスを受け取りました")
