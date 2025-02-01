@@ -31,7 +31,7 @@ async def handle_response(res: Response):
     for ship in ship_list:
         id = ship.get("api_id")
         name = ship.get("api_name")
-        replaced_name = name.replace(" ", "_").replace("-", "").replace(".", "")
+        replaced_name = name.replace(" ", "_").replace("-", "_").replace(".", "_")
         fuel_max = ship.get("api_fuel_max")
         bull_max = ship.get("api_bull_max")
         ships_str += f"{replaced_name} = Ship({id=}, {name=}, {fuel_max=}, {bull_max=})\n"

@@ -327,7 +327,7 @@ Z3改 = Ship(id=311, name='Z3改', fuel_max=20, bull_max=25)
 秋月改 = Ship(id=330, name='秋月改', fuel_max=20, bull_max=25)
 天城 = Ship(id=331, name='天城', fuel_max=50, bull_max=45)
 葛城 = Ship(id=332, name='葛城', fuel_max=50, bull_max=45)
-U511改 = Ship(id=334, name='U-511改', fuel_max=10, bull_max=20)
+U_511改 = Ship(id=334, name='U-511改', fuel_max=10, bull_max=20)
 香取改 = Ship(id=343, name='香取改', fuel_max=35, bull_max=20)
 朝霜改 = Ship(id=344, name='朝霜改', fuel_max=15, bull_max=20)
 高波改 = Ship(id=345, name='高波改', fuel_max=15, bull_max=20)
@@ -414,7 +414,7 @@ Intrepid改 = Ship(id=397, name='Intrepid改', fuel_max=90, bull_max=105)
 摩耶改二 = Ship(id=428, name='摩耶改二', fuel_max=45, bull_max=80)
 天城改 = Ship(id=429, name='天城改', fuel_max=50, bull_max=55)
 葛城改 = Ship(id=430, name='葛城改', fuel_max=50, bull_max=55)
-U511 = Ship(id=431, name='U-511', fuel_max=10, bull_max=20)
+U_511 = Ship(id=431, name='U-511', fuel_max=10, bull_max=20)
 Graf_Zeppelin = Ship(id=432, name='Graf Zeppelin', fuel_max=55, bull_max=65)
 Saratoga = Ship(id=433, name='Saratoga', fuel_max=65, bull_max=70)
 睦月改二 = Ship(id=434, name='睦月改二', fuel_max=15, bull_max=15)
@@ -518,18 +518,18 @@ Luigi_Torelli = Ship(id=535, name='Luigi Torelli', fuel_max=10, bull_max=20)
 神鷹改二 = Ship(id=536, name='神鷹改二', fuel_max=35, bull_max=35)
 涼月改 = Ship(id=537, name='涼月改', fuel_max=20, bull_max=25)
 冬月改 = Ship(id=538, name='冬月改', fuel_max=20, bull_max=25)
-UIT25 = Ship(id=539, name='UIT-25', fuel_max=10, bull_max=20)
+UIT_25 = Ship(id=539, name='UIT-25', fuel_max=10, bull_max=20)
 対馬 = Ship(id=540, name='対馬', fuel_max=10, bull_max=10)
 長門改二 = Ship(id=541, name='長門改二', fuel_max=180, bull_max=225)
 夕雲改二 = Ship(id=542, name='夕雲改二', fuel_max=15, bull_max=20)
 長波改二 = Ship(id=543, name='長波改二', fuel_max=15, bull_max=20)
 Gambier_Bay = Ship(id=544, name='Gambier Bay', fuel_max=25, bull_max=30)
-Saratoga_MkII = Ship(id=545, name='Saratoga Mk.II', fuel_max=90, bull_max=95)
+Saratoga_Mk_II = Ship(id=545, name='Saratoga Mk.II', fuel_max=90, bull_max=95)
 武蔵改二 = Ship(id=546, name='武蔵改二', fuel_max=275, bull_max=350)
 多摩改二 = Ship(id=547, name='多摩改二', fuel_max=25, bull_max=30)
 文月改二 = Ship(id=548, name='文月改二', fuel_max=15, bull_max=15)
 Intrepid = Ship(id=549, name='Intrepid', fuel_max=75, bull_max=80)
-Saratoga_MkII_Mod2 = Ship(id=550, name='Saratoga Mk.II Mod.2', fuel_max=100, bull_max=100)
+Saratoga_Mk_II_Mod_2 = Ship(id=550, name='Saratoga Mk.II Mod.2', fuel_max=100, bull_max=100)
 日振 = Ship(id=551, name='日振', fuel_max=10, bull_max=10)
 大東 = Ship(id=552, name='大東', fuel_max=10, bull_max=10)
 伊勢改二 = Ship(id=553, name='伊勢改二', fuel_max=110, bull_max=145)
@@ -540,7 +540,7 @@ Saratoga_MkII_Mod2 = Ship(id=550, name='Saratoga Mk.II Mod.2', fuel_max=100, bul
 浜風乙改 = Ship(id=558, name='浜風乙改', fuel_max=15, bull_max=25)
 谷風丁改 = Ship(id=559, name='谷風丁改', fuel_max=15, bull_max=25)
 瑞鳳改二乙 = Ship(id=560, name='瑞鳳改二乙', fuel_max=40, bull_max=45)
-Samuel_BRoberts = Ship(id=561, name='Samuel B.Roberts', fuel_max=15, bull_max=20)
+Samuel_B_Roberts = Ship(id=561, name='Samuel B.Roberts', fuel_max=15, bull_max=20)
 Johnston = Ship(id=562, name='Johnston', fuel_max=20, bull_max=20)
 巻雲改二 = Ship(id=563, name='巻雲改二', fuel_max=15, bull_max=20)
 風雲改二 = Ship(id=564, name='風雲改二', fuel_max=15, bull_max=20)
@@ -568,8 +568,8 @@ Maestrale改 = Ship(id=580, name='Maestrale改', fuel_max=15, bull_max=20)
 日進甲 = Ship(id=586, name='日進甲', fuel_max=40, bull_max=45)
 海風改二 = Ship(id=587, name='海風改二', fuel_max=15, bull_max=20)
 山風改二 = Ship(id=588, name='山風改二', fuel_max=15, bull_max=20)
-LdSDdAbruzzi = Ship(id=589, name='L.d.S.D.d.Abruzzi', fuel_max=40, bull_max=50)
-GGaribaldi = Ship(id=590, name='G.Garibaldi', fuel_max=40, bull_max=50)
+L_d_S_D_d_Abruzzi = Ship(id=589, name='L.d.S.D.d.Abruzzi', fuel_max=40, bull_max=50)
+G_Garibaldi = Ship(id=590, name='G.Garibaldi', fuel_max=40, bull_max=50)
 金剛改二丙 = Ship(id=591, name='金剛改二丙', fuel_max=100, bull_max=160)
 比叡改二丙 = Ship(id=592, name='比叡改二丙', fuel_max=100, bull_max=160)
 榛名改二乙 = Ship(id=593, name='榛名改二乙', fuel_max=100, bull_max=160)
@@ -606,8 +606,8 @@ Helena改 = Ship(id=620, name='Helena改', fuel_max=35, bull_max=60)
 秋霜 = Ship(id=625, name='秋霜', fuel_max=15, bull_max=20)
 神州丸改 = Ship(id=626, name='神州丸改', fuel_max=40, bull_max=20)
 敷波改二 = Ship(id=627, name='敷波改二', fuel_max=15, bull_max=20)
-Fletcher改_Mod2 = Ship(id=628, name='Fletcher改 Mod.2', fuel_max=20, bull_max=25)
-Fletcher_MkII = Ship(id=629, name='Fletcher Mk.II', fuel_max=25, bull_max=25)
+Fletcher改_Mod_2 = Ship(id=628, name='Fletcher改 Mod.2', fuel_max=20, bull_max=25)
+Fletcher_Mk_II = Ship(id=629, name='Fletcher Mk.II', fuel_max=25, bull_max=25)
 Gotland_andra = Ship(id=630, name='Gotland andra', fuel_max=30, bull_max=35)
 薄雲 = Ship(id=631, name='薄雲', fuel_max=15, bull_max=20)
 有明 = Ship(id=632, name='有明', fuel_max=15, bull_max=20)
@@ -652,7 +652,7 @@ Northampton改 = Ship(id=660, name='Northampton改', fuel_max=40, bull_max=65)
 日振改 = Ship(id=678, name='日振改', fuel_max=10, bull_max=10)
 大東改 = Ship(id=679, name='大東改', fuel_max=10, bull_max=10)
 浜波改 = Ship(id=680, name='浜波改', fuel_max=15, bull_max=20)
-Samuel_BRoberts改 = Ship(id=681, name='Samuel B.Roberts改', fuel_max=15, bull_max=20)
+Samuel_B_Roberts改 = Ship(id=681, name='Samuel B.Roberts改', fuel_max=15, bull_max=20)
 平戸改 = Ship(id=684, name='平戸改', fuel_max=10, bull_max=10)
 福江改 = Ship(id=685, name='福江改', fuel_max=10, bull_max=10)
 岸波改 = Ship(id=686, name='岸波改', fuel_max=15, bull_max=20)
@@ -660,9 +660,9 @@ Samuel_BRoberts改 = Ship(id=681, name='Samuel B.Roberts改', fuel_max=15, bull_
 早波改 = Ship(id=688, name='早波改', fuel_max=15, bull_max=20)
 Johnston改 = Ship(id=689, name='Johnston改', fuel_max=20, bull_max=20)
 日進改 = Ship(id=690, name='日進改', fuel_max=40, bull_max=40)
-GGaribaldi改 = Ship(id=691, name='G.Garibaldi改', fuel_max=40, bull_max=55)
+G_Garibaldi改 = Ship(id=691, name='G.Garibaldi改', fuel_max=40, bull_max=55)
 Fletcher改 = Ship(id=692, name='Fletcher改', fuel_max=20, bull_max=20)
-LdSDdAbruzzi改 = Ship(id=693, name='L.d.S.D.d.Abruzzi改', fuel_max=40, bull_max=55)
+L_d_S_D_d_Abruzzi改 = Ship(id=693, name='L.d.S.D.d.Abruzzi改', fuel_max=40, bull_max=55)
 霧島改二丙 = Ship(id=694, name='霧島改二丙', fuel_max=100, bull_max=160)
 秋霜改 = Ship(id=695, name='秋霜改', fuel_max=15, bull_max=20)
 Atlanta改 = Ship(id=696, name='Atlanta改', fuel_max=30, bull_max=60)
@@ -676,7 +676,7 @@ South_Dakota改 = Ship(id=697, name='South Dakota改', fuel_max=160, bull_max=20
 Hornet改 = Ship(id=704, name='Hornet改', fuel_max=70, bull_max=80)
 Sheffield改 = Ship(id=705, name='Sheffield改', fuel_max=40, bull_max=65)
 竹改 = Ship(id=706, name='竹改', fuel_max=15, bull_max=15)
-Gambier_Bay_MkII = Ship(id=707, name='Gambier Bay Mk.II', fuel_max=30, bull_max=40)
+Gambier_Bay_Mk_II = Ship(id=707, name='Gambier Bay Mk.II', fuel_max=30, bull_max=40)
 桃改 = Ship(id=708, name='桃改', fuel_max=15, bull_max=15)
 巻波改 = Ship(id=709, name='巻波改', fuel_max=15, bull_max=20)
 涼波改 = Ship(id=710, name='涼波改', fuel_max=15, bull_max=20)
@@ -695,12 +695,12 @@ Brooklyn改 = Ship(id=722, name='Brooklyn改', fuel_max=35, bull_max=60)
 Ranger改 = Ship(id=723, name='Ranger改', fuel_max=65, bull_max=70)
 Jean_Bart改 = Ship(id=724, name='Jean Bart改', fuel_max=100, bull_max=130)
 夕暮改 = Ship(id=725, name='夕暮改', fuel_max=15, bull_max=20)
-Heywood_LE改 = Ship(id=726, name='Heywood L.E.改', fuel_max=20, bull_max=20)
+Heywood_L_E_改 = Ship(id=726, name='Heywood L.E.改', fuel_max=20, bull_max=20)
 第百一号輸送艦改 = Ship(id=727, name='第百一号輸送艦改', fuel_max=15, bull_max=10)
 第二十二号海防艦改 = Ship(id=728, name='第二十二号海防艦改', fuel_max=10, bull_max=10)
 白雲改 = Ship(id=729, name='白雲改', fuel_max=15, bull_max=20)
 稲木改 = Ship(id=730, name='稲木改', fuel_max=10, bull_max=10)
-CCappellini改 = Ship(id=731, name='C.Cappellini改', fuel_max=10, bull_max=15)
+C_Cappellini改 = Ship(id=731, name='C.Cappellini改', fuel_max=10, bull_max=15)
 Drum改 = Ship(id=732, name='Drum改', fuel_max=10, bull_max=20)
 Valiant改 = Ship(id=733, name='Valiant改', fuel_max=90, bull_max=110)
 Phoenix改 = Ship(id=734, name='Phoenix改', fuel_max=35, bull_max=60)
@@ -740,7 +740,7 @@ Maryland = Ship(id=913, name='Maryland', fuel_max=90, bull_max=130)
 早潮改二 = Ship(id=915, name='早潮改二', fuel_max=15, bull_max=20)
 大和改二重 = Ship(id=916, name='大和改二重', fuel_max=300, bull_max=400)
 Maryland改 = Ship(id=918, name='Maryland改', fuel_max=95, bull_max=165)
-Samuel_BRoberts_MkII = Ship(id=920, name='Samuel B.Roberts Mk.II', fuel_max=15, bull_max=20)
+Samuel_B_Roberts_Mk_II = Ship(id=920, name='Samuel B.Roberts Mk.II', fuel_max=15, bull_max=20)
 鵜来 = Ship(id=921, name='鵜来', fuel_max=10, bull_max=10)
 稲木 = Ship(id=922, name='稲木', fuel_max=10, bull_max=10)
 Tuscaloosa = Ship(id=923, name='Tuscaloosa', fuel_max=40, bull_max=60)
@@ -753,13 +753,13 @@ Nevada改 = Ship(id=929, name='Nevada改', fuel_max=90, bull_max=150)
 Langley改 = Ship(id=930, name='Langley改', fuel_max=40, bull_max=45)
 Ranger = Ship(id=931, name='Ranger', fuel_max=50, bull_max=55)
 Massachusetts = Ship(id=933, name='Massachusetts', fuel_max=150, bull_max=190)
-CCappellini = Ship(id=934, name='C.Cappellini', fuel_max=10, bull_max=20)
+C_Cappellini = Ship(id=934, name='C.Cappellini', fuel_max=10, bull_max=20)
 Jean_Bart = Ship(id=935, name='Jean Bart', fuel_max=100, bull_max=125)
-Nevada改_Mod2 = Ship(id=936, name='Nevada改 Mod.2', fuel_max=90, bull_max=150)
+Nevada改_Mod_2 = Ship(id=936, name='Nevada改 Mod.2', fuel_max=90, bull_max=150)
 Massachusetts改 = Ship(id=938, name='Massachusetts改', fuel_max=160, bull_max=200)
-UIT24 = Ship(id=939, name='UIT-24', fuel_max=10, bull_max=20)
+UIT_24 = Ship(id=939, name='UIT-24', fuel_max=10, bull_max=20)
 伊503 = Ship(id=940, name='伊503', fuel_max=10, bull_max=20)
-Heywood_LE = Ship(id=941, name='Heywood L.E.', fuel_max=20, bull_max=20)
+Heywood_L_E_ = Ship(id=941, name='Heywood L.E.', fuel_max=20, bull_max=20)
 熊野丸 = Ship(id=943, name='熊野丸', fuel_max=40, bull_max=15)
 平安丸 = Ship(id=944, name='平安丸', fuel_max=30, bull_max=10)
 第百一号輸送艦 = Ship(id=945, name='第百一号輸送艦', fuel_max=15, bull_max=5)
@@ -1122,7 +1122,7 @@ ships_map = {
 	330: 秋月改,
 	331: 天城,
 	332: 葛城,
-	334: U511改,
+	334: U_511改,
 	343: 香取改,
 	344: 朝霜改,
 	345: 高波改,
@@ -1209,7 +1209,7 @@ ships_map = {
 	428: 摩耶改二,
 	429: 天城改,
 	430: 葛城改,
-	431: U511,
+	431: U_511,
 	432: Graf_Zeppelin,
 	433: Saratoga,
 	434: 睦月改二,
@@ -1313,18 +1313,18 @@ ships_map = {
 	536: 神鷹改二,
 	537: 涼月改,
 	538: 冬月改,
-	539: UIT25,
+	539: UIT_25,
 	540: 対馬,
 	541: 長門改二,
 	542: 夕雲改二,
 	543: 長波改二,
 	544: Gambier_Bay,
-	545: Saratoga_MkII,
+	545: Saratoga_Mk_II,
 	546: 武蔵改二,
 	547: 多摩改二,
 	548: 文月改二,
 	549: Intrepid,
-	550: Saratoga_MkII_Mod2,
+	550: Saratoga_Mk_II_Mod_2,
 	551: 日振,
 	552: 大東,
 	553: 伊勢改二,
@@ -1335,7 +1335,7 @@ ships_map = {
 	558: 浜風乙改,
 	559: 谷風丁改,
 	560: 瑞鳳改二乙,
-	561: Samuel_BRoberts,
+	561: Samuel_B_Roberts,
 	562: Johnston,
 	563: 巻雲改二,
 	564: 風雲改二,
@@ -1363,8 +1363,8 @@ ships_map = {
 	586: 日進甲,
 	587: 海風改二,
 	588: 山風改二,
-	589: LdSDdAbruzzi,
-	590: GGaribaldi,
+	589: L_d_S_D_d_Abruzzi,
+	590: G_Garibaldi,
 	591: 金剛改二丙,
 	592: 比叡改二丙,
 	593: 榛名改二乙,
@@ -1401,8 +1401,8 @@ ships_map = {
 	625: 秋霜,
 	626: 神州丸改,
 	627: 敷波改二,
-	628: Fletcher改_Mod2,
-	629: Fletcher_MkII,
+	628: Fletcher改_Mod_2,
+	629: Fletcher_Mk_II,
 	630: Gotland_andra,
 	631: 薄雲,
 	632: 有明,
@@ -1447,7 +1447,7 @@ ships_map = {
 	678: 日振改,
 	679: 大東改,
 	680: 浜波改,
-	681: Samuel_BRoberts改,
+	681: Samuel_B_Roberts改,
 	684: 平戸改,
 	685: 福江改,
 	686: 岸波改,
@@ -1455,9 +1455,9 @@ ships_map = {
 	688: 早波改,
 	689: Johnston改,
 	690: 日進改,
-	691: GGaribaldi改,
+	691: G_Garibaldi改,
 	692: Fletcher改,
-	693: LdSDdAbruzzi改,
+	693: L_d_S_D_d_Abruzzi改,
 	694: 霧島改二丙,
 	695: 秋霜改,
 	696: Atlanta改,
@@ -1471,7 +1471,7 @@ ships_map = {
 	704: Hornet改,
 	705: Sheffield改,
 	706: 竹改,
-	707: Gambier_Bay_MkII,
+	707: Gambier_Bay_Mk_II,
 	708: 桃改,
 	709: 巻波改,
 	710: 涼波改,
@@ -1490,12 +1490,12 @@ ships_map = {
 	723: Ranger改,
 	724: Jean_Bart改,
 	725: 夕暮改,
-	726: Heywood_LE改,
+	726: Heywood_L_E_改,
 	727: 第百一号輸送艦改,
 	728: 第二十二号海防艦改,
 	729: 白雲改,
 	730: 稲木改,
-	731: CCappellini改,
+	731: C_Cappellini改,
 	732: Drum改,
 	733: Valiant改,
 	734: Phoenix改,
@@ -1535,7 +1535,7 @@ ships_map = {
 	915: 早潮改二,
 	916: 大和改二重,
 	918: Maryland改,
-	920: Samuel_BRoberts_MkII,
+	920: Samuel_B_Roberts_Mk_II,
 	921: 鵜来,
 	922: 稲木,
 	923: Tuscaloosa,
@@ -1548,13 +1548,13 @@ ships_map = {
 	930: Langley改,
 	931: Ranger,
 	933: Massachusetts,
-	934: CCappellini,
+	934: C_Cappellini,
 	935: Jean_Bart,
-	936: Nevada改_Mod2,
+	936: Nevada改_Mod_2,
 	938: Massachusetts改,
-	939: UIT24,
+	939: UIT_24,
 	940: 伊503,
-	941: Heywood_LE,
+	941: Heywood_L_E_,
 	943: 熊野丸,
 	944: 平安丸,
 	945: 第百一号輸送艦,
