@@ -49,6 +49,7 @@ async def start_repair(should_use_dock_index_list: list[int], repairing_ship_cou
     入渠させる処理
     母港画面で実行されることを前提としている
     """
+    await random_sleep()
     
     # 入渠ボタンをクリック
     print("入渠ボタンをクリックします")
@@ -130,8 +131,12 @@ async def handle_response(res: Response):
         
         if any(is_ndock_empty_list):
             ships = data.get("api_ship")
+            docking_ship_id_list = map(lambda ndock: ndock.get("api_ship_id"), filter(lambda ndock: ndock.get("api_state") == 1, ndock_list))
             # MEMO 将来的に入渠時間が短い艦から入渠させたいので、入渠時間でソートしている
-            ships_of_sorted_by_ndock_time = sorted(filter(lambda ship: ship.get("api_ndock_time") != 0, ships), key=operator.itemgetter("api_ndock_time"))
+            ships_of_sorted_by_ndock_time = sorted(filter(lambda ship: 
+                    ship.get("api_ndock_time") != 0                             # 入渠時間が0の艦は除外
+                    and ship.get("api_id") not in docking_ship_id_list, ships   # すでに入渠中の艦は除外
+                ), key=operator.itemgetter("api_ndock_time"))
             print(len(ships_of_sorted_by_ndock_time), "隻の艦が入渠可能です")
             
             # 使用する入渠ドックのリストを作成する
