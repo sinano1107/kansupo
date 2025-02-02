@@ -19,6 +19,7 @@ class PortResponse:
         bull: int = field(metadata=config(field_name="api_bull"))
         maxhp: int = field(metadata=config(field_name="api_maxhp"))
         nowhp: int = field(metadata=config(field_name="api_nowhp"))
+        ndock_time: int = field(metadata=config(field_name="api_ndock_time"))
         
         @property
         def damage(self):
@@ -28,9 +29,17 @@ class PortResponse:
     class Deck:
         ship_id_list: list[int] = field(metadata=config(field_name="api_ship"))
     
+    @dataclass(frozen=True)
+    class NDock:
+        id: int = field(metadata=config(field_name="api_id"))
+        state: int = field(metadata=config(field_name="api_state"))
+        ship_id: int = field(metadata=config(field_name="api_ship_id"))
+        complete_time: int = field(metadata=config(field_name="api_complete_time"))
+    
     # 所持艦船リスト
     ship_list: list[Ship] = field(metadata=config(field_name="api_ship"))
     deck_port: list[Deck] = field(metadata=config(field_name="api_deck_port"))
+    ndock_list: list[NDock] = field(metadata=config(field_name="api_ndock"))
 
 
 @dataclass_json
@@ -149,3 +158,22 @@ class Context:
             print("タスクが存在するため設定しません")
             return
         cls.task = task
+    
+    @classmethod
+    def set_wait_task(cls, task: Coroutine):
+        if cls.wait_task is not None:
+            print("⚠️待機タスクが存在します。これは不具合の可能性があります。以前のタスクはキャンセルして上書きします。")
+            cls.wait_task.cancel()
+        async def do_task_and_clear():
+            await task()
+            cls.wait_task = None
+        cls.wait_task = asyncio.create_task(do_task_and_clear())
+    
+    @classmethod
+    def cancel_wait_task(cls):
+        if cls.wait_task is not None:
+            cls.wait_task.cancel()
+            cls.wait_task = None
+            print("待機タスクをキャンセルしました")
+        else:
+            print("待機タスクが存在しないため、キャンセルできません")
