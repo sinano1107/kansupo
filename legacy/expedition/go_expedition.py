@@ -10,7 +10,7 @@ from scan.targets.targets import (
     SORTIE_SELECT_SCAN_TARGET,
 )
 from legacy.supply import supply
-from targets import (
+from targets.targets import (
     EXPEDITION_DESTINATION_SELECT_DECIDE,
     EXPEDITION_SELECT,
     EXPEDITION_START,

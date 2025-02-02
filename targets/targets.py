@@ -1,4 +1,4 @@
-from rectangle import Rectangle
+from utils.rectangle import Rectangle
 
 # ゲームスタートボタン
 GAME_START = Rectangle(x_range=(700, 1100), y_range=(560, 640))

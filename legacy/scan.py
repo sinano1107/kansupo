@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from playwright.sync_api import Locator
 
-from rectangle import Rectangle
+from utils.rectangle import Rectangle
 
 
 class ScanTarget:

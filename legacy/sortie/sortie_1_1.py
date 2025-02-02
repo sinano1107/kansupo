@@ -13,7 +13,7 @@ from scan.targets.targets import (
     TAN,
     WITHDRAWAL_SCAN_TARGET,
 )
-from targets import (
+from targets.targets import (
     ATTACK,
     SEA_AREA_LEFT_TOP,
     SEA_AREA_SELECT_DECIDE,

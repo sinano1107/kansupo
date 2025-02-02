@@ -3,7 +3,7 @@ from typing import Callable
 from playwright.sync_api import Locator
 
 from legacy.click import click
-from targets import EXPEDITION_DESTINATION_SELECT_5, EXPEDITION_DESTINATION_SELECT_TOP
+from targets.targets import EXPEDITION_DESTINATION_SELECT_5, EXPEDITION_DESTINATION_SELECT_TOP
 
 
 @dataclass(frozen=True)

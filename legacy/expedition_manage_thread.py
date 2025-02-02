@@ -19,7 +19,7 @@ from scan.targets.targets import (
 
 from typing import TYPE_CHECKING
 
-from targets import HOME_PORT, SORTIE
+from targets.targets import HOME_PORT, SORTIE
 from legacy.wait_until_find import wait_until_find
 
 if TYPE_CHECKING:

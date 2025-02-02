@@ -1,6 +1,6 @@
-from rectangle import Rectangle
+from utils.rectangle import Rectangle
 from scan.scan_target import ScanTarget
-from targets import (
+from targets.targets import (
     EXPEDITION_NEXT,
     GAME_START,
     GO_BACK,

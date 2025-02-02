@@ -1,6 +1,6 @@
 from playwright.sync_api import Locator
 
-from rectangle import Rectangle
+from utils.rectangle import Rectangle
 
 
 def click(

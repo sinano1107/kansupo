@@ -1,4 +1,4 @@
-from rectangle import Rectangle
+from utils.rectangle import Rectangle
 
 
 class ScanTarget:
