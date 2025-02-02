@@ -103,28 +103,21 @@ def calc_remaining_hp():
     return (friend_remaining_hp_list, enemy_remaining_hp_list)
 
 async def sortie_1_1():
+    print("1-1に出撃します")
     await random_sleep()
     
-    print("1-1に出撃します")
-    
     await click(canvas, SORTIE)
-    
     await wait_until_find(canvas, SORTIE_SELECT_SCAN_TARGET)
-    
     await random_sleep()
     
     await click(canvas, SORTIE_SELECT_SCAN_TARGET.RECTANGLE)
-    
     await wait_until_find(canvas, SEA_AREA_SELECT_SCAN_TARGET)
-    
     await random_sleep()
     
     await click(canvas, SEA_AREA_LEFT_TOP)
-
     await random_sleep()
-
-    await click(canvas, SEA_AREA_SELECT_DECIDE)
     
+    await click(canvas, SEA_AREA_SELECT_DECIDE)
     await random_sleep()
     
     await click(canvas, SORTIE_START)
@@ -133,8 +126,6 @@ async def sortie_1_1():
     while page != Page.SORTIE_START:
         await asyncio.sleep(1)
     print("出撃を開始しました")
-    
-    # これ以降はおそらくループで処理することで一般化できる
     
     while True:
         # 次のセルから派生しているセルの個数
@@ -223,10 +214,13 @@ async def sortie_1_1():
         
         await wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
         await random_sleep(2)
+        
         await click(canvas)
         await random_sleep()
+        
         await wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
         await random_sleep()
+        
         await click(canvas)
         await random_sleep()
         
