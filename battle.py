@@ -61,19 +61,19 @@ def calc_remaining_hp():
     if response.hourai_flag[3]:
         raigeki = response.raigeki
         
-        for i, f in enumerate(raigeki.fdam[:6]):
+        for i, damage in enumerate(raigeki.fdam[:6]):
             # 庇った場合はdamage+0.1になるのでそれを処理する
             damage, mod = divmod(damage, 1)
             is_protected = mod != 0
-            print(f"味方の{i+1}隻目に{f}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
-            total_friend_damage_list[i] += f
+            print(f"味方の{i+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
+            total_friend_damage_list[i] += damage
 
-        for i, e in enumerate(raigeki.edam[:6]):
+        for i, damage in enumerate(raigeki.edam[:6]):
             # 庇った場合はdamage+0.1になるのでそれを処理する
             damage, mod = divmod(damage, 1)
             is_protected = mod != 0
-            print(f"敵の{i+1}隻目に{e}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
-            total_enemy_damage_list[i] += e
+            print(f"敵の{i+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
+            total_enemy_damage_list[i] += damage
     else:
         print("<雷撃戦は発生しませんでした>")
     
@@ -161,14 +161,13 @@ async def sortie_1_1():
                 midnight_battle_response = ResponseMemory.midnight_battle
                 
                 hougeki = midnight_battle_response.hougeki
-                at_e_flag_list = hougeki.get("api_at_eflag")
                 
                 if hougeki.at_eflag_list is None:
                     print("夜戦が発生しませんでした")
                 else:
                     total_friend_damage_list = [0] * 6
                     
-                    for i, at_e_flag in enumerate(at_e_flag_list):
+                    for i, at_e_flag in enumerate(hougeki.at_eflag_list):
                         if at_e_flag == 1:
                             for index, damage in zip(hougeki.df_list[i], hougeki.damage_list[i]):
                                 # 庇った場合はdamage+0.1になるのでそれを処理する
@@ -250,24 +249,6 @@ async def handle_response(res: Response):
         
         await ResponseMemory.set_response(Page.PORT, res)
         port_response = ResponseMemory.port
-        
-        # svdata: dict = json.loads((await res.body())[7:])
-        # data: dict = svdata.get("api_data")
-        
-        # # 所持艦船リスト
-        # ship_list = data.get("api_ship")
-        # # 所持艦船のID: 受けているダメージ、所持燃料数/弾薬数の辞書
-        # ship_data_map = {
-        #     ship.get("api_id"):  {
-        #         "ship_id": ship.get("api_ship_id"),
-        #         "damage": ship.get("api_maxhp") - ship.get("api_nowhp"),
-        #         "fuel": ship.get("api_fuel"),
-        #         "bull": ship.get("api_bull"),
-        #     }
-        # for ship in ship_list}
-        
-        # # 現在編成中の艦隊
-        # deck_port = data.get("api_deck_port")
         
         # 第一艦隊の損害/補給状況を確認
         for ship_id in port_response.deck_port[0].ship_id_list:
