@@ -6,12 +6,11 @@ from time import time
 from typing import Coroutine
 from playwright.async_api import async_playwright, Response, Locator
 
+from utils.game_start import game_start
 from utils.click import click
 from utils.random_sleep import random_sleep
 from utils.page import Page
-from scan.targets.targets import SETTING_SCAN_TARGET
-from targets.targets import GAME_START, HOME_PORT, REPAIR, REPAIR_START, REPAIR_START_CONFIRM, repair_dock_button, repair_ship
-from utils.wait_until_find import wait_until_find
+from targets.targets import HOME_PORT, REPAIR, REPAIR_START, REPAIR_START_CONFIRM, repair_dock_button, repair_ship
 
 
 page: Page = Page.START
@@ -148,28 +147,7 @@ async def handle_response(res: Response):
 async def main():
     async with async_playwright() as p:
         global canvas, repair
-        browser = await p.chromium.launch(headless=False)
-        context = await browser.new_context(storage_state="login_account.json", viewport={"width": 1300, "height": 900})
-        p_page = await context.new_page()
-        p_page.on("response", handle_response)
-        await p_page.goto("http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854")
-        canvas = (
-            p_page.locator('iframe[name="game_frame"]')
-                .content_frame.locator("#htmlWrap")
-                .content_frame.locator("canvas")
-        )
-        
-        await random_sleep(5, 3)
-        # スタートページにいる限り、ゲームスタートボタンの位置を定期的にクリックする
-        while page == Page.START:
-            await click(canvas, GAME_START)
-            await random_sleep()
-        
-        # 右下に設定ボタンが出現するまで待機する
-        await wait_until_find(canvas, SETTING_SCAN_TARGET)
-        
-        print("ゲームスタート処理を終了しました")
-        await random_sleep()
+        canvas = await game_start(p, handle_response)
         
         while True:
             for i in range(4):

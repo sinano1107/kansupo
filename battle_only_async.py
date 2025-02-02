@@ -1,15 +1,13 @@
 import asyncio
-from datetime import datetime
 import json
 from typing import Coroutine
 from playwright.async_api import async_playwright, Response, Locator
 
-from scan.scan import scan
-from tools.record_response import record_response
-from scan.targets.targets import SEA_AREA_SELECT_SCAN_TARGET, SETTING_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET, MIDNIGHT_BATTLE_SELECT_PAGE
-from targets.targets import GAME_START, SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, ATTACK, DO_MIDNIGHT_BATTLE, NO_MIDNIGHT_BATTLE
+from scan.targets.targets import SEA_AREA_SELECT_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET, MIDNIGHT_BATTLE_SELECT_PAGE
+from targets.targets import SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, ATTACK, DO_MIDNIGHT_BATTLE, NO_MIDNIGHT_BATTLE
 from scan.targets.targets import COMPASS, TAN
 from ships.ships import ships_map
+from utils.game_start import game_start
 from utils.wait_until_find import wait_until_find
 from utils.click import click
 from utils.random_sleep import random_sleep
@@ -384,36 +382,9 @@ async def handle_response(res: Response):
         print("ハンドラの設定されていないレスポンスを受け取りました")
 
 async def main():
-    name = "battle_only_async_test"
-    name += datetime.now().strftime("_%Y%m%d_%H%M%S")
     async with async_playwright() as p:
         global canvas, sortie
-        browser = await p.chromium.launch(headless=False)
-        context = await browser.new_context(storage_state="login_account.json", record_video_dir=f"responses/{name}", viewport={"width": 1300, "height": 900})
-        p_page = await context.new_page()
-        p_page.on("response", handle_response)
-        p_page.on("response", lambda res: record_response(res, name))
-        await p_page.goto("http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854")
-        canvas = (
-            p_page.locator('iframe[name="game_frame"]')
-                .content_frame.locator("#htmlWrap")
-                .content_frame.locator("canvas")
-        )
-        
-        await random_sleep(5, 3)
-        # スタートページにいる限り、ゲームスタートボタンの位置を定期的にクリックする
-        while page == Page.START:
-            await click(canvas, GAME_START)
-            await random_sleep()
-        
-        # 右下に設定ボタンが出現するまで待機する
-        while True:
-            if await scan(canvas, [SETTING_SCAN_TARGET]) == 0:
-                break
-            await asyncio.sleep(1)
-        
-        print("ゲームスタート処理を終了しました")
-        await random_sleep()
+        canvas = await game_start(p, handle_response)
         
         while True:
             for i in range(4):
