@@ -2,8 +2,10 @@ import asyncio
 import json
 from playwright.async_api import async_playwright, Response
 
-from ndock_only_async import click, random_sleep, wait_until_find
 from scan.targets.targets import GAME_START_SCAN_TARGET
+from utils.click import click
+from utils.random_sleep import random_sleep
+from utils.wait_until_find import wait_until_find
 
 should_finish = False
 
