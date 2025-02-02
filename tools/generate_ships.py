@@ -38,7 +38,7 @@ async def handle_response(res: Response):
         dict_str += f"\t{id}: {replaced_name},\n"
     
     with open("ships/ships.py", "w") as f:
-        f.write(f"from ships.ship import Ship\n\n\n{ships_str}\n\nships_map = {{\n{dict_str}}}")
+        f.write(f"from .ship import Ship\n\n\n{ships_str}\n\nships_map = {{\n{dict_str}}}")
     
     should_finish = True
 

@@ -1,48 +1,24 @@
 import asyncio
 from datetime import datetime, timedelta
-from enum import Enum
 import json
 import operator
-from random import random
 from time import time
 from typing import Coroutine
-import cv2
-import numpy as np
 from playwright.async_api import async_playwright, Response, Locator
 
-from utils.rectangle import Rectangle
-from scan.scan_target import ScanTarget
+from utils.click import click
+from utils.random_sleep import random_sleep
+from utils.page import Page
 from scan.targets.targets import SETTING_SCAN_TARGET
 from targets.targets import GAME_START, HOME_PORT, REPAIR, REPAIR_START, REPAIR_START_CONFIRM, repair_dock_button, repair_ship
+from utils.wait_until_find import wait_until_find
 
-class Page(Enum):
-    START = "START"
-    PORT = "PORT"
-    NDOCK = "NDOCK"
-    # 出撃開始ページ
-    SORTIE_START = "SORTIE_START"
-    # 戦闘中
-    BATTLE = "BATTLE"
-    # 夜戦中
-    MIDNIGHT_BATTLE = "MIDNIGHT_BATTLE"
-    # 戦闘結果
-    BATTLE_RESULT = "BATTLE_RESULT"
-    # 次のセルへ移動中
-    GOING_TO_NEXT_CELL = "GOING_TO_NEXT_CELL"
 
 page: Page = Page.START
 canvas: Locator = None
 wait_for_dock_to_open_task: asyncio.Task = None
 repair: Coroutine = None
 
-async def random_sleep(base: float = 1, buffer: float = 1):
-    """ランダムな秒数待つ"""
-    await asyncio.sleep(base + random() * buffer)
-
-async def click(canvas: Locator, target=Rectangle(x_range=(0, 1200), y_range=(0, 720))):
-    """指定された範囲のランダムな位置をクリックする"""
-    x, y = target.random_point()
-    await canvas.click(position={"x": x, "y": y})
 
 async def start_repair(should_use_dock_index_list: list[int], repairing_ship_count: int):
     """
@@ -87,31 +63,6 @@ async def start_repair(should_use_dock_index_list: list[int], repairing_ship_cou
     
     print("母港画面に戻りました")
 
-async def scan(canvas: Locator, targets: list[ScanTarget], log=False) -> int:
-    """画面内の指定されたターゲットとの類似度を比較する"""
-    screenshot = await canvas.screenshot()
-    image = np.frombuffer(screenshot, dtype=np.uint8)
-    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-    for i, target in enumerate(targets):
-        rectangle = target.RECTANGLE
-        cropped = image[
-            rectangle.Y_RANGE[0] : rectangle.Y_RANGE[1],
-            rectangle.X_RANGE[0] : rectangle.X_RANGE[1],
-        ]
-        # croppedとtarget.IMAGEのサイズは同じ前提なので、類似度は1x1の配列で返ってくる
-        similarity = cv2.matchTemplate(cropped, cv2.imread(target.IMAGE), cv2.TM_CCOEFF_NORMED)[0][0]
-        if log:
-            print("{}番目のターゲットとの類似度は{}です".format(i, similarity))
-        if similarity > 0.9:
-            return i
-    return -1
-
-async def wait_until_find(canvas: Locator, target: ScanTarget, delay=1):
-    """指定したターゲットを発見するまで待機する"""
-    while True:
-        await asyncio.sleep(delay)
-        if await scan(canvas, [target]) == 0:
-            break
 
 # FIXME 1分未満で入渠が完了する場合の考慮が未実装
 async def handle_response(res: Response):

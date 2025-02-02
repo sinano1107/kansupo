@@ -4,12 +4,16 @@ import json
 from typing import Coroutine
 from playwright.async_api import async_playwright, Response, Locator
 
-from ndock_only_async import Page, click, random_sleep, scan, wait_until_find
+from scan.scan import scan
 from tools.record_response import record_response
 from scan.targets.targets import SEA_AREA_SELECT_SCAN_TARGET, SETTING_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET, MIDNIGHT_BATTLE_SELECT_PAGE
 from targets.targets import GAME_START, SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, ATTACK, DO_MIDNIGHT_BATTLE, NO_MIDNIGHT_BATTLE
 from scan.targets.targets import COMPASS, TAN
 from ships.ships import ships_map
+from utils.wait_until_find import wait_until_find
+from utils.click import click
+from utils.random_sleep import random_sleep
+from utils.page import Page
 
 
 page: Page = Page.START
@@ -55,8 +59,8 @@ def calc_remaining_hp():
         for i, at_e_flag in enumerate(at_e_flag_list):
             for index, damage in zip(df_list[i], damage_list[i]):
                 # 庇った場合はdamage+0.1になるのでそれを処理する
-                is_protected = damage % 1 == 0.1
-                damage //= 1
+                damage, mod = divmod(damage, 1)
+                is_protected = mod != 0
                 
                 # ダメージを記録
                 if at_e_flag == 1:
@@ -74,15 +78,15 @@ def calc_remaining_hp():
         
         for i, f in enumerate(fdam[:6]):
             # 庇った場合はdamage+0.1になるのでそれを処理する
-            is_protected = f % 1 == 0.1
-            f //= 1
+            damage, mod = divmod(damage, 1)
+            is_protected = mod != 0
             print(f"味方の{i+1}隻目に{f}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
             total_friend_damage_list[i] += f
 
         for i, e in enumerate(edam[:6]):
             # 庇った場合はdamage+0.1になるのでそれを処理する
-            is_protected = e % 1 == 0.1
-            e //= 1
+            damage, mod = divmod(damage, 1)
+            is_protected = mod != 0
             print(f"敵の{i+1}隻目に{e}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
             total_enemy_damage_list[i] += e
     else:

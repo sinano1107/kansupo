@@ -1,4 +1,4 @@
-from ships.ship import Ship
+from .ship import Ship
 
 
 睦月 = Ship(id=1, name='睦月', fuel_max=15, bull_max=15)
