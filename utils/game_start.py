@@ -3,6 +3,7 @@ from playwright.async_api import Playwright, Response
 
 from scan.targets.targets import GAME_START_SCAN_TARGET, SETTING_SCAN_TARGET
 from utils.click import click
+from utils.context import Context
 from utils.random_sleep import random_sleep
 from utils.wait_until_find import wait_until_find
 
@@ -24,12 +25,11 @@ async def access(playwright: Playwright, handle_response: Callable[[Response], N
 
 
 async def game_start(playwright: Playwright, handle_response: Callable[[Response], None]):
-    canvas = await access(playwright, handle_response)
-    await wait_until_find(canvas, GAME_START_SCAN_TARGET)
+    Context.canvas = await access(playwright, handle_response)
+    await wait_until_find(GAME_START_SCAN_TARGET)
     await random_sleep()
-    await click(canvas, GAME_START_SCAN_TARGET.RECTANGLE)
+    await click(GAME_START_SCAN_TARGET.RECTANGLE)
     await random_sleep()
-    await wait_until_find(canvas, SETTING_SCAN_TARGET)
+    await wait_until_find(SETTING_SCAN_TARGET)
     print("ゲームスタート処理を終了しました")
     await random_sleep()
-    return canvas
