@@ -3,7 +3,7 @@ import json
 from playwright.async_api import async_playwright, Response
 
 from ndock_only_async import click, random_sleep, wait_until_find
-from scan_targets.index import GAME_START_SCAN_TARGET
+from scan.targets.targets import GAME_START_SCAN_TARGET
 
 should_finish = False
 

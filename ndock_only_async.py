@@ -12,7 +12,7 @@ from playwright.async_api import async_playwright, Response, Locator
 
 from rectangle import Rectangle
 from scan.scan_target import ScanTarget
-from scan_targets.index import SETTING_SCAN_TARGET
+from scan.targets.targets import SETTING_SCAN_TARGET
 from targets import GAME_START, HOME_PORT, REPAIR, REPAIR_START, REPAIR_START_CONFIRM, repair_dock_button, repair_ship
 
 class Page(Enum):

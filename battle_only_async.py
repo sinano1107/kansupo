@@ -6,9 +6,9 @@ from playwright.async_api import async_playwright, Response, Locator
 
 from ndock_only_async import Page, click, random_sleep, scan, wait_until_find
 from record_response import record_response
-from scan_targets.index import SEA_AREA_SELECT_SCAN_TARGET, SETTING_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET, MIDNIGHT_BATTLE_SELECT_PAGE
-from targets import GAME_START, SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, SUPPLY, ATTACK, DO_MIDNIGHT_BATTLE, NO_MIDNIGHT_BATTLE
-from scan_targets.index import COMPASS, TAN
+from scan.targets.targets import SEA_AREA_SELECT_SCAN_TARGET, SETTING_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET, MIDNIGHT_BATTLE_SELECT_PAGE
+from targets import GAME_START, SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, ATTACK, DO_MIDNIGHT_BATTLE, NO_MIDNIGHT_BATTLE
+from scan.targets.targets import COMPASS, TAN
 from ships.ships import ships_map
 
 

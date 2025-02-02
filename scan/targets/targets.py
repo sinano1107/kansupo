@@ -9,11 +9,10 @@ from targets import (
     SEA_AREA_SELECT,
     SETTING,
     SORTIE_SELECT,
-    SORTIE_START,
     WITHDRAWAL,
 )
 
-ROOT = "scan_targets/images/"
+ROOT = "scan/targets/images/"
 
 
 GAME_START_SCAN_TARGET = ScanTarget(GAME_START, ROOT + "game_start.png")

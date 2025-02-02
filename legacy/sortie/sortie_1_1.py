@@ -3,7 +3,7 @@ from playwright.sync_api import Locator
 from legacy.click import click
 from legacy.detect_huge_damage import detect_huge_damage
 from legacy.random_sleep import random_sleep
-from scan_targets.index import (
+from scan.targets.targets import (
     COMPASS,
     GO_BACK_SCAN_TARGET,
     SORTIE_NEXT_SCAN_TARGET,

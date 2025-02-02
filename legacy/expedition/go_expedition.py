@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 from legacy.click import click
 from expedition.destinations import ExpeditionDestination
 from legacy.random_sleep import random_sleep
-from scan_targets.index import (
+from scan.targets.targets import (
     EXPEDITION_DESTINATION_SELECT_SCAN_TARGET,
     HOME_PORT_SCAN_TARGET,
     SETTING_SCAN_TARGET,

@@ -2,7 +2,7 @@ from playwright.async_api import Locator
 from legacy.click import click
 from legacy.random_sleep import random_sleep
 from rectangle import Rectangle
-from scan_targets.index import SETTING_SCAN_TARGET
+from scan.targets.targets import SETTING_SCAN_TARGET
 from targets import FULL_FLEET_SUPPLY, HOME_PORT, SUPPLY
 from legacy.wait_until_find import wait_until_find
 
