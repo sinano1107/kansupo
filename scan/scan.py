@@ -10,6 +10,8 @@ async def scan(canvas: Locator, targets: list[ScanTarget], log=False) -> int:
     screenshot = await canvas.screenshot()
     image = np.frombuffer(screenshot, dtype=np.uint8)
     image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    target_images = [cv2.imread(target.IMAGE) for target in targets]
+    
     for i, target in enumerate(targets):
         rectangle = target.RECTANGLE
         cropped = image[
@@ -17,7 +19,7 @@ async def scan(canvas: Locator, targets: list[ScanTarget], log=False) -> int:
             rectangle.X_RANGE[0] : rectangle.X_RANGE[1],
         ]
         # croppedとtarget.IMAGEのサイズは同じ前提なので、類似度は1x1の配列で返ってくる
-        similarity = cv2.matchTemplate(cropped, cv2.imread(target.IMAGE), cv2.TM_CCOEFF_NORMED)[0][0]
+        similarity = cv2.matchTemplate(cropped, target_images[i], cv2.TM_CCOEFF_NORMED)[0][0]
         if log:
             print("{}番目のターゲットとの類似度は{}です".format(i, similarity))
         if similarity > 0.9:

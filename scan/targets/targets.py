@@ -19,35 +19,36 @@ HOME_PORT_SCAN_TARGET = ScanTarget(HOME_PORT, ROOT + "home_port.png")
 
 SORTIE_SELECT_SCAN_TARGET = ScanTarget(SORTIE_SELECT, ROOT + "sortie_select.png")
 
-SEA_AREA_SELECT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(190, 650), y_range=(155, 200)), ROOT + "sea_area_select.png")
+SEA_AREA_SELECT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(190, 650), y_range=(155, 200)), ROOT + "sea_area_select.png", name="海域選択画面")
 
 EXPEDITION_DESTINATION_SELECT_SCAN_TARGET = ScanTarget(
 Rectangle(x_range=(180, 265), y_range=(110, 135)),
     ROOT + "expedition_destination_select.png",
 )
 
-EXPEDITION_NEXT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1125, 1170), y_range=(643, 688)), ROOT + "expedition_next.png")
+EXPEDITION_NEXT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1125, 1170), y_range=(643, 688)), ROOT + "expedition_next.png", name="次(遠征帰還画面)")
 
 # 「単縦陣」選択ボタンの「単」
-TAN = ScanTarget(Rectangle(x_range=(637, 659), y_range=(266, 290)), ROOT + "tan.png")
+TAN = ScanTarget(Rectangle(x_range=(637, 659), y_range=(266, 290)), ROOT + "tan.png", name="「単縦陣」選択ボタンの「単」")
 
-SORTIE_NEXT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1110, 1150), y_range=(625, 670)), ROOT + "sortie_next.png")
+SORTIE_NEXT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1110, 1150), y_range=(625, 670)), ROOT + "sortie_next.png", name="次(戦闘結果画面)")
 
-GO_BACK_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1120, 1160), y_range=(637, 682)), ROOT + "go_back.png")
+GO_BACK_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1120, 1160), y_range=(637, 682)), ROOT + "go_back.png", name="帰(戦闘結果画面)")
 
 WITHDRAWAL_SCAN_TARGET = ScanTarget(WITHDRAWAL, ROOT + "withdrawal.png")
 
 # 羅針盤
 COMPASS = ScanTarget(
-    Rectangle(x_range=(450, 750), y_range=(210, 510)), ROOT + "compass.png"
+    Rectangle(x_range=(450, 750), y_range=(210, 510)), ROOT + "compass.png", name="羅針盤"
 )
 
 EXPEDITION_RETURN_MESSAGE = ScanTarget(
     Rectangle(x_range=(855, 1075), y_range=(40, 65)),
     ROOT + "expedition_return_message.png",
+    name="遠征帰還メッセージ",
 )
 
 # 夜戦選択画面
 MIDNIGHT_BATTLE_SELECT_PAGE = ScanTarget(
-    Rectangle(x_range=(60, 190), y_range=(45, 80)), ROOT + "midnight_battle_select_page.png"
+    Rectangle(x_range=(60, 190), y_range=(45, 80)), ROOT + "midnight_battle_select_page.png", name="夜戦選択画面"
 )

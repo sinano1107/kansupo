@@ -109,17 +109,13 @@ async def sortie_1_1():
     
     await click(canvas, SORTIE)
     
-    print("出撃画面が出現するまで待機します")
     await wait_until_find(canvas, SORTIE_SELECT_SCAN_TARGET)
-    print("出撃画面が出現しました")
     
     await random_sleep()
     
     await click(canvas, SORTIE_SELECT_SCAN_TARGET.RECTANGLE)
     
-    print("海域選択画面が出現するまで待機します")
     await wait_until_find(canvas, SEA_AREA_SELECT_SCAN_TARGET)
-    print("海域選択画面が出現しました")
     
     await random_sleep()
     
@@ -150,9 +146,7 @@ async def sortie_1_1():
         # 羅針盤が表示されるか確認する
         rashin_flag = response.get("api_rashin_flg")
         if rashin_flag == 1:
-            print("羅針盤が表示されるまで待機します")
             await wait_until_find(canvas, COMPASS)
-            print("羅針盤が表示されました")
             await random_sleep()
             await click(canvas)
             await random_sleep()
@@ -166,9 +160,7 @@ async def sortie_1_1():
             continue
         
         # FIXME 4隻未満のとき、陣形選択ができないので、この処理をスキップする
-        print("単縦陣選択画面が表示されるまで待機します")
         await wait_until_find(canvas, TAN)
-        print("単縦陣選択ボタンが表示されました")
         await random_sleep()
         await click(canvas, SELECT_SINGLE_LINE)
         
@@ -181,9 +173,7 @@ async def sortie_1_1():
         
         can_midnight_battle = any(hp > 0 for hp in enemy_remaining_hp_list)
         if can_midnight_battle:
-            print("夜戦選択画面が表示されるまで待機します")
             await wait_until_find(canvas, MIDNIGHT_BATTLE_SELECT_PAGE)
-            print("夜戦選択画面が表示されました")
             
             await random_sleep()
             
@@ -231,35 +221,19 @@ async def sortie_1_1():
             await asyncio.sleep(1)
         print("戦闘終了画面に遷移しました")
         
-        print("次へボタンが表示されるまで待機します(1)")
         await wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
-        print("次へボタンが表示されました(1)")
-        
         await random_sleep(2)
-        
-        print("次へ進みます(1)")
         await click(canvas)
-        print("次へ進みました(1)")
-        
         await random_sleep()
-        
-        print("次へボタンが表示されるまで待機します(2)")
         await wait_until_find(canvas, SORTIE_NEXT_SCAN_TARGET)
-        print("次へボタンが表示されました(2)")
-        
         await random_sleep()
-        
-        print("次へ進みます(2)")
         await click(canvas)
-        print("次へ進みました(2)")
-        
         await random_sleep()
         
         get_flag = response.get("api_get_flag")
         if get_flag[1] == 1:
             get_ship = response.get("api_get_ship")
             print(f"艦娘を取得しました: {get_ship.get('api_ship_name')}")
-            print("帰るボタンが表示されるまで待機します")
             await wait_until_find(canvas, GO_BACK_SCAN_TARGET)
             await random_sleep()
             await click(canvas)
@@ -268,9 +242,7 @@ async def sortie_1_1():
             print("行き止まりなので終了")
             return
         
-        print("撤退ボタンが表示されるまで待機します")
         await wait_until_find(canvas, WITHDRAWAL_SCAN_TARGET)
-        print("撤退ボタンが表示されました")
         
         await random_sleep()
         
