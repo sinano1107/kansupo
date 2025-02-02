@@ -27,7 +27,6 @@ async def start_repair(should_use_dock_index_list: list[int], repairing_ship_cou
     await random_sleep()
     
     # 入渠ボタンをクリック
-    print("入渠ボタンをクリックします")
     await click(canvas, REPAIR)
     
     # 入渠ページに遷移するまで待機
@@ -40,23 +39,18 @@ async def start_repair(should_use_dock_index_list: list[int], repairing_ship_cou
     await random_sleep()
     
     for i, dock_index in enumerate(should_use_dock_index_list):
-        print("ドック{}を使用して入渠させます".format(dock_index + 1))
         await click(canvas, repair_dock_button(dock_index))
         await random_sleep()
         
-        print(f"上から{i + repairing_ship_count}番目の艦をクリックします")
         await click(canvas, repair_ship(i + repairing_ship_count))
         await random_sleep()
         
-        print("入渠開始ボタンをクリックします")
         await click(canvas, REPAIR_START)
         await random_sleep()
         
-        print("入渠開始確認ボタンをクリックします")
         await click(canvas, REPAIR_START_CONFIRM)
         await random_sleep()
     
-    print("母港画面に戻ります")
     await click(canvas, HOME_PORT)
     await random_sleep()
     

@@ -107,7 +107,6 @@ async def sortie_1_1():
     
     print("1-1に出撃します")
     
-    print("出撃ボタンを押下します")
     await click(canvas, SORTIE)
     
     print("出撃画面が出現するまで待機します")
@@ -116,7 +115,6 @@ async def sortie_1_1():
     
     await random_sleep()
     
-    print("出撃を選択します")
     await click(canvas, SORTIE_SELECT_SCAN_TARGET.RECTANGLE)
     
     print("海域選択画面が出現するまで待機します")
@@ -125,18 +123,14 @@ async def sortie_1_1():
     
     await random_sleep()
     
-    print("左上の海域を選択します")
     await click(canvas, SEA_AREA_LEFT_TOP)
 
     await random_sleep()
 
-    print("決定します")
     await click(canvas, SEA_AREA_SELECT_DECIDE)
-    print("決定しました")
     
     await random_sleep()
     
-    print("出撃開始ボタンを押下します")
     await click(canvas, SORTIE_START)
     
     print("出撃を開始するまで待機します")
@@ -160,9 +154,7 @@ async def sortie_1_1():
             await wait_until_find(canvas, COMPASS)
             print("羅針盤が表示されました")
             await random_sleep()
-            print("画面をクリックします")
             await click(canvas)
-            print("画面をクリックしました")
             await random_sleep()
         else:
             print("羅針盤は表示されません")
@@ -178,9 +170,7 @@ async def sortie_1_1():
         await wait_until_find(canvas, TAN)
         print("単縦陣選択ボタンが表示されました")
         await random_sleep()
-        print("単縦陣選択ボタンをクリックします")
         await click(canvas, SELECT_SINGLE_LINE)
-        print("単縦陣を選択しました")
         
         print("戦闘開始まで待機します")
         while page != Page.BATTLE:
@@ -272,7 +262,6 @@ async def sortie_1_1():
             print("帰るボタンが表示されるまで待機します")
             await wait_until_find(canvas, GO_BACK_SCAN_TARGET)
             await random_sleep()
-            print("画面をクリックします")
             await click(canvas)
         
         if next == 0:
@@ -290,7 +279,6 @@ async def sortie_1_1():
             await click(canvas, WITHDRAWAL_SCAN_TARGET.RECTANGLE)
             return
         
-        print("進撃ボタンをクリックします")
         await click(canvas, ATTACK)
         
         print("次のセルへ向かうレスポンスが帰ってくるまで待機します")

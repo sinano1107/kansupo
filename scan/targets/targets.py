@@ -1,12 +1,8 @@
 from utils.rectangle import Rectangle
 from ..scan_target import ScanTarget
 from targets.targets import (
-    EXPEDITION_NEXT,
     GAME_START,
-    GO_BACK,
     HOME_PORT,
-    SORTIE_NEXT,
-    SEA_AREA_SELECT,
     SETTING,
     SORTIE_SELECT,
     WITHDRAWAL,
@@ -23,21 +19,21 @@ HOME_PORT_SCAN_TARGET = ScanTarget(HOME_PORT, ROOT + "home_port.png")
 
 SORTIE_SELECT_SCAN_TARGET = ScanTarget(SORTIE_SELECT, ROOT + "sortie_select.png")
 
-SEA_AREA_SELECT_SCAN_TARGET = ScanTarget(SEA_AREA_SELECT, ROOT + "sea_area_select.png")
+SEA_AREA_SELECT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(190, 650), y_range=(155, 200)), ROOT + "sea_area_select.png")
 
 EXPEDITION_DESTINATION_SELECT_SCAN_TARGET = ScanTarget(
-    Rectangle(x_range=(180, 265), y_range=(110, 135)),
+Rectangle(x_range=(180, 265), y_range=(110, 135)),
     ROOT + "expedition_destination_select.png",
 )
 
-EXPEDITION_NEXT_SCAN_TARGET = ScanTarget(EXPEDITION_NEXT, ROOT + "expedition_next.png")
+EXPEDITION_NEXT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1125, 1170), y_range=(643, 688)), ROOT + "expedition_next.png")
 
 # 「単縦陣」選択ボタンの「単」
 TAN = ScanTarget(Rectangle(x_range=(637, 659), y_range=(266, 290)), ROOT + "tan.png")
 
-SORTIE_NEXT_SCAN_TARGET = ScanTarget(SORTIE_NEXT, ROOT + "sortie_next.png")
+SORTIE_NEXT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1110, 1150), y_range=(625, 670)), ROOT + "sortie_next.png")
 
-GO_BACK_SCAN_TARGET = ScanTarget(GO_BACK, ROOT + "go_back.png")
+GO_BACK_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1120, 1160), y_range=(637, 682)), ROOT + "go_back.png")
 
 WITHDRAWAL_SCAN_TARGET = ScanTarget(WITHDRAWAL, ROOT + "withdrawal.png")
 
