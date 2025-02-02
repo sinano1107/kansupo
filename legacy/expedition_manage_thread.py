@@ -10,7 +10,7 @@ from legacy.click import click
 from expedition.handle import handle_expedition
 from legacy.random_sleep import random_sleep
 from legacy.scan import scan
-from scan_targets.index import (
+from scan.targets.targets import (
     EXPEDITION_NEXT_SCAN_TARGET,
     EXPEDITION_RETURN_MESSAGE,
     SETTING_SCAN_TARGET,
