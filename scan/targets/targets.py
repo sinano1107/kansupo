@@ -22,8 +22,9 @@ SORTIE_SELECT_SCAN_TARGET = ScanTarget(SORTIE_SELECT, ROOT + "sortie_select.png"
 SEA_AREA_SELECT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(190, 650), y_range=(155, 200)), ROOT + "sea_area_select.png", name="海域選択画面")
 
 EXPEDITION_DESTINATION_SELECT_SCAN_TARGET = ScanTarget(
-Rectangle(x_range=(180, 265), y_range=(110, 135)),
+    Rectangle(x_range=(180, 265), y_range=(110, 135)),
     ROOT + "expedition_destination_select.png",
+    name="遠征先選択画面",
 )
 
 EXPEDITION_NEXT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1125, 1170), y_range=(643, 688)), ROOT + "expedition_next.png", name="次(遠征帰還画面)")

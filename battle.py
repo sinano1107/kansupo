@@ -251,7 +251,7 @@ async def handle_response(res: Response):
         port_response = ResponseMemory.port
         
         # 第一艦隊の損害/補給状況を確認
-        for ship_id in port_response.deck_port[0].ship_id_list:
+        for ship_id in port_response.deck_list[0].ship_id_list:
             if ship_id == -1:
                 # 飛ばし飛ばしで編成することはできないので、からのスロットがあり次第ループを離脱
                 break

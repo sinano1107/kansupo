@@ -28,6 +28,7 @@ class PortResponse:
     @dataclass(frozen=True)
     class Deck:
         ship_id_list: list[int] = field(metadata=config(field_name="api_ship"))
+        mission: list[int] = field(metadata=config(field_name="api_mission"))
     
     @dataclass(frozen=True)
     class NDock:
@@ -38,7 +39,7 @@ class PortResponse:
     
     # 所持艦船リスト
     ship_list: list[Ship] = field(metadata=config(field_name="api_ship"))
-    deck_port: list[Deck] = field(metadata=config(field_name="api_deck_port"))
+    deck_list: list[Deck] = field(metadata=config(field_name="api_deck_port"))
     ndock_list: list[NDock] = field(metadata=config(field_name="api_ndock"))
 
 
