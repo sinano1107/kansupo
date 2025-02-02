@@ -8,17 +8,17 @@ from typing import Callable
 from playwright.sync_api import sync_playwright, Locator, Response
 
 from access import access
-from click import click
+from legacy.click import click
 from expedition.handle import handle_expedition
-from expedition_manage_thread import ExpeditionManageThread
-from random_sleep import random_sleep
+from legacy.expedition_manage_thread import ExpeditionManageThread
+from legacy.random_sleep import random_sleep
 from scan_targets.index import (
     GAME_START_SCAN_TARGET,
     SETTING_SCAN_TARGET,
 )
 from sortie.sortie_1_1 import sortie_1_1
-from supply import supply
-from wait_until_find import wait_until_find
+from legacy.supply import supply
+from legacy.wait_until_find import wait_until_find
 
 
 @dataclass

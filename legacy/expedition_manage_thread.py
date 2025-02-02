@@ -6,10 +6,10 @@ from time import sleep
 
 from dataclasses_json import dataclass_json
 
-from click import click
+from legacy.click import click
 from expedition.handle import handle_expedition
-from random_sleep import random_sleep
-from scan import scan
+from legacy.random_sleep import random_sleep
+from legacy.scan import scan
 from scan_targets.index import (
     EXPEDITION_NEXT_SCAN_TARGET,
     EXPEDITION_RETURN_MESSAGE,
@@ -20,10 +20,10 @@ from scan_targets.index import (
 from typing import TYPE_CHECKING
 
 from targets import HOME_PORT, SORTIE
-from wait_until_find import wait_until_find
+from legacy.wait_until_find import wait_until_find
 
 if TYPE_CHECKING:
-    from main import MainThread
+    from legacy.main import MainThread
 
 
 @dataclass_json

@@ -1,5 +1,5 @@
 from rectangle import Rectangle
-from scan import ScanTarget
+from scan.scan_target import ScanTarget
 from targets import (
     EXPEDITION_NEXT,
     GAME_START,

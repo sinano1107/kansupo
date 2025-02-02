@@ -1,8 +1,8 @@
 from time import sleep
 from playwright.sync_api import Locator
-from click import click
-from detect_huge_damage import detect_huge_damage
-from random_sleep import random_sleep
+from legacy.click import click
+from legacy.detect_huge_damage import detect_huge_damage
+from legacy.random_sleep import random_sleep
 from scan_targets.index import (
     COMPASS,
     GO_BACK_SCAN_TARGET,
@@ -21,7 +21,7 @@ from targets import (
     SORTIE,
     SORTIE_START,
 )
-from wait_until_find import wait_until_find, wait_until_find_any
+from legacy.wait_until_find import wait_until_find, wait_until_find_any
 
 
 def sortie_1_1(canvas: Locator):

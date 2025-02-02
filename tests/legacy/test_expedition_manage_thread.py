@@ -1,4 +1,4 @@
-from expedition_manage_thread import ExpeditionManageThread
+from legacy.expedition_manage_thread import ExpeditionManageThread
 
 
 def test_save_and_load():

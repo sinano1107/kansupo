@@ -1,15 +1,15 @@
 from time import sleep
 from typing import TYPE_CHECKING
-from click import click
+from legacy.click import click
 from expedition.destinations import ExpeditionDestination
-from random_sleep import random_sleep
+from legacy.random_sleep import random_sleep
 from scan_targets.index import (
     EXPEDITION_DESTINATION_SELECT_SCAN_TARGET,
     HOME_PORT_SCAN_TARGET,
     SETTING_SCAN_TARGET,
     SORTIE_SELECT_SCAN_TARGET,
 )
-from supply import supply
+from legacy.supply import supply
 from targets import (
     EXPEDITION_DESTINATION_SELECT_DECIDE,
     EXPEDITION_SELECT,
@@ -17,10 +17,10 @@ from targets import (
     HOME_PORT,
     SORTIE,
 )
-from wait_until_find import wait_until_find
+from legacy.wait_until_find import wait_until_find
 
 if TYPE_CHECKING:
-    from expedition_manage_thread import ExpeditionManageThread
+    from legacy.expedition_manage_thread import ExpeditionManageThread
 
 
 def go_expedition(

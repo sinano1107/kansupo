@@ -3,7 +3,7 @@ from expedition.destinations import ED_1_1, ED_1_5, ExpeditionDestination
 from expedition.go_expedition import go_expedition
 
 if TYPE_CHECKING:
-    from expedition_manage_thread import ExpeditionManageThread
+    from legacy.expedition_manage_thread import ExpeditionManageThread
 
 
 def handle_expedition(name: str, expedition_manage_thread: "ExpeditionManageThread"):
