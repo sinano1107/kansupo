@@ -7,7 +7,7 @@ from time import sleep
 from typing import Callable
 from playwright.sync_api import sync_playwright, Locator, Response
 
-from access import access
+from legacy.access import access
 from legacy.click import click
 from expedition.handle import handle_expedition
 from legacy.expedition_manage_thread import ExpeditionManageThread
