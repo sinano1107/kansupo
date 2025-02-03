@@ -95,21 +95,27 @@ async def handle_response(res: Response):
         print("ハンドラの設定されていないレスポンスを受け取りました")
 
 
+async def wait_command():
+    while True:
+        command = await asyncio.to_thread(input)
+        command = command.split(" ")
+        if command[0] == "pause":
+            Context.pause()
+        elif command[0] == "resume":
+            await Context.resume()
+        else:
+            print(f"不明なコマンドです {command=}")
+
+
 async def main():
     async with async_playwright() as p:
+        asyncio.create_task(wait_command())
+
         await game_start(p, handle_response)
 
         while True:
-            for i in range(4):
-                if Context.task is None:
-                    # キューが空の場合は待機
-                    print("\rwaiting" + "." * i + " " * (3 - i), end="")
-                else:
-                    # キューが空でない場合は処理を実行
-                    print("\rprocess start!")
-                    await Context.do_task()
-                # 1秒ごとに確認
-                await asyncio.sleep(1)
+            await Context.do_task()
+            await asyncio.sleep(1)
 
 
 if __name__ == "__main__":

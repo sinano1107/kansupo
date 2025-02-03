@@ -163,12 +163,16 @@ class Context:
     page: Page = Page.START
     wait_task: asyncio.Task = None
     task: Coroutine = None
+    pause_flag = False
+    task_doing_flag = False
 
     @classmethod
     async def do_task(cls):
         if cls.task is not None:
+            cls.task_doing_flag = True
             await cls.task()
             cls.task = None
+            cls.task_doing_flag = False
 
     @classmethod
     def set_page(cls, page: Page):
@@ -181,6 +185,9 @@ class Context:
 
     @classmethod
     def set_task(cls, task: Coroutine):
+        if cls.pause_flag:
+            print("一時停止中のため、タスクを設定しません")
+            return
         if cls.task is not None:
             print("タスクが存在するため設定しません")
             return
@@ -188,6 +195,9 @@ class Context:
 
     @classmethod
     def set_wait_task(cls, task: Coroutine):
+        if cls.pause_flag:
+            print("一時停止中のため、待機タスクを設定しません")
+            return
         if cls.wait_task is not None:
             print("待機タスクが存在します。以前のタスクはキャンセルして上書きします。")
             cls.wait_task.cancel()
@@ -202,5 +212,26 @@ class Context:
             cls.wait_task.cancel()
             cls.wait_task = None
             print("待機タスクをキャンセルしました")
-        else:
-            print("待機タスクが存在しないため、キャンセルできません")
+
+    @classmethod
+    def pause(cls):
+        if cls.task_doing_flag:
+            print("タスク実行中のため、一時停止できません")
+            return
+        if cls.page != Page.PORT and cls.page != Page.START:
+            print("母港画面でないため、一時停止できません")
+            return
+        cls.cancel_wait_task()
+        cls.task = None
+        cls.pause_flag = True
+        print("一時停止しました")
+
+    @classmethod
+    async def resume(cls):
+        if not cls.pause_flag:
+            print("一時停止中ではありません")
+            return
+        cls.pause_flag = False
+        print(
+            "再開しました。一度別画面に移動してから母港に移動すると処理が再開します。"
+        )
