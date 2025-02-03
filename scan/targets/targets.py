@@ -29,8 +29,12 @@ EXPEDITION_DESTINATION_SELECT_SCAN_TARGET = ScanTarget(
 
 EXPEDITION_NEXT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1125, 1170), y_range=(643, 688)), ROOT + "expedition_next.png", name="次(遠征帰還画面)")
 
-# 「単縦陣」選択ボタンの「単」
-TAN = ScanTarget(Rectangle(x_range=(637, 659), y_range=(266, 290)), ROOT + "tan.png", name="「単縦陣」選択ボタンの「単」")
+# 陣形選択画面
+FORMATION_SELECT_SCAN_TARGET = ScanTarget(
+    Rectangle(x_range=(410, 760), y_range=(600, 640)),
+    ROOT + "formation_select.png",
+    name="陣形選択画面",
+)
 
 SORTIE_NEXT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1110, 1150), y_range=(625, 670)), ROOT + "sortie_next.png", name="次(戦闘結果画面)")
 

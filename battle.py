@@ -1,7 +1,15 @@
 import asyncio
 from playwright.async_api import async_playwright, Response
 
-from scan.targets.targets import SEA_AREA_SELECT_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET, MIDNIGHT_BATTLE_SELECT_PAGE
+from scan.targets.targets import (
+    FORMATION_SELECT_SCAN_TARGET,
+    SEA_AREA_SELECT_SCAN_TARGET,
+    SORTIE_SELECT_SCAN_TARGET,
+    SORTIE_NEXT_SCAN_TARGET,
+    GO_BACK_SCAN_TARGET,
+    WITHDRAWAL_SCAN_TARGET,
+    MIDNIGHT_BATTLE_SELECT_PAGE,
+)
 from targets.targets import (
     SEA_AREA_SELECT_DECIDE,
     SORTIE,
@@ -12,7 +20,7 @@ from targets.targets import (
     NO_MIDNIGHT_BATTLE,
     sea_area,
 )
-from scan.targets.targets import COMPASS, TAN
+from scan.targets.targets import COMPASS
 from ships.ships import ships_map
 from utils.game_start import game_start
 from utils.wait_until_find import wait_until_find
@@ -160,7 +168,7 @@ async def sortie():
             exit()
 
         # FIXME 4隻未満のとき、陣形選択ができないので、この処理をスキップする
-        await wait_until_find(TAN)
+        await wait_until_find(FORMATION_SELECT_SCAN_TARGET)
         await random_sleep()
         await click(SELECT_SINGLE_LINE)
 
@@ -342,6 +350,7 @@ async def wait_command():
             mapinfo_no = int(command[1])
             SortieDestinationWrapper.maparea_id = maparea_id
             SortieDestinationWrapper.mapinfo_no = mapinfo_no
+            break
         except:
             print("不正な入力です")
 
