@@ -11,6 +11,7 @@ from utils.game_start import game_start
 from utils.page import Page
 from utils.random_sleep import random_sleep
 from utils.supply import supply
+from utils.wait_reload import wait_reload
 from utils.wait_until_find import wait_until_find
 
 
@@ -86,32 +87,6 @@ def calc_expeditions_wait_seconds():
     return ResponseMemory.port.deck_list[1].mission[2] / 1000 - time() - 60
 
 
-def handle_expedition_waiting(wait_seconds: float):
-    """
-    遠征/強制帰還が終了するまで待機
-    待機後にリロード、回収、再出発を実施
-    """
-
-    async def _():
-        print(
-            "{}まで待機します".format(datetime.now() + timedelta(seconds=wait_seconds))
-        )
-        await asyncio.sleep(wait_seconds)
-        print("遠征帰還時刻になったので、リロード、回収、再出発を実施します")
-
-        async def _():
-            await click(REPAIR)
-            await random_sleep()
-            await click(HOME_PORT)
-            await wait_until_find(SETTING_SCAN_TARGET)
-            await random_sleep()
-            await collect_and_go_expedition()
-
-        Context.set_task(_)
-
-    Context.set_wait_task(_)
-
-
 async def handle_response(res: Response):
     url = res.url
 
@@ -132,7 +107,7 @@ async def handle_response(res: Response):
 
         # 遠征中/強制帰還中なら待機
         wait_seconds = calc_expeditions_wait_seconds()
-        handle_expedition_waiting(wait_seconds)
+        wait_reload(wait_seconds)
 
 
 async def main():

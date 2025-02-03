@@ -6,12 +6,11 @@ from expedition import (
     calc_expeditions_wait_seconds,
     handle_expedition_idling,
     handle_expedition_returned,
-    handle_expedition_waiting,
     DestinationWrapper,
 )
 from ndock import calc_repair_wait_seconds, handle_should_repair
 from targets.targets import EXPEDITION_DESTINATION_SELECT_5
-from utils.context import Context
+from utils.context import Context, ResponseMemory
 from utils.game_start import game_start
 from utils.page import Page
 from utils.wait_reload import wait_reload
@@ -48,30 +47,21 @@ async def handle_response(res: Response):
         if await handle_sortie():
             return
 
+        # cond値は3分毎に回復するので、最低3分毎にリロードを行う
+        reload_period = 3 * 60
+
         # 最短の遠征が終了するまでの待機秒数を取得
         expeditions_wait_seconds = calc_expeditions_wait_seconds()
 
         # 最短の入渠が終了するまでの待機秒数と、入渠可能となるドックのインデックスを取得
-        repairs_wait_seconds = calc_repair_wait_seconds()
+        repairs_wait_seconds = (
+            calc_repair_wait_seconds()
+            if ResponseMemory.port.has_repair_ship
+            else reload_period
+        )
 
-        # cond値は3分毎に回復するので、最低3分毎にリロードを行う
-        reload_period = 3 * 60
-
-        # 入渠よりも遠征よりもリロード間隔のほうが短い場合は、リロードを行う
-        if (
-            repairs_wait_seconds > reload_period
-            and expeditions_wait_seconds > reload_period
-        ):
-            wait_reload(reload_period)
-            return
-
-        if repairs_wait_seconds < expeditions_wait_seconds:
-            # 入渠が先に終了する場合
-            wait_reload(repairs_wait_seconds)
-            return
-
-        # 遠征が先に終了する場合
-        await handle_expedition_waiting(expeditions_wait_seconds)
+        # cond値の回復、遠征の帰還、入渠完了のいずれかが終了するまで待機しリロード
+        wait_reload(min(reload_period, expeditions_wait_seconds, repairs_wait_seconds))
         return
     elif url.endswith("api_req_map/start"):
         print("出撃開始レスポンスを受け取りました")
