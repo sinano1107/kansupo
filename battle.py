@@ -157,6 +157,7 @@ async def sortie():
                 "対応していないイベントが発生しました。スクリーンショットを撮影して終了します。"
             )
             await Context.canvas.screenshot(path="screenshot.png")
+            exit()
 
         # FIXME 4隻未満のとき、陣形選択ができないので、この処理をスキップする
         await wait_until_find(TAN)
