@@ -11,7 +11,9 @@ from utils.page import Page
 from targets.targets import HOME_PORT, REPAIR, REPAIR_START, REPAIR_START_CONFIRM, repair_dock_button, repair_ship
 
 
-async def start_repair(should_use_dock_index_list: list[int], repairing_ship_count: int):
+async def start_repair(
+    should_use_dock_index_list: list[int], should_repair_ship_index_list: list[int]
+):
     """
     入渠させる処理
     母港画面で実行されることを前提としている
@@ -30,11 +32,13 @@ async def start_repair(should_use_dock_index_list: list[int], repairing_ship_cou
     print("入渠ページに遷移したので、入渠させます")
     await random_sleep()
 
-    for i, dock_index in enumerate(should_use_dock_index_list):
+    for dock_index, ship_index in zip(
+        should_use_dock_index_list, should_repair_ship_index_list
+    ):
         await click(repair_dock_button(dock_index))
         await random_sleep()
 
-        await click(repair_ship(i + repairing_ship_count))
+        await click(repair_ship(ship_index))
         await random_sleep()
 
         await click(REPAIR_START)
@@ -51,16 +55,14 @@ async def handle_should_repair():
     response = ResponseMemory.port
     # 入渠ドックの空き状況を取得
     is_ndock_empty_list = response.ndock_empty_flag_list
+    # 入渠中の艦のIDリストを取得
+    repairing_ships_id_list = response.repairing_ships_id_list
+    # 損傷艦のリストを作成
+    damaged_ships = [ship for ship in response.ship_list if ship.damage > 0]
     # 入渠させるべき艦のリストを取得
-    should_repair_ships = list(
-        filter(
-            lambda ship: (ship.ndock_time != 0)  # 入渠時間が0の艦は除外
-            and (
-                ship.id not in response.repairing_ships_id_list
-            ),  # すでに入渠中の艦は除外
-            response.ship_list,
-        )
-    )
+    should_repair_ships = [
+        ship for ship in damaged_ships if ship.id not in repairing_ships_id_list
+    ]
     # 空きドックの数を取得
     ndock_empty_count = is_ndock_empty_list.count(True)
 
@@ -76,15 +78,32 @@ async def handle_should_repair():
             index = is_ndock_empty_list.index(True, index + 1)
             should_use_dock_index_list.append(index)
 
+        # 入渠させる艦のインデックスのリストを作成する
+        # 現在HPが低い艦が上に来る。
+        # 同じHPの場合、どちらが優先されるのかは要検証。
+        # ここでは、maxhpが大きい方が優先されると仮定している。
+        sorted_damaged_ship = sorted(
+            damaged_ships, key=lambda ship: (ship.nowhp, -ship.maxhp)
+        )
+        index = 0
+        should_repair_ship_index_list: list[int] = []
+        # 損傷艦の表示順が正しいか確認するためのデバッグコード
+        # print([ships_map.get(ship.ship_id).name for ship in sorted_damaged_ship])
+        for _ in range(can_repair_count):
+            # 前回に発見した該当艦の次の要素から検索する
+            for i in range(index, len(damaged_ships)):
+                if sorted_damaged_ship[i].id not in repairing_ships_id_list:
+                    should_repair_ship_index_list.append(i)
+                    index = i + 1
+                    break
+
         print("入渠を実施します")
 
         # 入渠させる処理を代入
         Context.set_task(
             lambda: start_repair(
                 should_use_dock_index_list,
-                repairing_ship_count=[
-                    ndock.state for ndock in response.ndock_list
-                ].count(1),
+                should_repair_ship_index_list,
             )
         )
         return True
