@@ -1,8 +1,7 @@
 import asyncio
-from datetime import datetime, timedelta
 from playwright.async_api import async_playwright, Response
 
-from battle import handle_sortie
+from battle import SortieDestinationWrapper, handle_sortie
 from expedition import (
     calc_expeditions_wait_seconds,
     handle_expedition_idling,
@@ -10,15 +9,12 @@ from expedition import (
     handle_expedition_waiting,
     DestinationWrapper,
 )
-from ndock import calc_ndock_data, handle_should_repair, handle_using_all_docks
-from scan.targets.targets import HOME_PORT_SCAN_TARGET
-from targets.targets import EXPEDITION_DESTINATION_SELECT_5, HOME_PORT, REPAIR
-from utils.click import click
+from ndock import calc_repair_wait_seconds, handle_should_repair
+from targets.targets import EXPEDITION_DESTINATION_SELECT_5
 from utils.context import Context
 from utils.game_start import game_start
 from utils.page import Page
-from utils.random_sleep import random_sleep
-from utils.wait_until_find import wait_until_find
+from utils.wait_reload import wait_reload
 
 
 async def handle_response(res: Response):
@@ -56,39 +52,22 @@ async def handle_response(res: Response):
         expeditions_wait_seconds = calc_expeditions_wait_seconds()
 
         # 最短の入渠が終了するまでの待機秒数と、入渠可能となるドックのインデックスを取得
-        repairs_wait_seconds, open_dock_index, using_dock_count = calc_ndock_data()
+        repairs_wait_seconds = calc_repair_wait_seconds()
 
         # cond値は3分毎に回復するので、最低3分毎にリロードを行う
         reload_period = 3 * 60
 
+        # 入渠よりも遠征よりもリロード間隔のほうが短い場合は、リロードを行う
         if (
-            repairs_wait_seconds is None or repairs_wait_seconds > reload_period
-        ) and expeditions_wait_seconds > reload_period:
-
-            async def _():
-                print(
-                    f"{datetime.now() + timedelta(seconds=reload_period)}まで待ってからリロードを行います"
-                )
-                await asyncio.sleep(reload_period)
-
-                async def _():
-                    await random_sleep()
-                    await click(REPAIR)
-                    await random_sleep()
-                    await wait_until_find(HOME_PORT_SCAN_TARGET)
-                    await random_sleep()
-                    await click(HOME_PORT)
-
-                await Context.set_task(_)
-
-            Context.set_wait_task(_)
+            repairs_wait_seconds > reload_period
+            and expeditions_wait_seconds > reload_period
+        ):
+            wait_reload(reload_period)
             return
 
         if repairs_wait_seconds < expeditions_wait_seconds:
             # 入渠が先に終了する場合
-            await handle_using_all_docks(
-                repairs_wait_seconds, open_dock_index, using_dock_count
-            )
+            wait_reload(repairs_wait_seconds)
             return
 
         # 遠征が先に終了する場合
@@ -135,4 +114,5 @@ async def main():
 
 if __name__ == "__main__":
     DestinationWrapper.destination = EXPEDITION_DESTINATION_SELECT_5
+    SortieDestinationWrapper.mapinfo_no = 2
     asyncio.run(main())

@@ -60,7 +60,7 @@ class PortResponse:
 
     @property
     def has_repair_ship(self):
-        """修理すべき艦を持っているか"""
+        """修理すべき艦を持っているか(修理中の艦は除く)"""
         repairing_ship_id_list = self.repairing_ships_id_list
         for ship in self.ship_list:
             if ship.ndock_time != 0 and ship.id not in repairing_ship_id_list:

@@ -1,5 +1,4 @@
 import asyncio
-from datetime import datetime, timedelta
 from time import time
 from playwright.async_api import async_playwright, Response
 
@@ -9,6 +8,7 @@ from utils.click import click
 from utils.random_sleep import random_sleep
 from utils.page import Page
 from targets.targets import HOME_PORT, REPAIR, REPAIR_START, REPAIR_START_CONFIRM, repair_dock_button, repair_ship
+from utils.wait_reload import wait_reload
 
 
 async def start_repair(
@@ -110,46 +110,16 @@ async def handle_should_repair():
     return False
 
 
-def calc_ndock_data():
-    if ResponseMemory.port.has_repair_ship:
-        using_dock_list = [
-            dock for dock in ResponseMemory.port.ndock_list if dock.state == 1
-        ]
-        using_docks_complete_time_list = [
-            dock.complete_time for dock in using_dock_list
-        ]
-        min_complete_time = min(using_docks_complete_time_list)
-        open_dock_index = (
-            using_dock_list[using_docks_complete_time_list.index(min_complete_time)].id
-            - 1
-        )
+def calc_repair_wait_seconds():
+    using_dock_list = [
+        dock for dock in ResponseMemory.port.ndock_list if dock.state == 1
+    ]
+    using_docks_complete_time_list = [dock.complete_time for dock in using_dock_list]
+    min_complete_time = min(using_docks_complete_time_list)
 
-        wait_seconds = min_complete_time / 1000 - time()
-        wait_seconds -= 60  # 入渠ページに遷移することで1分短縮できるので、1分引く
-        return wait_seconds, open_dock_index, len(using_dock_list)
-    return None, None, None
-
-
-async def handle_using_all_docks(
-    wait_seconds: float, min_dock_index: int, using_dock_count: int
-):
-    print("入渠ドックが空くまで待機します")
-
-    # 待ってから入渠させる処理
-    async def wait_and_repair():
-        print(
-            "{}まで待機してから、入渠させます".format(
-                datetime.now() + timedelta(seconds=wait_seconds)
-            )
-        )
-        await asyncio.sleep(wait_seconds)
-        print("入渠完了時刻になったので、入渠タスクを代入します")
-        Context.task = lambda: start_repair(
-            [min_dock_index], repairing_ship_count=using_dock_count - 1
-        )
-
-    # 待ってから入渠させる処理のタスクを作成
-    Context.set_wait_task(wait_and_repair)
+    wait_seconds = min_complete_time / 1000 - time()
+    wait_seconds -= 60  # 入渠ページに遷移することで1分短縮できるので、1分引く
+    return wait_seconds
 
 
 # NOTE 1分未満で入渠が完了する場合にも母港に戻るのがほんの少し時間の無駄
@@ -165,12 +135,9 @@ async def handle_response(res: Response):
         if await handle_should_repair():
             return
 
-        wait_seconds, open_dock_index, using_dock_count = calc_ndock_data()
-
-        if wait_seconds is not None:
-            await handle_using_all_docks(
-                wait_seconds, open_dock_index, using_dock_count
-            )
+        if ResponseMemory.port.has_repair_ship:
+            wait_seconds = calc_repair_wait_seconds()
+            wait_reload(wait_seconds)
             return
 
         print("入渠の必要はありません")
