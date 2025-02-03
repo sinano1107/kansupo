@@ -14,11 +14,15 @@ from utils.supply import supply
 from utils.wait_until_find import wait_until_find
 
 
+class DestinationWrapper:
+    destination = EXPEDITION_DESTINATION_SELECT_TOP
+
+
 async def go_expedition():
     print("補給を実施します")
     await supply(2)
     await random_sleep()
-    
+
     print("遠征に送り出します")
     await click(SORTIE)
     await wait_until_find(SORTIE_SELECT_SCAN_TARGET)
@@ -26,7 +30,7 @@ async def go_expedition():
     await click(EXPEDITION_SELECT)
     await wait_until_find(EXPEDITION_DESTINATION_SELECT_SCAN_TARGET)
     await random_sleep()
-    await click(EXPEDITION_DESTINATION_SELECT_TOP)
+    await click(DestinationWrapper.destination)
     await random_sleep()
     await click(EXPEDITION_DESTINATION_SELECT_DECIDE)
     await random_sleep()
@@ -49,54 +53,86 @@ async def collect_and_go_expedition():
     await go_expedition()
 
 
+async def handle_expedition_returned():
+    """遠征帰還済みなら、回収して再出発"""
+    if ResponseMemory.port.deck_list[1].mission[0] == 2:
+        print("第2艦隊が遠征から帰投しています")
+
+        async def _():
+            await random_sleep()
+            await collect_and_go_expedition()
+
+        Context.set_task(_)
+        return True
+    return False
+
+
+async def handle_expedition_idling():
+    """遠征待機中なら出発させる"""
+    if ResponseMemory.port.deck_list[1].mission[0] == 0:
+        print("第2艦隊が待機中のため、遠征に送り出します")
+
+        async def _():
+            await random_sleep()
+            await go_expedition()
+
+        Context.set_task(_)
+        return True
+    return False
+
+
+def calc_expeditions_wait_seconds():
+    """遠征帰還時刻までの待機時間を計算"""
+    return ResponseMemory.port.deck_list[1].mission[2] / 1000 - time() - 60
+
+
+def handle_expedition_waiting(wait_seconds: float):
+    """
+    遠征/強制帰還が終了するまで待機
+    待機後にリロード、回収、再出発を実施
+    """
+
+    async def _():
+        print(
+            "{}まで待機します".format(datetime.now() + timedelta(seconds=wait_seconds))
+        )
+        await asyncio.sleep(wait_seconds)
+        print("遠征帰還時刻になったので、リロード、回収、再出発を実施します")
+
+        async def _():
+            await click(REPAIR)
+            await random_sleep()
+            await click(HOME_PORT)
+            await wait_until_find(SETTING_SCAN_TARGET)
+            await random_sleep()
+            await collect_and_go_expedition()
+
+        Context.set_task(_)
+
+    Context.set_wait_task(_)
+
+
 async def handle_response(res: Response):
     url = res.url
-    
+
     if not url.startswith("http://w14h.kancolle-server.com/kcsapi/"):
         return
-    
+
     if res.url.endswith("/api_port/port"):
         print("母港に到達しました")
-        
         await Context.set_page_and_response(Page.PORT, res)
-        
-        response = ResponseMemory.port
 
         # 遠征帰還済みなら、回収して再出発
-        if response.deck_list[1].mission[0] == 2:
-            print("第2艦隊が遠征から帰投しています")
-            async def _():
-                await random_sleep()
-                await collect_and_go_expedition()
-            Context.set_task(_)
+        if await handle_expedition_returned():
             return
-        
-        # 待機中なら、出発
-        if response.deck_list[1].mission[0] == 0:
-            print("第2艦隊が待機中のため、遠征に送り出します")
-            async def _():
-                await random_sleep()
-                await go_expedition()
-            Context.set_task(_)
+
+        # 待機中なら、出発させる
+        if await handle_expedition_idling():
             return
-        
+
         # 遠征中/強制帰還中なら待機
-        async def reload_and_collect_and_go_expedition():
-            wait_seconds = response.deck_list[1].mission[2] / 1000 - time()
-            wait_seconds -= 60
-            print("{}まで待機してから遠征に送り出します".format(datetime.now() + timedelta(seconds=wait_seconds)))
-            await asyncio.sleep(wait_seconds)
-            async def _():
-                print("遠征帰還時刻になったので、リロード、回収、再出発を実施します")
-                await click(REPAIR)
-                await random_sleep()
-                await click(HOME_PORT)
-                await wait_until_find(SETTING_SCAN_TARGET)
-                await random_sleep()
-                await collect_and_go_expedition()
-            Context.set_task(_)
-            
-        Context.set_wait_task(reload_and_collect_and_go_expedition)
+        wait_seconds = calc_expeditions_wait_seconds()
+        handle_expedition_waiting(wait_seconds)
 
 
 async def main():

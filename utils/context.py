@@ -20,27 +20,55 @@ class PortResponse:
         maxhp: int = field(metadata=config(field_name="api_maxhp"))
         nowhp: int = field(metadata=config(field_name="api_nowhp"))
         ndock_time: int = field(metadata=config(field_name="api_ndock_time"))
-        
+        cond: int = field(metadata=config(field_name="api_cond"))
+
         @property
         def damage(self):
             return self.maxhp - self.nowhp
-    
+
     @dataclass(frozen=True)
     class Deck:
         ship_id_list: list[int] = field(metadata=config(field_name="api_ship"))
         mission: list[int] = field(metadata=config(field_name="api_mission"))
-    
+
     @dataclass(frozen=True)
     class NDock:
         id: int = field(metadata=config(field_name="api_id"))
         state: int = field(metadata=config(field_name="api_state"))
         ship_id: int = field(metadata=config(field_name="api_ship_id"))
         complete_time: int = field(metadata=config(field_name="api_complete_time"))
-    
+
     # 所持艦船リスト
     ship_list: list[Ship] = field(metadata=config(field_name="api_ship"))
     deck_list: list[Deck] = field(metadata=config(field_name="api_deck_port"))
     ndock_list: list[NDock] = field(metadata=config(field_name="api_ndock"))
+
+    @property
+    def ndock_empty_flag_list(self):
+        """空いているドックのインデックスのみTrueのリスト"""
+        return [ndock.state == 0 for ndock in self.ndock_list]
+
+    @property
+    def repairing_ships_id_list(self):
+        """入渠中の艦のIDリスト"""
+        return list(
+            map(
+                lambda ndock: ndock.ship_id,
+                filter(lambda ndock: ndock.state == 1, self.ndock_list),
+            )
+        )
+
+    @property
+    def has_repair_ship(self):
+        """修理すべき艦を持っているか"""
+        repairing_ship_id_list = self.repairing_ships_id_list
+        for ship in self.ship_list:
+            if ship.ndock_time != 0 and ship.id not in repairing_ship_id_list:
+                return True
+        return False
+
+    def get_ship(self, ship_id: int):
+        return next(ship for ship in self.ship_list if ship.id == ship_id)
 
 
 @dataclass_json
@@ -135,7 +163,7 @@ class Context:
     page: Page = Page.START
     wait_task: asyncio.Task = None
     task: Coroutine = None
-    
+
     @classmethod
     async def do_task(cls):
         if cls.task is None:
@@ -143,33 +171,33 @@ class Context:
         else:
             await cls.task()
             cls.task = None
-    
+
     @classmethod
     def set_page(cls, page: Page):
         cls.page = page
-    
+
     @classmethod
     async def set_page_and_response(cls, page: Page, response: Response):
         await ResponseMemory.set_response(page, response)
         cls.set_page(page)
-    
+
     @classmethod
     def set_task(cls, task: Coroutine):
         if cls.task is not None:
             print("タスクが存在するため設定しません")
             return
         cls.task = task
-    
+
     @classmethod
     def set_wait_task(cls, task: Coroutine):
         if cls.wait_task is not None:
-            print("⚠️待機タスクが存在します。これは不具合の可能性があります。以前のタスクはキャンセルして上書きします。")
+            print("待機タスクが存在します。以前のタスクはキャンセルして上書きします。")
             cls.wait_task.cancel()
         async def do_task_and_clear():
             await task()
             cls.wait_task = None
         cls.wait_task = asyncio.create_task(do_task_and_clear())
-    
+
     @classmethod
     def cancel_wait_task(cls):
         if cls.wait_task is not None:
