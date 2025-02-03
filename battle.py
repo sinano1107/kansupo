@@ -4,7 +4,7 @@ from playwright.async_api import async_playwright, Response
 from scan.targets.targets import (
     FORMATION_SELECT_SCAN_TARGET,
     SEA_AREA_SELECT_SCAN_TARGET,
-    SORTIE_SELECT_SCAN_TARGET,
+    SORTIE_SELECT_PAGE_SCAN_TARGET,
     SORTIE_NEXT_SCAN_TARGET,
     GO_BACK_SCAN_TARGET,
     WITHDRAWAL_SCAN_TARGET,
@@ -13,6 +13,7 @@ from scan.targets.targets import (
 from targets.targets import (
     SEA_AREA_SELECT_DECIDE,
     SORTIE,
+    SORTIE_SELECT,
     SORTIE_START,
     SELECT_SINGLE_LINE,
     ATTACK,
@@ -121,10 +122,10 @@ async def sortie():
     await random_sleep()
 
     await click(SORTIE)
-    await wait_until_find(SORTIE_SELECT_SCAN_TARGET)
+    await wait_until_find(SORTIE_SELECT_PAGE_SCAN_TARGET)
     await random_sleep()
 
-    await click(SORTIE_SELECT_SCAN_TARGET.RECTANGLE)
+    await click(SORTIE_SELECT)
     await wait_until_find(SEA_AREA_SELECT_SCAN_TARGET)
     await random_sleep()
 

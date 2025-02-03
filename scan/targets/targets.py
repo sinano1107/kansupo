@@ -4,7 +4,6 @@ from targets.targets import (
     GAME_START,
     HOME_PORT,
     SETTING,
-    SORTIE_SELECT,
     WITHDRAWAL,
 )
 
@@ -17,7 +16,11 @@ SETTING_SCAN_TARGET = ScanTarget(SETTING, ROOT + "setting.png")
 
 HOME_PORT_SCAN_TARGET = ScanTarget(HOME_PORT, ROOT + "home_port.png")
 
-SORTIE_SELECT_SCAN_TARGET = ScanTarget(SORTIE_SELECT, ROOT + "sortie_select.png")
+SORTIE_SELECT_PAGE_SCAN_TARGET = ScanTarget(
+    Rectangle(x_range=(185, 275), y_range=(110, 135)),
+    ROOT + "sortie_select_page.png",
+    name="出撃選択画面",
+)
 
 SEA_AREA_SELECT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(190, 650), y_range=(155, 200)), ROOT + "sea_area_select.png", name="海域選択画面")
 

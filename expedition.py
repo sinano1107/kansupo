@@ -1,9 +1,14 @@
 import asyncio
 from time import time
-from datetime import datetime, timedelta
 from playwright.async_api import async_playwright, Response
 
-from scan.targets.targets import EXPEDITION_DESTINATION_SELECT_SCAN_TARGET, EXPEDITION_NEXT_SCAN_TARGET, HOME_PORT_SCAN_TARGET, SETTING_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET
+from scan.targets.targets import (
+    EXPEDITION_DESTINATION_SELECT_SCAN_TARGET,
+    EXPEDITION_NEXT_SCAN_TARGET,
+    HOME_PORT_SCAN_TARGET,
+    SETTING_SCAN_TARGET,
+    SORTIE_SELECT_PAGE_SCAN_TARGET,
+)
 from targets.targets import EXPEDITION_DESTINATION_SELECT_DECIDE, EXPEDITION_DESTINATION_SELECT_TOP, EXPEDITION_SELECT, EXPEDITION_START, HOME_PORT, REPAIR, SORTIE
 from utils.click import click
 from utils.context import Context, ResponseMemory
@@ -26,7 +31,7 @@ async def go_expedition():
 
     print("遠征に送り出します")
     await click(SORTIE)
-    await wait_until_find(SORTIE_SELECT_SCAN_TARGET)
+    await wait_until_find(SORTIE_SELECT_PAGE_SCAN_TARGET)
     await random_sleep()
     await click(EXPEDITION_SELECT)
     await wait_until_find(EXPEDITION_DESTINATION_SELECT_SCAN_TARGET)
