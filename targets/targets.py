@@ -55,9 +55,31 @@ EXPEDITION_DESTINATION_SELECT_DECIDE = Rectangle(x_range=(915, 1145), y_range=(6
 # 遠征開始ボタン
 EXPEDITION_START = Rectangle(x_range=(800, 1040), y_range=(645, 690), name="遠征開始ボタン")
 
+
+# 海域選択ボタン
+def sea_area(maparea_id: int, mapinfo_no: int):
+    if maparea_id != 1:
+        raise ValueError("maparea_idは現在1以外に対応していません")
+    if mapinfo_no < 1 or mapinfo_no > 5:
+        raise ValueError(
+            "mapinfo_noは1以上5以下である必要があります(5以上にはまだ対応していません)"
+        )
+
+    x_start = 715 - (mapinfo_no % 2 * 505)
+    y_start = mapinfo_no // 3 * 215 + 230
+
+    return Rectangle(
+        x_range=(x_start, x_start + 430),
+        y_range=(y_start, y_start + 160),
+        name=f"海域{maparea_id}-{mapinfo_no}",
+    )
+
+
+# TODO sea_areaを使用するようにして削除する
 # 海域選択左上
 SEA_AREA_LEFT_TOP = Rectangle(x_range=(210, 640), y_range=(230, 390), name="海域選択左上")
 
+# TODO sea_areaを使用するようにして削除する
 # 海域選択左下
 SEA_AREA_LEFT_BOTTOM = Rectangle(x_range=(210, 640), y_range=(445, 605), name="海域選択左下")
 

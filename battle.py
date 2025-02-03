@@ -2,7 +2,16 @@ import asyncio
 from playwright.async_api import async_playwright, Response
 
 from scan.targets.targets import SEA_AREA_SELECT_SCAN_TARGET, SORTIE_SELECT_SCAN_TARGET, SORTIE_NEXT_SCAN_TARGET, GO_BACK_SCAN_TARGET, WITHDRAWAL_SCAN_TARGET, MIDNIGHT_BATTLE_SELECT_PAGE
-from targets.targets import SEA_AREA_LEFT_TOP, SEA_AREA_SELECT_DECIDE, SORTIE, SORTIE_START, SELECT_SINGLE_LINE, ATTACK, DO_MIDNIGHT_BATTLE, NO_MIDNIGHT_BATTLE
+from targets.targets import (
+    SEA_AREA_SELECT_DECIDE,
+    SORTIE,
+    SORTIE_START,
+    SELECT_SINGLE_LINE,
+    ATTACK,
+    DO_MIDNIGHT_BATTLE,
+    NO_MIDNIGHT_BATTLE,
+    sea_area,
+)
 from scan.targets.targets import COMPASS, TAN
 from ships.ships import ships_map
 from utils.game_start import game_start
@@ -12,6 +21,11 @@ from utils.random_sleep import random_sleep
 from utils.page import Page
 from utils.supply import supply
 from utils.context import BattleResponse, Context, ResponseMemory
+
+
+class SortieDestinationWrapper:
+    maparea_id = 1
+    mapinfo_no = 1
 
 
 def calc_remaining_hp():
@@ -90,8 +104,12 @@ def calc_remaining_hp():
 
     return (friend_remaining_hp_list, enemy_remaining_hp_list)
 
-async def sortie_1_1():
-    print("1-1に出撃します")
+
+async def sortie():
+    maparea_id = SortieDestinationWrapper.maparea_id
+    mapinfo_no = SortieDestinationWrapper.mapinfo_no
+
+    print(f"{maparea_id}-{mapinfo_no}に出撃します")
     await random_sleep()
 
     await click(SORTIE)
@@ -102,7 +120,7 @@ async def sortie_1_1():
     await wait_until_find(SEA_AREA_SELECT_SCAN_TARGET)
     await random_sleep()
 
-    await click(SEA_AREA_LEFT_TOP)
+    await click(sea_area(maparea_id, mapinfo_no))
     await random_sleep()
 
     await click(SEA_AREA_SELECT_DECIDE)
@@ -127,9 +145,18 @@ async def sortie_1_1():
         else:
             print("羅針盤は表示されません")
 
-        # 「気のせいだった」の時はスキップする
-        if map_next_response.event_id == 6:
+        event_id = map_next_response.event_id
+
+        # イベントなし、資源獲得、渦潮、気のせいだった、の時はスキップする
+        if event_id == 1 or event_id == 2 or event_id == 3 or event_id == 6:
             continue
+
+        # 戦闘、ボス戦以外の場合は対応していない
+        if event_id != 4 and event_id != 5:
+            print(
+                "対応していないイベントが発生しました。スクリーンショットを撮影して終了します。"
+            )
+            await Context.canvas.screenshot(path="screenshot.png")
 
         # FIXME 4隻未満のとき、陣形選択ができないので、この処理をスキップする
         await wait_until_find(TAN)
@@ -150,7 +177,7 @@ async def sortie_1_1():
 
             await random_sleep()
 
-            if map_next_response.event_id == 5:
+            if event_id == 5:
                 print("ボスマスなので夜戦を行います")
                 await click(DO_MIDNIGHT_BATTLE)
 
@@ -266,7 +293,7 @@ async def handle_sortie():
         if should_supply:
             await random_sleep()
             await supply()
-        await sortie_1_1()
+        await sortie()
 
     Context.set_task(_)
     return True
@@ -282,7 +309,7 @@ async def handle_response(res: Response):
         print("母港に到達しました")
         await Context.set_page_and_response(Page.PORT, res)
 
-        if await handle_response():
+        if await handle_sortie():
             return
 
         print("損傷感か疲労艦が含まれています。編成を行なってください。")
@@ -304,21 +331,31 @@ async def handle_response(res: Response):
     else:
         print("ハンドラの設定されていないレスポンスを受け取りました")
 
+
+async def wait_command():
+    while True:
+        command = await asyncio.to_thread(input, "海域番号を受付中: ")
+        command = command.split("-")
+        try:
+            maparea_id = int(command[0])
+            mapinfo_no = int(command[1])
+            SortieDestinationWrapper.maparea_id = maparea_id
+            SortieDestinationWrapper.mapinfo_no = mapinfo_no
+        except:
+            print("不正な入力です")
+
+
 async def main():
     async with async_playwright() as p:
+        await wait_command()
+
         await game_start(p, handle_response)
-        
+
+        input("Enterで出撃します")
+
         while True:
-            for i in range(4):
-                if Context.task is None:
-                    # コルーチンが空の場合は待機
-                    print("\rwaiting" + "." * i + " " * (3 - i), end="")
-                else:
-                    # コルーチンが空でない場合は処理を実行
-                    print("\rprocess start!")
-                    await Context.do_task()
-                # 1秒ごとに確認
-                await asyncio.sleep(1)
+            await Context.do_task()
+            await asyncio.sleep(1)
 
 if __name__ == "__main__":
     asyncio.run(main())

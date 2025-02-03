@@ -166,9 +166,7 @@ class Context:
 
     @classmethod
     async def do_task(cls):
-        if cls.task is None:
-            print("タスクが設定されていません")
-        else:
+        if cls.task is not None:
             await cls.task()
             cls.task = None
 
