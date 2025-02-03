@@ -74,15 +74,6 @@ def sea_area(maparea_id: int, mapinfo_no: int):
         name=f"海域{maparea_id}-{mapinfo_no}",
     )
 
-
-# TODO sea_areaを使用するようにして削除する
-# 海域選択左上
-SEA_AREA_LEFT_TOP = Rectangle(x_range=(210, 640), y_range=(230, 390), name="海域選択左上")
-
-# TODO sea_areaを使用するようにして削除する
-# 海域選択左下
-SEA_AREA_LEFT_BOTTOM = Rectangle(x_range=(210, 640), y_range=(445, 605), name="海域選択左下")
-
 # 海域選択決定
 SEA_AREA_SELECT_DECIDE = Rectangle(x_range=(900, 1130), y_range=(645, 690), name="海域選択決定")
 
