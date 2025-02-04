@@ -79,11 +79,10 @@ async def handle_should_repair():
             should_use_dock_index_list.append(index)
 
         # 入渠させる艦のインデックスのリストを作成する
-        # 現在HPが低い艦が上に来る。
-        # 同じHPの場合、どちらが優先されるのかは要検証。
-        # ここでは、maxhpが大きい方が優先されると仮定している。
+        # 現在HPの割合が低い艦が優先される（仮定）
+        # 同じ割合の場合、どちらが優先されるのかは要検証。
         sorted_damaged_ship = sorted(
-            damaged_ships, key=lambda ship: (ship.nowhp, -ship.maxhp)
+            damaged_ships, key=lambda ship: ship.nowhp / ship.maxhp
         )
         index = 0
         should_repair_ship_index_list: list[int] = []
