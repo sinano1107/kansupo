@@ -1,4 +1,6 @@
 import asyncio
+from datetime import datetime
+import sys
 from playwright.async_api import async_playwright, Response
 
 from battle import SortieDestinationWrapper, handle_sortie
@@ -23,7 +25,13 @@ async def handle_response(res: Response):
         return
 
     if res.url.endswith("/api_port/port"):
-        print("母港に到達しました")
+        # レコードを支持されていたら記録する
+        if should_record:
+            with open(
+                f"{dirname}/port_{int((datetime.now() - start_time).total_seconds())}.txt",
+                "w",
+            ) as f:
+                f.write(await res.text())
 
         if Context.task is not None:
             print("タスクが存在します")
@@ -81,8 +89,6 @@ async def handle_response(res: Response):
     elif url.endswith("/api_get_member/ndock"):
         print("入渠ドックに到達しました")
         Context.set_page(Page.NDOCK)
-    else:
-        print("ハンドラの設定されていないレスポンスを受け取りました")
 
 
 async def wait_command():
@@ -101,7 +107,11 @@ async def main():
     async with async_playwright() as p:
         asyncio.create_task(wait_command())
 
-        await game_start(p, handle_response)
+        await game_start(
+            p,
+            handle_response,
+            record_video_dir=dirname,
+        )
 
         while True:
             await Context.do_task()
@@ -109,6 +119,13 @@ async def main():
 
 
 if __name__ == "__main__":
+    global should_record, start_time, dirname
+    should_record = "record" in sys.argv
+    start_time: datetime = None
+    dirname: str = None
+    if should_record:
+        start_time = datetime.now()
+        dirname = "records/main_{}".format(start_time.strftime("%Y%m%d%H%M%S"))
     DestinationWrapper.destination = EXPEDITION_DESTINATION_SELECT_5
     SortieDestinationWrapper.mapinfo_no = 2
     asyncio.run(main())

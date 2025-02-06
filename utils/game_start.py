@@ -8,11 +8,17 @@ from utils.random_sleep import random_sleep
 from utils.wait_until_find import wait_until_find
 
 
-async def access(playwright: Playwright, handle_response: Callable[[Response], None]):
+async def access(
+    playwright: Playwright,
+    handle_response: Callable[[Response], None],
+    record_video_dir: str = None,
+):
     browser = await playwright.chromium.launch(headless=False)
     context = await browser.new_context(
         storage_state="login_account.json",
-        viewport={"width": 1300, "height": 900})
+        record_video_dir=record_video_dir,
+        viewport={"width": 1300, "height": 900},
+    )
     p_page = await context.new_page()
     p_page.on("response", handle_response)
     await p_page.goto("http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854")
@@ -24,8 +30,14 @@ async def access(playwright: Playwright, handle_response: Callable[[Response], N
     return canvas
 
 
-async def game_start(playwright: Playwright, handle_response: Callable[[Response], None]):
-    Context.canvas = await access(playwright, handle_response)
+async def game_start(
+    playwright: Playwright,
+    handle_response: Callable[[Response], None],
+    record_video_dir: str = None,
+):
+    Context.canvas = await access(
+        playwright, handle_response, record_video_dir=record_video_dir
+    )
     await wait_until_find(GAME_START_SCAN_TARGET)
     await random_sleep()
     await click(GAME_START_SCAN_TARGET.RECTANGLE)
