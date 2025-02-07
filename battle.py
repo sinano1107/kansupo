@@ -37,6 +37,13 @@ class SortieDestinationWrapper:
     mapinfo_no = 1
 
 
+def calc_protected_damage(damage: int):
+    """庇った場合はdamage+0.1になるのでそれを処理する"""
+    damage, mod = divmod(damage, 1)
+    is_protected = mod != 0
+    return damage, is_protected
+
+
 def calc_remaining_hp():
     """
     味方・敵 艦隊の残りHPを計算する
@@ -44,6 +51,22 @@ def calc_remaining_hp():
     response = ResponseMemory.battle
     total_friend_damage_list = [0] * 6
     total_enemy_damage_list = [0] * 6
+
+    if response.stage_flag[2]:
+        print("<航空攻撃>")
+        for i, damage in enumerate(response.kouku.stage3.fdam):
+            damage, is_protected = calc_protected_damage(damage)
+            print(
+                f"味方の{i+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}"
+            )
+            total_friend_damage_list[i] += damage
+
+        for i, damage in enumerate(response.kouku.stage3.edam):
+            damage, is_protected = calc_protected_damage(damage)
+            print(
+                f"敵の{i+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}"
+            )
+            total_enemy_damage_list[i] += damage
 
     if response.opening_taisen_flag:
         # TODO 先制対潜のダメージを計算する
@@ -69,9 +92,7 @@ def calc_remaining_hp():
 
         for i, at_eflag in enumerate(hougeki_data.at_eflag_list):
             for index, damage in zip(hougeki_data.df_list[i], hougeki_data.damage_list[i]):
-                # 庇った場合はdamage+0.1になるのでそれを処理する
-                damage, mod = divmod(damage, 1)
-                is_protected = mod != 0
+                damage, is_protected = calc_protected_damage(damage)
 
                 # ダメージを記録
                 if at_eflag == 1:
@@ -86,16 +107,12 @@ def calc_remaining_hp():
         raigeki = response.raigeki
 
         for i, damage in enumerate(raigeki.fdam[:6]):
-            # 庇った場合はdamage+0.1になるのでそれを処理する
-            damage, mod = divmod(damage, 1)
-            is_protected = mod != 0
+            damage, is_protected = calc_protected_damage(damage)
             print(f"味方の{i+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
             total_friend_damage_list[i] += damage
 
         for i, damage in enumerate(raigeki.edam[:6]):
-            # 庇った場合はdamage+0.1になるのでそれを処理する
-            damage, mod = divmod(damage, 1)
-            is_protected = mod != 0
+            damage, is_protected = calc_protected_damage(damage)
             print(f"敵の{i+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
             total_enemy_damage_list[i] += damage
     else:
@@ -208,9 +225,7 @@ async def sortie():
                     for i, at_e_flag in enumerate(hougeki.at_eflag_list):
                         if at_e_flag == 1:
                             for index, damage in zip(hougeki.df_list[i], hougeki.damage_list[i]):
-                                # 庇った場合はdamage+0.1になるのでそれを処理する
-                                is_protected = damage % 1 == 0.1
-                                damage //= 1
+                                damage, is_protected = calc_protected_damage(damage)
 
                                 print(f"味方の{index+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
                                 total_friend_damage_list[index] += damage
