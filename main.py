@@ -11,11 +11,13 @@ from expedition import (
     DestinationWrapper,
 )
 from ndock import calc_repair_wait_seconds, handle_should_repair
+from scan.targets.targets import SETTING_SCAN_TARGET
 from targets.targets import EXPEDITION_DESTINATION_SELECT_5
 from utils.context import Context, ResponseMemory
 from utils.game_start import game_start
 from utils.page import Page
 from utils.wait_reload import wait_reload
+from utils.wait_until_find import wait_until_find
 
 
 async def handle_response(res: Response):
@@ -25,13 +27,16 @@ async def handle_response(res: Response):
         return
 
     if res.url.endswith("/api_port/port"):
-        # レコードを支持されていたら記録する
+        # レコードを指示されていたら記録する
         if should_record:
             with open(
                 f"{dirname}/port_{int((datetime.now() - start_time).total_seconds())}.txt",
                 "w",
             ) as f:
                 f.write(await res.text())
+
+        # 母港画面に訪れるより先に、レスポンスのみが返ることもあるので、母港画面に訪れたことを確認する
+        await wait_until_find(SETTING_SCAN_TARGET)
 
         if Context.task is not None:
             print("タスクが存在します")
