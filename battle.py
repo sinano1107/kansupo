@@ -310,7 +310,9 @@ async def handle_sortie():
 
         # 疲労感が含まれている場合も離脱
         if ship.cond < 49:
-            print("第一艦隊に疲労艦が含まれています")
+            print(
+                f"第一艦隊に疲労艦が含まれています {ships_map.get(ship.ship_id).name}"
+            )
             return False
 
         # 補給が必要か判定
