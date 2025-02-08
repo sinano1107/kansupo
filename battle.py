@@ -131,6 +131,14 @@ def calc_remaining_hp():
     return (friend_remaining_hp_list, enemy_remaining_hp_list)
 
 
+async def wait_until_going_next_cell():
+    print("次のセルへ向かうレスポンスが帰ってくるまで待機します")
+    while Context.page != Page.GOING_TO_NEXT_CELL:
+        await asyncio.sleep(1)
+    Context.page = None
+    print("次のセルへ向かうレスポンスが帰ってきました")
+
+
 async def sortie():
     maparea_id = SortieDestinationWrapper.maparea_id
     mapinfo_no = SortieDestinationWrapper.mapinfo_no
@@ -175,6 +183,7 @@ async def sortie():
 
         # イベントなし、資源獲得、渦潮、気のせいだった、の時はスキップする
         if event_id == 1 or event_id == 2 or event_id == 3 or event_id == 6:
+            await wait_until_going_next_cell()
             continue
 
         # 戦闘、ボス戦以外の場合は対応していない
@@ -279,10 +288,7 @@ async def sortie():
 
         await click(ATTACK)
 
-        print("次のセルへ向かうレスポンスが帰ってくるまで待機します")
-        while Context.page != Page.GOING_TO_NEXT_CELL:
-            await asyncio.sleep(1)
-        print("次のセルへ向かうレスポンスが帰ってきました")
+        await wait_until_going_next_cell()
 
 
 async def handle_sortie():
@@ -304,7 +310,9 @@ async def handle_sortie():
 
         # 疲労感が含まれている場合も離脱
         if ship.cond < 49:
-            print("第一艦隊に疲労艦が含まれています")
+            print(
+                f"第一艦隊に疲労艦が含まれています {ships_map.get(ship.ship_id).name}"
+            )
             return False
 
         # 補給が必要か判定
@@ -353,8 +361,6 @@ async def handle_response(res: Response):
     elif url.endswith("/api_req_map/next"):
         print("次のセルへ向かうレスポンスを受け取りました")
         await Context.set_page_and_response(Page.GOING_TO_NEXT_CELL, res)
-    else:
-        print("ハンドラの設定されていないレスポンスを受け取りました")
 
 
 async def wait_command():
@@ -377,7 +383,7 @@ async def main():
 
         await game_start(p, handle_response)
 
-        input("Enterで出撃します")
+        input("Enterで出撃します🚨編成変更後に補給や疲労の確認を行いません")
 
         while True:
             await Context.do_task()
