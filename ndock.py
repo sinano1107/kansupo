@@ -1,14 +1,77 @@
 import asyncio
 from time import time
 from playwright.async_api import async_playwright, Response
+from math import ceil
 
-from utils.context import Context, ResponseMemory
-from utils.game_start import game_start
+from utils.context import Context, PortResponse, ResponseMemory
 from utils.click import click
+from utils.game_start import game_start
 from utils.random_sleep import random_sleep
 from utils.page import Page
-from targets.targets import HOME_PORT, REPAIR, REPAIR_START, REPAIR_START_CONFIRM, repair_dock_button, repair_ship
+from targets.targets import (
+    HOME_PORT,
+    REPAIR,
+    REPAIR_START,
+    REPAIR_START_CONFIRM,
+    repair_dock_button,
+    repair_page_from_the_left,
+    repair_ship,
+)
 from utils.wait_reload import wait_reload
+from ships.ships import ships_map
+
+
+class PageSelector:
+    @staticmethod
+    def calc_process(current_page: int, page_number: int):
+        """対象ページまでに選択すべきボタン(左から何番目か)を算出する
+        Args:
+            page_number (int): ページ番号(1スタート)
+        """
+        answer: list[int] = []
+
+        max_page = ceil(len(ResponseMemory.port.ship_list) / 10)
+        while current_page != page_number:
+            # まずは選択中のページが左から何番目かを調べる
+            from_the_left = None  # 1スタート
+            if current_page < 3:
+                from_the_left = current_page
+            elif current_page > max_page - 2:
+                from_the_left = 5 - (max_page - current_page)
+            else:
+                from_the_left = 3
+
+            if current_page < page_number:
+                # 右に進む場合
+                if page_number - current_page <= 5 - from_the_left:
+                    # 直接選択できる場合
+                    answer.append(page_number - current_page + from_the_left)
+                    current_page = page_number
+                else:
+                    # 直接選択できない場合
+                    answer.append(5)
+                    current_page += 5 - from_the_left
+            else:
+                # 左に戻る場合
+                if current_page - page_number <= from_the_left - 1:
+                    # 直接選択できる場合
+                    answer.append(from_the_left - (current_page - page_number))
+                    current_page = page_number
+                else:
+                    # 直接選択できない場合
+                    answer.append(1)
+                    current_page -= from_the_left - 1
+
+        return answer
+
+    @staticmethod
+    async def select_page(current_page: int, page_number: int):
+        """艦リストのページを選択する
+        Args:
+            page_number (int): ページ番号(1スタート)
+        """
+        for from_the_left in PageSelector.calc_process(current_page, page_number):
+            yield repair_page_from_the_left(from_the_left)
 
 
 async def start_repair(
@@ -38,7 +101,23 @@ async def start_repair(
         await click(repair_dock_button(dock_index))
         await random_sleep()
 
-        await click(repair_ship(ship_index))
+        current_page = 1
+
+        if ship_index < (current_page - 1) * 10 or current_page * 10 <= ship_index:
+            # 現在のページ範囲外の艦はページを選択してからクリック
+            new_page = ceil((ship_index + 1) / 10)
+            select_page_coroutine = PageSelector.select_page(current_page, new_page)
+            current_page = new_page
+            while True:
+                try:
+                    target = await anext(select_page_coroutine)
+                    await click(target)
+                    await random_sleep()
+                except StopAsyncIteration:
+                    print("ページ選択が終了しました")
+                    break
+
+        await click(repair_ship(ship_index % 10))
         await random_sleep()
 
         await click(REPAIR_START)
@@ -48,6 +127,65 @@ async def start_repair(
         await random_sleep()
 
     await click(HOME_PORT)
+
+
+def calc_start_repair_data(
+    can_repair_count: int,
+    is_ndock_empty_list: list[bool],
+    damaged_ships: list[PortResponse.Ship],
+    repairing_ships_id_list: list[int],
+):
+    """入渠を開始するために必要な情報を計算する"""
+    # 使用する入渠ドックのリストを作成する
+    index = -1
+    should_use_dock_index_list: list[int] = []
+    for _ in range(can_repair_count):
+        # 前回に発見したTrueの次の要素から検索する
+        index = is_ndock_empty_list.index(True, index + 1)
+        should_use_dock_index_list.append(index)
+
+    # 入渠させる艦のインデックスのリストを作成する
+    # 現在HPの割合が低い艦が優先される（仮定）
+    # 同じ割合の場合、sort_idが小さい方が優先される
+    sorted_damaged_ship = sorted(
+        damaged_ships,
+        key=lambda ship: (
+            ship.nowhp / ship.maxhp,
+            ships_map.get(ship.ship_id).sort_id,
+        ),
+    )
+    damaged_ships_sorted_by_time = sorted(
+        damaged_ships,
+        key=lambda ship: (
+            ship.ndock_time,
+            -ships_map.get(ship.ship_id).sort_id,  # ここはマイナスがついていていい
+        ),
+    )
+    should_repair_ship_index_list: list[int] = []
+    # 損傷艦の表示順が正しいか確認するためのデバッグコード
+    print([(ship.id, ships_map.get(ship.ship_id).name) for ship in sorted_damaged_ship])
+    print(
+        [
+            (ship.id, ships_map.get(ship.ship_id).name)
+            for ship in damaged_ships_sorted_by_time
+        ]
+    )
+    # 入渠させる艦のインデックスを取得
+    i = 0
+    while len(should_repair_ship_index_list) < can_repair_count:
+        # 入渠可能数分のデータになるまでループを回す
+        candidate = damaged_ships_sorted_by_time[i]
+        if candidate.id not in repairing_ships_id_list:
+            # すでに入渠中でない場合は追加
+            for j in range(len(damaged_ships)):
+                # 損害率順の中で何番目かを取得
+                if sorted_damaged_ship[j].id == candidate.id:
+                    # 入渠艦リストに追加
+                    should_repair_ship_index_list.append(j)
+                    break
+        i += 1
+
+    return should_use_dock_index_list, should_repair_ship_index_list
 
 
 async def handle_should_repair():
@@ -69,34 +207,14 @@ async def handle_should_repair():
     # 入渠可能な数が0より大きい場合、入渠を開始する
     can_repair_count = min(ndock_empty_count, len(should_repair_ships))
     if can_repair_count > 0:
-
-        # 使用する入渠ドックのリストを作成する
-        index = -1
-        should_use_dock_index_list: list[int] = []
-        for _ in range(can_repair_count):
-            # 前回に発見したTrueの次の要素から検索する
-            index = is_ndock_empty_list.index(True, index + 1)
-            should_use_dock_index_list.append(index)
-
-        # 入渠させる艦のインデックスのリストを作成する
-        # 現在HPの割合が低い艦が優先される（仮定）
-        # 同じ割合の場合、どちらが優先されるのかは要検証。
-        sorted_damaged_ship = sorted(
-            damaged_ships, key=lambda ship: ship.nowhp / ship.maxhp
+        should_use_dock_index_list, should_repair_ship_index_list = (
+            calc_start_repair_data(
+                can_repair_count,
+                is_ndock_empty_list,
+                damaged_ships,
+                repairing_ships_id_list,
+            )
         )
-        index = 0
-        should_repair_ship_index_list: list[int] = []
-        # 損傷艦の表示順が正しいか確認するためのデバッグコード
-        # print([ships_map.get(ship.ship_id).name for ship in sorted_damaged_ship])
-        for _ in range(can_repair_count):
-            # 前回に発見した該当艦の次の要素から検索する
-            for i in range(index, len(damaged_ships)):
-                if sorted_damaged_ship[i].id not in repairing_ships_id_list:
-                    should_repair_ship_index_list.append(i)
-                    index = i + 1
-                    break
-
-        print("入渠を実施します")
 
         # 入渠させる処理を代入
         Context.set_task(

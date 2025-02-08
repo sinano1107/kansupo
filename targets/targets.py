@@ -28,6 +28,17 @@ def repair_ship(n: int):
     y_start = 46 * n + 190
     return Rectangle(x_range=(600, 1100), y_range=(y_start, y_start + 39), name=f"入渠の上から{n + 1}番目の艦")
 
+
+# 入渠のページ選択 左から何番目か(1~5)
+def repair_page_from_the_left(n: int):
+    x_start = 737 + 53 * (n - 1)
+    return Rectangle(
+        x_range=(x_start, x_start + 15),
+        y_range=(673, 688),
+        name=f"入渠のページ選択 左から{n}番目",
+    )
+
+
 # 入渠開始
 REPAIR_START = Rectangle(x_range=(925, 1125), y_range=(630, 680), name="入渠開始ボタン")
 
