@@ -13,3 +13,4 @@ class Ship:
     name: str
     fuel_max: int
     bull_max: int
+    sort_id: int
