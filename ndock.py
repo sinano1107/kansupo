@@ -163,13 +163,13 @@ def calc_start_repair_data(
     )
     should_repair_ship_index_list: list[int] = []
     # 損傷艦の表示順が正しいか確認するためのデバッグコード
-    print([(ship.id, ships_map.get(ship.ship_id).name) for ship in sorted_damaged_ship])
-    print(
-        [
-            (ship.id, ships_map.get(ship.ship_id).name)
-            for ship in damaged_ships_sorted_by_time
-        ]
-    )
+    # print([(ship.id, ships_map.get(ship.ship_id).name) for ship in sorted_damaged_ship])
+    # print(
+    #     [
+    #         (ship.id, ships_map.get(ship.ship_id).name)
+    #         for ship in damaged_ships_sorted_by_time
+    #     ]
+    # )
     # 入渠させる艦のインデックスを取得
     i = 0
     while len(should_repair_ship_index_list) < can_repair_count:
