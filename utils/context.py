@@ -11,6 +11,11 @@ from playwright.async_api import Locator, Response
 @dataclass_json
 @dataclass(frozen=True)
 class PortResponse:
+
+    @dataclass(frozen=True)
+    class Basic:
+        max_chara: int = field(metadata=config(field_name="api_max_chara"))
+
     @dataclass(frozen=True)
     class Ship:
         id: int = field(metadata=config(field_name="api_id"))
@@ -21,6 +26,7 @@ class PortResponse:
         nowhp: int = field(metadata=config(field_name="api_nowhp"))
         ndock_time: int = field(metadata=config(field_name="api_ndock_time"))
         cond: int = field(metadata=config(field_name="api_cond"))
+        lv: int = field(metadata=config(field_name="api_lv"))
 
         @property
         def damage(self):
@@ -38,6 +44,7 @@ class PortResponse:
         ship_id: int = field(metadata=config(field_name="api_ship_id"))
         complete_time: int = field(metadata=config(field_name="api_complete_time"))
 
+    basic: Basic = field(metadata=config(field_name="api_basic"))
     # 所持艦船リスト
     ship_list: list[Ship] = field(metadata=config(field_name="api_ship"))
     deck_list: list[Deck] = field(metadata=config(field_name="api_deck_port"))
