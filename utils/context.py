@@ -2,8 +2,9 @@ import asyncio
 from dataclasses import dataclass, field
 import json
 from typing import Coroutine, Optional
-
 from dataclasses_json import config, dataclass_json
+
+from ships.ships import ships_map
 from utils.page import Page
 from playwright.async_api import Locator, Response
 
@@ -27,10 +28,26 @@ class PortResponse:
         ndock_time: int = field(metadata=config(field_name="api_ndock_time"))
         cond: int = field(metadata=config(field_name="api_cond"))
         lv: int = field(metadata=config(field_name="api_lv"))
+        locked: bool = field(metadata=config(field_name="api_locked"))
+
+        @property
+        def mst(self):
+            res = ships_map.get(self.ship_id)
+            if res is None:
+                raise ValueError(f"艦ID{self.ship_id}に対忋する艦が存在しません")
+            return res
 
         @property
         def damage(self):
             return self.maxhp - self.nowhp
+
+        @property
+        def name(self):
+            return self.mst.name
+
+        @property
+        def sort_id(self):
+            return self.mst.sort_id
 
     @dataclass(frozen=True)
     class Deck:

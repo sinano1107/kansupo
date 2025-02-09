@@ -18,6 +18,12 @@ SUPPLY = Rectangle(x_range=(75, 155), y_range=(295, 375), name="補給ボタン(
 # 入渠ボタン(母港)
 REPAIR = Rectangle(x_range=(145, 225), y_range=(505, 585), name="入渠ボタン(母港)")
 
+# 工廠ボタン(母港)
+ARSENAL = Rectangle(x_range=(367, 447), y_range=(505, 585), name="工廠ボタン(母港)")
+
+# 解体ボタン
+DEMOLITION = Rectangle(x_range=(260, 440), y_range=(360, 420), name="解体ボタン")
+
 # 入渠ドックのn番目(0~3)
 def repair_dock_button(n: int):
     y_start = 122.5 * n + 225
@@ -105,3 +111,29 @@ NO_MIDNIGHT_BATTLE = Rectangle(x_range=(380, 480), y_range=(325, 405), name="「
 
 # 「夜戦突入」ボタン
 DO_MIDNIGHT_BATTLE = Rectangle(x_range=(705, 805), y_range=(325, 405), name="「夜戦突入」ボタン")
+
+
+# 解体のページ選択 左から何番目か(1~5)
+def demolition_page_from_the_left(n: int):
+    x_start = 432 + 53 * (n - 1)
+    return Rectangle(
+        x_range=(x_start, x_start + 15),
+        y_range=(672, 687),
+        name=f"解体のページ選択 左から{n}番目",
+    )
+
+
+# 解体の上からn番目の艦(0~9)
+def demolition_ship(n: int):
+    y_start = 46 * n + 188
+    return Rectangle(
+        x_range=(300, 800),
+        y_range=(y_start, y_start + 39),
+        name=f"解体の上から{n + 1}番目の艦",
+    )
+
+
+# 解体ボタン
+DEMOLITION_BUTTON = Rectangle(
+    x_range=(970, 1120), y_range=(635, 675), name="解体ボタン"
+)
