@@ -3,6 +3,7 @@ from time import time
 from playwright.async_api import async_playwright, Response
 from math import ceil
 
+from utils.calc_page_select_process import calc_page_select_process
 from utils.context import Context, PortResponse, ResponseMemory
 from utils.click import click
 from utils.game_start import game_start
@@ -19,59 +20,6 @@ from targets.targets import (
 )
 from utils.wait_reload import wait_reload
 from ships.ships import ships_map
-
-
-class PageSelector:
-    @staticmethod
-    def calc_process(current_page: int, page_number: int):
-        """対象ページまでに選択すべきボタン(左から何番目か)を算出する
-        Args:
-            page_number (int): ページ番号(1スタート)
-        """
-        answer: list[int] = []
-
-        max_page = ceil(len(ResponseMemory.port.ship_list) / 10)
-        while current_page != page_number:
-            # まずは選択中のページが左から何番目かを調べる
-            from_the_left = None  # 1スタート
-            if current_page < 3:
-                from_the_left = current_page
-            elif current_page > max_page - 2:
-                from_the_left = 5 - (max_page - current_page)
-            else:
-                from_the_left = 3
-
-            if current_page < page_number:
-                # 右に進む場合
-                if page_number - current_page <= 5 - from_the_left:
-                    # 直接選択できる場合
-                    answer.append(page_number - current_page + from_the_left)
-                    current_page = page_number
-                else:
-                    # 直接選択できない場合
-                    answer.append(5)
-                    current_page += 5 - from_the_left
-            else:
-                # 左に戻る場合
-                if current_page - page_number <= from_the_left - 1:
-                    # 直接選択できる場合
-                    answer.append(from_the_left - (current_page - page_number))
-                    current_page = page_number
-                else:
-                    # 直接選択できない場合
-                    answer.append(1)
-                    current_page -= from_the_left - 1
-
-        return answer
-
-    @staticmethod
-    async def select_page(current_page: int, page_number: int):
-        """艦リストのページを選択する
-        Args:
-            page_number (int): ページ番号(1スタート)
-        """
-        for from_the_left in PageSelector.calc_process(current_page, page_number):
-            yield repair_page_from_the_left(from_the_left)
 
 
 async def start_repair(
@@ -102,20 +50,18 @@ async def start_repair(
         await random_sleep()
 
         current_page = 1
+        max_page = ceil(len(ResponseMemory.port.ship_list) / 10)
 
         if ship_index < (current_page - 1) * 10 or current_page * 10 <= ship_index:
             # 現在のページ範囲外の艦はページを選択してからクリック
             new_page = ceil((ship_index + 1) / 10)
-            select_page_coroutine = PageSelector.select_page(current_page, new_page)
+            for from_the_left in calc_page_select_process(
+                current_page=current_page, page_number=new_page, max_page=max_page
+            ):
+                target = repair_page_from_the_left(from_the_left)
+                await click(target)
+                await random_sleep()
             current_page = new_page
-            while True:
-                try:
-                    target = await anext(select_page_coroutine)
-                    await click(target)
-                    await random_sleep()
-                except StopAsyncIteration:
-                    print("ページ選択が終了しました")
-                    break
 
         await click(repair_ship(ship_index % 10))
         await random_sleep()
