@@ -9,7 +9,14 @@ from scan.targets.targets import (
     SETTING_SCAN_TARGET,
     SORTIE_SELECT_PAGE_SCAN_TARGET,
 )
-from targets.targets import EXPEDITION_DESTINATION_SELECT_DECIDE, EXPEDITION_DESTINATION_SELECT_TOP, EXPEDITION_SELECT, EXPEDITION_START, HOME_PORT, REPAIR, SORTIE
+from targets.targets import (
+    EXPEDITION_DESTINATION_SELECT_DECIDE,
+    EXPEDITION_DESTINATION_SELECT_TOP,
+    EXPEDITION_SELECT,
+    EXPEDITION_START,
+    HOME_PORT,
+    SORTIE,
+)
 from utils.click import click
 from utils.context import Context, ResponseMemory
 from utils.game_start import game_start

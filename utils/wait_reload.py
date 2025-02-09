@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 
 from scan.targets.targets import HOME_PORT_SCAN_TARGET
-from targets.targets import HOME_PORT, REPAIR
+from targets.targets import ARSENAL, HOME_PORT
 from utils.click import click
 from utils.context import Context
 from utils.random_sleep import random_sleep
@@ -18,7 +18,7 @@ def wait_reload(reload_period: int):
 
         async def _():
             await random_sleep()
-            await click(REPAIR)
+            await click(ARSENAL)
             await random_sleep()
             await wait_until_find(HOME_PORT_SCAN_TARGET)
             await random_sleep()
