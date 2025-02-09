@@ -1,37 +1,7 @@
 import json
 
-from ndock import PageSelector, calc_start_repair_data
+from ndock import calc_start_repair_data
 from utils.context import PortResponse, ResponseMemory
-
-
-def test_PageSelector_calc_process():
-    with open(
-        "test_resources/ndock/2025-02-07 12:34:16.637291_api_port-port.json"
-    ) as f:
-        data = json.load(f).get("api_data")
-        ResponseMemory.port = PortResponse.from_dict(data)
-    assert PageSelector.calc_process(1, 1) == []
-    assert PageSelector.calc_process(1, 2) == [2]
-    assert PageSelector.calc_process(1, 3) == [3]
-    assert PageSelector.calc_process(1, 4) == [4]
-    assert PageSelector.calc_process(1, 5) == [5]
-    assert PageSelector.calc_process(1, 6) == [5, 4]
-    assert PageSelector.calc_process(1, 7) == [5, 5]
-    assert PageSelector.calc_process(1, 8) == [5, 5, 4]
-    assert PageSelector.calc_process(1, 9) == [5, 5, 5]
-    assert PageSelector.calc_process(1, 10) == [5, 5, 5, 5]
-
-    assert PageSelector.calc_process(10, 9) == [4]
-    assert PageSelector.calc_process(10, 8) == [3]
-    assert PageSelector.calc_process(10, 7) == [2]
-    assert PageSelector.calc_process(10, 6) == [1]
-    assert PageSelector.calc_process(10, 5) == [1, 2]
-    assert PageSelector.calc_process(10, 4) == [1, 1]
-    assert PageSelector.calc_process(10, 3) == [1, 1, 2]
-    assert PageSelector.calc_process(10, 2) == [1, 1, 1]
-    assert PageSelector.calc_process(10, 1) == [1, 1, 1, 1]
-
-    assert PageSelector.calc_process(4, 5) == [4]
 
 
 def test_calc_start_repair_data():

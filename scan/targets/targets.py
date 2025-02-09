@@ -1,6 +1,7 @@
 from utils.rectangle import Rectangle
 from ..scan_target import ScanTarget
 from targets.targets import (
+    DEMOLITION_BUTTON,
     GAME_START,
     HOME_PORT,
     SETTING,
@@ -53,4 +54,9 @@ COMPASS = ScanTarget(
 # 夜戦選択画面
 MIDNIGHT_BATTLE_SELECT_PAGE = ScanTarget(
     Rectangle(x_range=(60, 190), y_range=(45, 80)), ROOT + "midnight_battle_select_page.png", name="夜戦選択画面"
+)
+
+# 解体ボタン
+DEMOLITION_BUTTON_SCAN_TARGET = ScanTarget(
+    DEMOLITION_BUTTON, ROOT + "demolition_button.png", name="解体ボタン"
 )

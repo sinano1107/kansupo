@@ -4,6 +4,7 @@ import sys
 from playwright.async_api import async_playwright, Response
 
 from battle import SortieDestinationWrapper, handle_sortie
+from clean import calc_resource_ships, handle_clean
 from expedition import (
     calc_expeditions_wait_seconds,
     handle_expedition_idling,
@@ -54,6 +55,11 @@ async def handle_response(res: Response):
 
         # 入渠が必要かつ可能なら入渠を実施
         if await handle_should_repair():
+            return
+
+        # 保持艦数が上限に近い場合は解体
+        resource_ships = calc_resource_ships()
+        if await handle_clean(resource_ships=resource_ships):
             return
 
         # 出撃が可能なら出撃
@@ -132,5 +138,5 @@ if __name__ == "__main__":
         start_time = datetime.now()
         dirname = "records/main_{}".format(start_time.strftime("%Y%m%d%H%M%S"))
     DestinationWrapper.destination = EXPEDITION_DESTINATION_SELECT_5
-    SortieDestinationWrapper.mapinfo_no = 2
+    SortieDestinationWrapper.mapinfo_no = 3
     asyncio.run(main())
