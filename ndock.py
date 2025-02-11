@@ -1,8 +1,9 @@
 import asyncio
 from time import time
 from playwright.async_api import async_playwright, Response
-from math import ceil
+from math import ceil, floor
 
+from clean import calc_resource_ships
 from utils.calc_page_select_process import calc_page_select_process
 from utils.context import Context, PortResponse, ResponseMemory
 from utils.click import click
@@ -43,18 +44,19 @@ async def start_repair(
     print("入渠ページに遷移したので、入渠させます")
     await random_sleep()
 
+    current_page = 1
+    max_page = ceil(len(ResponseMemory.port.ship_list) / 10)
+
     for dock_index, ship_index in zip(
         should_use_dock_index_list, should_repair_ship_index_list
     ):
         await click(repair_dock_button(dock_index))
         await random_sleep()
 
-        current_page = 1
-        max_page = ceil(len(ResponseMemory.port.ship_list) / 10)
-
         if ship_index < (current_page - 1) * 10 or current_page * 10 <= ship_index:
             # 現在のページ範囲外の艦はページを選択してからクリック
-            new_page = ceil((ship_index + 1) / 10)
+            new_page = floor(ship_index / 10) + 1
+            print(f"ページを選択します current_page={current_page} new_page={new_page}")
             for from_the_left in calc_page_select_process(
                 current_page=current_page, page_number=new_page, max_page=max_page
             ):
@@ -79,7 +81,7 @@ def calc_start_repair_data(
     can_repair_count: int,
     is_ndock_empty_list: list[bool],
     damaged_ships: list[PortResponse.Ship],
-    repairing_ships_id_list: list[int],
+    should_repair_ships: list[PortResponse.Ship],
 ):
     """入渠を開始するために必要な情報を計算する"""
     # 使用する入渠ドックのリストを作成する
@@ -121,12 +123,15 @@ def calc_start_repair_data(
     while len(should_repair_ship_index_list) < can_repair_count:
         # 入渠可能数分のデータになるまでループを回す
         candidate = damaged_ships_sorted_by_time[i]
-        if candidate.id not in repairing_ships_id_list:
-            # すでに入渠中でない場合は追加
+        if candidate in should_repair_ships:
+            # 入渠させるべきとされていた場合は追加
             for j in range(len(damaged_ships)):
                 # 損害率順の中で何番目かを取得
                 if sorted_damaged_ship[j].id == candidate.id:
                     # 入渠艦リストに追加
+                    print(
+                        f"{candidate.name}(lv={candidate.lv})を入渠させます index={j}"
+                    )
                     should_repair_ship_index_list.append(j)
                     break
         i += 1
@@ -134,7 +139,7 @@ def calc_start_repair_data(
     return should_use_dock_index_list, should_repair_ship_index_list
 
 
-async def handle_should_repair():
+async def handle_should_repair(resource_ships: list[PortResponse.Ship]):
     """入渠させるべき艦と空きドックがある場合、入渠を開始する"""
     response = ResponseMemory.port
     # 入渠ドックの空き状況を取得
@@ -145,7 +150,9 @@ async def handle_should_repair():
     damaged_ships = [ship for ship in response.ship_list if ship.damage > 0]
     # 入渠させるべき艦のリストを取得
     should_repair_ships = [
-        ship for ship in damaged_ships if ship.id not in repairing_ships_id_list
+        ship
+        for ship in damaged_ships
+        if ship.id not in repairing_ships_id_list and ship not in resource_ships
     ]
     # 空きドックの数を取得
     ndock_empty_count = is_ndock_empty_list.count(True)
@@ -158,7 +165,7 @@ async def handle_should_repair():
                 can_repair_count,
                 is_ndock_empty_list,
                 damaged_ships,
-                repairing_ships_id_list,
+                should_repair_ships=should_repair_ships,
             )
         )
 
@@ -197,7 +204,9 @@ async def handle_response(res: Response):
 
         await Context.set_page_and_response(Page.PORT, res)
 
-        if await handle_should_repair():
+        resource_ships = calc_resource_ships()
+
+        if await handle_should_repair(resource_ships=resource_ships):
             return
 
         if ResponseMemory.port.has_repair_ship:
