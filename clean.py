@@ -49,7 +49,7 @@ def calc_resource_ships(ship_needs_map: dict[Ship, int] = ship_needs_map):
             max_count = math.inf
 
         if len(ships) > max_count:
-            sorted_ships = sorted(ships, key=lambda ship: -ship.lv)
+            sorted_ships = sorted(ships, key=lambda ship: (-ship.lv, -ship.exp[0]))
             resource_ships.extend(sorted_ships[max_count:])
 
     for resource_ship in resource_ships[:]:  # resource_shipsのコピーを作成してループ
@@ -72,7 +72,8 @@ def calc_demolition_process(
 
     # shipsを並び替える
     sorted_ship_list = sorted(
-        ResponseMemory.port.ship_list, key=lambda ship: (ship.lv, -ship.sort_id)
+        ResponseMemory.port.ship_list,
+        key=lambda ship: (ship.lv, -ship.sort_id, ship.exp[0]),
     )
 
     max_page = math.ceil(len(sorted_ship_list) / 10)
@@ -107,7 +108,10 @@ async def handle_clean(resource_ships: list[PortResponse.Ship]):
     ships_count = len(response.ship_list)
     max_ships_count = response.basic.max_chara
 
-    if max_ships_count - 5 < ships_count:
+    margin_count = 10
+    if max_ships_count - margin_count <= ships_count:
+        if len(resource_ships) < margin_count:
+            raise ValueError("解体したとしても最大保有艦船数いっぱいに近いです")
         print("艦船数が最大艦船数に近いため解体を行います")
 
         async def _():
