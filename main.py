@@ -36,14 +36,20 @@ async def handle_response(res: Response):
             ) as f:
                 f.write(await res.text())
 
+        # レスポンスを反映 編成後の編成成功確認に用いる
+        await ResponseMemory.set_response(Page.PORT, res)
+
         # 母港画面に訪れるより先に、レスポンスのみが返ることもあるので、母港画面に訪れたことを確認する
         await wait_until_find(SETTING_SCAN_TARGET)
+
+        # ボタン群が出現するまで待機
+        await asyncio.sleep(1)
 
         if Context.task is not None:
             print("タスクが存在します")
             return
 
-        await Context.set_page_and_response(Page.PORT, res)
+        Context.set_page(Page.PORT)
 
         # 遠征帰還済みなら、回収して出発
         if await handle_expedition_returned():
@@ -54,16 +60,16 @@ async def handle_response(res: Response):
             return
 
         # 入渠が必要かつ可能なら入渠を実施
-        if await handle_should_repair():
+        resource_ships = calc_resource_ships()
+        if await handle_should_repair(resource_ships=resource_ships):
             return
 
         # 保持艦数が上限に近い場合は解体
-        resource_ships = calc_resource_ships()
         if await handle_clean(resource_ships=resource_ships):
             return
 
         # 出撃が可能なら出撃
-        if await handle_sortie():
+        if await handle_sortie(resource_ships=resource_ships):
             return
 
         # cond値は3分毎に回復するので、最低3分毎にリロードを行う

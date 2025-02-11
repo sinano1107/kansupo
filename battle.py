@@ -1,17 +1,28 @@
 import asyncio
+import math
 from playwright.async_api import async_playwright, Response
 
+from clean import calc_resource_ships
 from scan.targets.targets import (
     FORMATION_SELECT_SCAN_TARGET,
+    HOME_PORT_SCAN_TARGET,
     SEA_AREA_SELECT_SCAN_TARGET,
+    SETTING_SCAN_TARGET,
     SORTIE_SELECT_PAGE_SCAN_TARGET,
     SORTIE_NEXT_SCAN_TARGET,
     GO_BACK_SCAN_TARGET,
+    WITHDRAWAL_CIRCLE_SCAN_TARGET,
     WITHDRAWAL_SCAN_TARGET,
     MIDNIGHT_BATTLE_SELECT_PAGE,
 )
+from ships.ndock_rate import ndock_rate
+from ships.ship import SType
 from targets.targets import (
+    HOME_PORT,
+    ORGANIZATION,
+    RELEASE_ESCORT,
     SEA_AREA_SELECT_DECIDE,
+    SHIP_CHANGE,
     SORTIE,
     SORTIE_SELECT,
     SORTIE_START,
@@ -19,17 +30,21 @@ from targets.targets import (
     ATTACK,
     DO_MIDNIGHT_BATTLE,
     NO_MIDNIGHT_BATTLE,
+    change_ship_button,
+    organization_page_from_the_left,
+    organization_ship,
     sea_area,
 )
 from scan.targets.targets import COMPASS
 from ships.ships import ships_map
+from utils.calc_page_select_process import calc_page_select_process
 from utils.game_start import game_start
 from utils.wait_until_find import wait_until_find
 from utils.click import click
 from utils.random_sleep import random_sleep
 from utils.page import Page
 from utils.supply import supply
-from utils.context import BattleResponse, Context, ResponseMemory
+from utils.context import BattleResponse, Context, PortResponse, ResponseMemory
 
 
 class SortieDestinationWrapper:
@@ -139,7 +154,7 @@ async def wait_until_going_next_cell():
     print("次のセルへ向かうレスポンスが帰ってきました")
 
 
-async def sortie():
+async def sortie(fleet_size: int):
     maparea_id = SortieDestinationWrapper.maparea_id
     mapinfo_no = SortieDestinationWrapper.mapinfo_no
 
@@ -195,9 +210,10 @@ async def sortie():
             exit()
 
         # FIXME 4隻未満のとき、陣形選択ができないので、この処理をスキップする
-        await wait_until_find(FORMATION_SELECT_SCAN_TARGET)
-        await random_sleep()
-        await click(SELECT_SINGLE_LINE)
+        if fleet_size >= 4:
+            await wait_until_find(FORMATION_SELECT_SCAN_TARGET)
+            await random_sleep()
+            await click(SELECT_SINGLE_LINE)
 
         print("戦闘開始まで待機します")
         while Context.page != Page.BATTLE:
@@ -277,6 +293,13 @@ async def sortie():
             print("行き止まりなので終了")
             return
 
+        if huge_damage_list[0]:
+            print("旗艦が大破したので撤退します")
+            await wait_until_find(WITHDRAWAL_CIRCLE_SCAN_TARGET)
+            await random_sleep()
+            await click()
+            return
+
         await wait_until_find(WITHDRAWAL_SCAN_TARGET)
 
         await random_sleep()
@@ -291,42 +314,171 @@ async def sortie():
         await wait_until_going_next_cell()
 
 
-async def handle_sortie():
+def calc_fleet(resource_ships: list[PortResponse.Ship]) -> list[int]:
+    """編成可能な艦隊を導出する"""
+
+    # 1-3をターゲットとした編成を行う
+    # 駆逐4自由2の編成を行う
+
     response = ResponseMemory.port
-    global should_supply
-    should_supply = False
-    for ship_id in response.deck_list[0].ship_id_list:
-        # 飛ばし飛ばしで編成することはできないので、空のスロットがあり次第ループを離脱
-        if ship_id == -1:
+    other_fleet_ship_ids = response.other_fleet_ship_ids
+
+    # まずは駆逐艦を揃える
+    destroyer_candidate: list[PortResponse.Ship] = []
+    free_backup_destroyer: list[PortResponse.Ship] = []
+    for ship in response.ship_list:
+        print(ship.name)
+        # 資源艦、他の艦隊に所属している、損傷を受けている、疲労がある、同じ艦を編成済みの場合は編成しない
+        if (
+            ship in resource_ships
+            or ship.id in other_fleet_ship_ids
+            or ship.damage > 0
+            or ship.cond < 49
+            or ship.ship_id
+            in [s.id for s in destroyer_candidate + free_backup_destroyer]
+        ):
+            continue
+
+        # 駆逐艦ではない場合も編成しない
+        if ship.stype != SType.Destroyer:
+            continue
+
+        # バックアップは駆逐艦が４隻揃ってから追加する
+        if len(destroyer_candidate) < 4:
+            destroyer_candidate.append(ship)
+        else:
+            free_backup_destroyer.append(ship)
+
+        # 駆逐艦が4隻、自由編成バックアップ駆逐が2隻になったらループを抜ける
+        if len(destroyer_candidate) == 4 and len(free_backup_destroyer) == 2:
             break
 
-        # 編成中の艦の情報を取得
-        ship = response.get_ship(ship_id)
+    if len(destroyer_candidate) != 4:
+        # 編成不可能なのでNoneを返す
+        print(destroyer_candidate, free_backup_destroyer)
+        return None
 
-        # 損傷感が含まれている場合は離脱
-        if ship.damage > 0:
-            print("第一艦隊に損傷艦が含まれています")
-            return False
+    # 次に自由編成艦を揃える
+    free_candidate: list[PortResponse.Ship] = []
+    for ship in response.ship_list:
+        # 駆逐艦はいらないので抜ける
+        if ship.stype == SType.Destroyer:
+            continue
 
-        # 疲労感が含まれている場合も離脱
-        if ship.cond < 49:
-            print(
-                f"第一艦隊に疲労艦が含まれています {ships_map.get(ship.ship_id).name}"
-            )
-            return False
-
-        # 補給が必要か判定
-        mst_ship_data = ships_map.get(ship.ship_id)
-        if not should_supply and (
-            ship.fuel < mst_ship_data.fuel_max or ship.bull < mst_ship_data.bull_max
+        # 資源艦、他の艦隊に所属している、損傷を受けている、疲労がある、同じ艦を編成済みの場合は編成しない
+        if (
+            ship in resource_ships
+            or ship.id in other_fleet_ship_ids
+            or ship.damage > 0
+            or ship.cond < 49
+            or ship.ship_id in [free_candidate]
         ):
-            should_supply = True
+            continue
+
+        # 工作艦は戦闘に向かないので編成しない
+        if ship.stype == SType.RepairShip:
+            continue
+
+        free_candidate.append(ship)
+
+        # 自由編成艦が2隻になったらループを抜ける
+        if len(free_candidate) == 2:
+            break
+
+    if (len(free_candidate) + len(free_backup_destroyer)) < 2:
+        # 編成不可能なのでNoneを返す
+        return None
+
+    # 自由編成が2隻になっていない場合はバックアップ駆逐艦を追加する
+    if len(free_candidate) < 2:
+        free_candidate = (free_candidate + free_backup_destroyer)[:2]
+
+    fleet = destroyer_candidate + free_candidate
+    high_cost_ship = sorted(
+        fleet, key=lambda ship: (ndock_rate(ship), ship.lv), reverse=True
+    )[0]
+    fleet = [high_cost_ship] + [ship for ship in fleet if ship != high_cost_ship]
+    print(f"編成します {[f.name for f in fleet]}")
+    return [f.id for f in fleet]
+
+
+async def handle_organize(fleet: list[int]):
+    sorted_ship_list = sorted(
+        ResponseMemory.port.ship_list, key=lambda ship: (-ship.lv, ship.sort_id)
+    )
+    max_page = math.ceil(len(sorted_ship_list) / 10)
+    deck = ResponseMemory.port.deck_list[0]
+
+    # 各艦のインデックスを取得
+    index_list = [-1] * len(fleet)
+    for i, id in enumerate(fleet):
+        for j, ship in enumerate(sorted_ship_list):
+            if ship.id == id:
+                index_list[i] = j
+                break
+
+    await random_sleep()
+    await click(ORGANIZATION)
+    await wait_until_find(HOME_PORT_SCAN_TARGET)
+    await random_sleep()
+    await click(RELEASE_ESCORT)
+    await random_sleep()
+
+    current_page = 1
+    for i, id in enumerate(fleet):
+        # 旗艦が等しかった場合はスキップ
+        if i == 0 and deck.ship_id_list[0] == id:
+            continue
+
+        await click(change_ship_button(i))
+        await random_sleep()
+
+        index = index_list[i]
+        if index < (current_page - 1) * 10 or current_page * 10 <= index:
+            new_page = math.floor(index / 10) + 1
+            for from_the_left in calc_page_select_process(
+                current_page=current_page,
+                page_number=new_page,
+                max_page=max_page,
+            ):
+                target = organization_page_from_the_left(from_the_left)
+                await click(target)
+                await random_sleep()
+            current_page = new_page
+
+        await click(organization_ship(index % 10))
+        await random_sleep()
+        await click(SHIP_CHANGE)
+        await random_sleep()
+
+    await click(HOME_PORT)
+    while Context.page != Page.PORT:
+        await asyncio.sleep(1)
+    await wait_until_find(SETTING_SCAN_TARGET)
+    if ResponseMemory.port.deck_list[0].ship_id_list != fleet:
+        print("編成に失敗しました")
+        exit()
+
+
+async def handle_sortie(resource_ships: list[PortResponse.Ship]):
+    response = ResponseMemory.port
+    fleet = calc_fleet(resource_ships)
+
+    # 編成不可能な場合は離脱
+    if fleet is None:
+        return False
+
+    # 編成を実施
+    await handle_organize(fleet)
+
+    # 補給が必要かどうか
+    should_supply = any([response.get_ship(id).need_supply for id in fleet])
 
     async def _():
         if should_supply:
             await random_sleep()
             await supply()
-        await sortie()
+        await sortie(fleet_size=len(fleet))
 
     Context.set_task(_)
     return True
@@ -342,7 +494,9 @@ async def handle_response(res: Response):
         print("母港に到達しました")
         await Context.set_page_and_response(Page.PORT, res)
 
-        if await handle_sortie():
+        resource_ships = calc_resource_ships()
+
+        if await handle_sortie(resource_ships=resource_ships):
             return
 
         print("損傷感か疲労艦が含まれています。編成を行なってください。")

@@ -21,6 +21,51 @@ REPAIR = Rectangle(x_range=(145, 225), y_range=(505, 585), name="入渠ボタン
 # 工廠ボタン(母港)
 ARSENAL = Rectangle(x_range=(367, 447), y_range=(505, 585), name="工廠ボタン(母港)")
 
+# 編成ボタン(母港)
+ORGANIZATION = Rectangle(
+    x_range=(257, 337), y_range=(162, 242), name="編成ボタン(母港)"
+)
+
+# 随伴艦一括解除ボタン
+RELEASE_ESCORT = Rectangle(
+    x_range=(583, 673), y_range=(170, 185), name="随伴艦一括解除ボタン"
+)
+
+
+# 艦変更ボタン(0~5)
+def change_ship_button(n: int):
+    x_start = 1090 if n % 2 else 575
+    y_start = n // 2 * 168 + 310
+    return Rectangle(
+        x_range=(x_start, x_start + 75),
+        y_range=(y_start, y_start + 25),
+        name=f"艦変更ボタン{n+1}",
+    )
+
+
+# 編成のページ選択 左から何番目か(1~5)
+def organization_page_from_the_left(n: int):
+    x_start = 753 + 53 * (n - 1)
+    return Rectangle(
+        x_range=(x_start, x_start + 15),
+        y_range=(672, 687),
+        name=f"編成のページ選択 左から{n}番目",
+    )
+
+
+# 編成の上からn番目の艦(0~9)
+def organization_ship(n: int):
+    y_start = 43 * n + 226
+    return Rectangle(
+        x_range=(600, 1100),
+        y_range=(y_start, y_start + 33),
+        name=f"編成の上から{n + 1}番目の艦",
+    )
+
+
+# 艦変更ボタン
+SHIP_CHANGE = Rectangle(x_range=(975, 1100), y_range=(650, 690), name="変更ボタン")
+
 # 解体ボタン
 DEMOLITION = Rectangle(x_range=(260, 440), y_range=(360, 420), name="解体ボタン")
 

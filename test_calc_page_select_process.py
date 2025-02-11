@@ -43,3 +43,7 @@ def test_calc_page_select_process():
     assert calc_page_select_process(5, 3, 5) == [3]
     assert calc_page_select_process(5, 2, 5) == [2]
     assert calc_page_select_process(5, 1, 5) == [1]
+
+    assert calc_page_select_process(3, 1, 8) == [1]
+    assert calc_page_select_process(1, 3, 8) == [3]
+    assert calc_page_select_process(2, 1, 8) == [1]

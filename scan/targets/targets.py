@@ -44,6 +44,12 @@ SORTIE_NEXT_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1110, 1150), y_range=(62
 
 GO_BACK_SCAN_TARGET = ScanTarget(Rectangle(x_range=(1120, 1160), y_range=(637, 682)), ROOT + "go_back.png", name="帰(戦闘結果画面)")
 
+WITHDRAWAL_CIRCLE_SCAN_TARGET = ScanTarget(
+    Rectangle(x_range=(1110, 1140), y_range=(600, 635)),
+    ROOT + "withdrawal_circle.png",
+    name="「退」ボタン(旗艦大破時)",
+)
+
 WITHDRAWAL_SCAN_TARGET = ScanTarget(WITHDRAWAL, ROOT + "withdrawal.png")
 
 # 羅針盤
