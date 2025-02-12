@@ -117,6 +117,7 @@ def test_calc_fleet():
         ],
         "api_deck_port": [
             {
+                "api_id": 1,
                 "api_ship": [1, 2, 3, 4, 5, 6],
                 "api_mission": [0, 0, 0, 0],
             }
@@ -176,6 +177,7 @@ def test_calc_fleet():
     belong_to_another_fleet_data.get("api_deck_port")[0].get("api_ship").remove(1)
     belong_to_another_fleet_data.get("api_deck_port").append(
         {
+            "api_id": 2,
             "api_ship": [1],
             "api_mission": [0, 0, 0, 0],
         }
