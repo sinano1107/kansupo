@@ -1,10 +1,10 @@
 import asyncio
 from dataclasses import dataclass, field
+from enum import Enum
 import json
 from typing import Coroutine, Optional
 from dataclasses_json import config, dataclass_json
 
-from ships.ships import ships_map
 from utils.page import Page
 from playwright.async_api import Locator, Response
 
@@ -28,10 +28,13 @@ class PortResponse:
         ndock_time: int = field(metadata=config(field_name="api_ndock_time"))
         cond: int = field(metadata=config(field_name="api_cond"))
         lv: int = field(metadata=config(field_name="api_lv"))
+        exp: list[int] = field(metadata=config(field_name="api_exp"))
         locked: bool = field(metadata=config(field_name="api_locked"))
 
         @property
         def mst(self):
+            from ships.ships import ships_map
+
             res = ships_map.get(self.ship_id)
             if res is None:
                 raise ValueError(f"艦ID{self.ship_id}に対忋する艦が存在しません")
@@ -49,10 +52,32 @@ class PortResponse:
         def sort_id(self):
             return self.mst.sort_id
 
+        @property
+        def need_supply(self):
+            return self.fuel < self.mst.fuel_max or self.bull < self.mst.bull_max
+
+        @property
+        def stype(self):
+            return self.mst.stype
+
     @dataclass(frozen=True)
     class Deck:
         ship_id_list: list[int] = field(metadata=config(field_name="api_ship"))
         mission: list[int] = field(metadata=config(field_name="api_mission"))
+
+        class MissionState(Enum):
+            # 未出撃
+            NotDispatched = 0
+            # 遠征中
+            OnAnExpedition = 1
+            # 遠征帰投
+            ExpeditionReturned = 2
+            # 強制帰投中
+            ForcedReturn = 3
+
+        @property
+        def mission_state(self) -> MissionState:
+            return self.mission[0]
 
     @dataclass(frozen=True)
     class NDock:
@@ -91,8 +116,17 @@ class PortResponse:
                 return True
         return False
 
-    def get_ship(self, ship_id: int):
-        return next(ship for ship in self.ship_list if ship.id == ship_id)
+    @property
+    def other_fleet_ship_ids(self):
+        """第一艦隊以外に所属している艦のIDリスト"""
+        res: list[int] = []
+        for deck in self.deck_list[1:]:
+            res.extend(deck.ship_id_list)
+        return res
+
+    def get_ship(self, id: int):
+        """idから艦を取得する"""
+        return next(ship for ship in self.ship_list if ship.id == id)
 
 
 @dataclass_json

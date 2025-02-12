@@ -4,11 +4,7 @@ from pathlib import Path
 import sys
 from playwright.async_api import async_playwright, Response
 sys.path.append(str(Path(__file__).resolve().parent.parent))
-from scan.targets.targets import GAME_START_SCAN_TARGET
-from utils.click import click
 from utils.game_start import game_start
-from utils.random_sleep import random_sleep
-from utils.wait_until_find import wait_until_find
 
 
 should_finish = False
@@ -41,7 +37,8 @@ async def handle_response(res: Response):
         fuel_max = ship.get("api_fuel_max")
         bull_max = ship.get("api_bull_max")
         sort_id = ship.get("api_sort_id")
-        ships_str += f"{replaced_name} = Ship({id=}, {name=}, {fuel_max=}, {bull_max=}, {sort_id=})\n"
+        stype = ship.get("api_stype")
+        ships_str += f"{replaced_name} = Ship({id=}, {name=}, {fuel_max=}, {bull_max=}, {sort_id=}, {stype=})\n"
         dict_str += f"\t{id}: {replaced_name},\n"
 
     with open("ships/ships.py", "w") as f:
