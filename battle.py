@@ -470,6 +470,9 @@ async def handle_organize(fleet: list[int]):
 
 
 async def handle_sortie(resource_ships: list[PortResponse.Ship]):
+    if Context.skip_sortie:
+        return False
+
     response = ResponseMemory.port
     fleet = calc_fleet(resource_ships)
 

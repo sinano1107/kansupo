@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+import math
 import sys
 from playwright.async_api import async_playwright, Response
 
@@ -71,7 +72,7 @@ async def handle_response(res: Response):
             return
 
         # cond値は3分毎に回復するので、最低3分毎にリロードを行う
-        reload_period = 3 * 60
+        reload_period = 3 * 60 if not Context.skip_sortie else math.inf
 
         # 最短の遠征が終了するまでの待機秒数を取得
         expeditions_wait_seconds = calc_expeditions_wait_seconds()
@@ -107,11 +108,21 @@ async def wait_command():
         command = await asyncio.to_thread(input)
         command = command.split(" ")
         if command[0] == "pause":
-            Context.pause()
+            if len(command) == 1:
+                Context.pause()
+                return
+            elif len(command) == 2 and command[1] == "sortie":
+                Context.skip_sortie = True
+                print("出撃を停止します")
+                return
         elif command[0] == "resume":
-            await Context.resume()
-        else:
-            print(f"不明なコマンドです {command=}")
+            if len(command) == 1:
+                await Context.resume()
+            elif len(command) == 2 and command[1] == "sortie":
+                Context.skip_sortie = False
+                print("出撃を再開します")
+            return
+        print(f"不明なコマンドです {command=}")
 
 
 async def main():

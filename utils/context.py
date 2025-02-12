@@ -237,6 +237,7 @@ class Context:
     task: Coroutine = None
     pause_flag = False
     task_doing_flag = False
+    skip_sortie: bool = True
 
     @classmethod
     async def do_task(cls):
