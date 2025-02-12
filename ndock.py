@@ -1,4 +1,5 @@
 import asyncio
+import math
 from time import time
 from playwright.async_api import async_playwright, Response
 from math import ceil, floor
@@ -186,7 +187,7 @@ def calc_repair_wait_seconds():
     ]
     using_docks_complete_time_list = [dock.complete_time for dock in using_dock_list]
     if len(using_docks_complete_time_list) == 0:
-        return 0
+        return math.inf
     min_complete_time = min(using_docks_complete_time_list)
 
     wait_seconds = min_complete_time / 1000 - time()

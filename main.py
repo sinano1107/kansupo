@@ -9,11 +9,9 @@ from expedition import (
     calc_expeditions_wait_seconds,
     handle_expedition_idling,
     handle_expedition_returned,
-    DestinationWrapper,
 )
 from ndock import calc_repair_wait_seconds, handle_should_repair
 from scan.targets.targets import SETTING_SCAN_TARGET
-from targets.targets import EXPEDITION_DESTINATION_SELECT_5
 from utils.context import Context, ResponseMemory
 from utils.game_start import game_start
 from utils.page import Page
@@ -36,7 +34,7 @@ async def handle_response(res: Response):
             ) as f:
                 f.write(await res.text())
 
-        # レスポンスを反映 編成後の編成成功確認に用いる
+        # レスポンスを反映 編成後の編成成功確認/遠征が帰還しているかの確認に用いる
         await ResponseMemory.set_response(Page.PORT, res)
 
         # 母港画面に訪れるより先に、レスポンスのみが返ることもあるので、母港画面に訪れたことを確認する
@@ -79,11 +77,7 @@ async def handle_response(res: Response):
         expeditions_wait_seconds = calc_expeditions_wait_seconds()
 
         # 最短の入渠が終了するまでの待機秒数と、入渠可能となるドックのインデックスを取得
-        repairs_wait_seconds = (
-            calc_repair_wait_seconds()
-            if ResponseMemory.port.has_repair_ship
-            else reload_period
-        )
+        repairs_wait_seconds = calc_repair_wait_seconds()
 
         # cond値の回復、遠征の帰還、入渠完了のいずれかが終了するまで待機しリロード
         wait_reload(min(reload_period, expeditions_wait_seconds, repairs_wait_seconds))
@@ -143,6 +137,5 @@ if __name__ == "__main__":
     if should_record:
         start_time = datetime.now()
         dirname = "records/main_{}".format(start_time.strftime("%Y%m%d%H%M%S"))
-    DestinationWrapper.destination = EXPEDITION_DESTINATION_SELECT_5
     SortieDestinationWrapper.mapinfo_no = 3
     asyncio.run(main())

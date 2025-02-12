@@ -1,6 +1,6 @@
 import asyncio
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import IntEnum
 import json
 from typing import Coroutine, Optional
 from dataclasses_json import config, dataclass_json
@@ -62,10 +62,11 @@ class PortResponse:
 
     @dataclass(frozen=True)
     class Deck:
+        id: int = field(metadata=config(field_name="api_id"))
         ship_id_list: list[int] = field(metadata=config(field_name="api_ship"))
         mission: list[int] = field(metadata=config(field_name="api_mission"))
 
-        class MissionState(Enum):
+        class MissionState(IntEnum):
             # 未出撃
             NotDispatched = 0
             # 遠征中

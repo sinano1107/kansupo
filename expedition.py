@@ -1,4 +1,5 @@
 import asyncio
+import math
 from time import time
 from playwright.async_api import async_playwright, Response
 
@@ -11,29 +12,33 @@ from scan.targets.targets import (
 )
 from targets.targets import (
     EXPEDITION_DESTINATION_SELECT_DECIDE,
-    EXPEDITION_DESTINATION_SELECT_TOP,
     EXPEDITION_SELECT,
     EXPEDITION_START,
     HOME_PORT,
     SORTIE,
+    expedition_destination_from_the_top,
+    expedition_fleet,
 )
 from utils.click import click
-from utils.context import Context, ResponseMemory
+from utils.context import Context, PortResponse, ResponseMemory
 from utils.game_start import game_start
 from utils.page import Page
 from utils.random_sleep import random_sleep
+from utils.rectangle import Rectangle
 from utils.supply import supply
 from utils.wait_reload import wait_reload
 from utils.wait_until_find import wait_until_find
 
 
-class DestinationWrapper:
-    destination = EXPEDITION_DESTINATION_SELECT_TOP
+FLEET_NUM_TO_DESTINATION_MAP = {
+    2: expedition_destination_from_the_top(5),
+    3: expedition_destination_from_the_top(2),
+}
 
 
-async def go_expedition():
+async def go_expedition(fleet_num: int, destination: Rectangle):
     print("補給を実施します")
-    await supply(2)
+    await supply(fleet_num=fleet_num)
     await random_sleep()
 
     print("遠征に送り出します")
@@ -43,18 +48,25 @@ async def go_expedition():
     await click(EXPEDITION_SELECT)
     await wait_until_find(EXPEDITION_DESTINATION_SELECT_SCAN_TARGET)
     await random_sleep()
-    await click(DestinationWrapper.destination)
+    await click(destination)
     await random_sleep()
     await click(EXPEDITION_DESTINATION_SELECT_DECIDE)
+
+    # 第三艦隊、第四艦隊の時は、遠征艦隊を選択
+    if fleet_num > 2:
+        await random_sleep()
+        await click(expedition_fleet(fleet_num))
+
     await random_sleep()
     await click(EXPEDITION_START)
     await asyncio.sleep(2)
     await wait_until_find(HOME_PORT_SCAN_TARGET)
     await random_sleep()
     await click(HOME_PORT)
+    await wait_until_find(SETTING_SCAN_TARGET)
 
 
-async def collect_and_go_expedition():
+async def collect_returned_expedition():
     await click()
     await wait_until_find(EXPEDITION_NEXT_SCAN_TARGET)
     await random_sleep()
@@ -63,40 +75,83 @@ async def collect_and_go_expedition():
     await click()
     await wait_until_find(SETTING_SCAN_TARGET)
     await random_sleep()
-    await go_expedition()
 
 
 async def handle_expedition_returned():
     """遠征帰還済みなら、回収して再出発"""
-    if ResponseMemory.port.deck_list[1].mission[0] == 2:
-        print("第2艦隊が遠征から帰投しています")
+    deck_list = ResponseMemory.port.deck_list[1:]
 
-        async def _():
+    is_deck_returned_list = [
+        deck.mission_state == PortResponse.Deck.MissionState.ExpeditionReturned
+        for deck in deck_list
+    ]
+
+    # どの艦隊も遠征から帰投していない場合はブレイク
+    if not any(is_deck_returned_list):
+        return False
+
+    async def _():
+        for deck, is_deck_returned in zip(deck_list, is_deck_returned_list):
+            if not is_deck_returned:
+                continue
+            print(f"第{deck.id}艦隊が遠征から帰投しているので回収します")
             await random_sleep()
-            await collect_and_go_expedition()
+            await collect_returned_expedition()
 
-        Context.set_task(_)
-        return True
-    return False
+        for deck, is_deck_returned in zip(deck_list, is_deck_returned_list):
+            if not is_deck_returned:
+                continue
+            print(f"第{deck.id}艦隊を遠征に送り出します")
+            await random_sleep()
+            await go_expedition(
+                fleet_num=deck.id,
+                destination=FLEET_NUM_TO_DESTINATION_MAP.get(deck.id),
+            )
+            await random_sleep()
+
+    Context.set_task(_)
+    return True
 
 
 async def handle_expedition_idling():
     """遠征待機中なら出発させる"""
-    if ResponseMemory.port.deck_list[1].mission[0] == 0:
-        print("第2艦隊が待機中のため、遠征に送り出します")
+    deck_list = ResponseMemory.port.deck_list[1:]
 
-        async def _():
+    is_deck_idling_list = [
+        deck.mission_state == PortResponse.Deck.MissionState.NotDispatched
+        for deck in deck_list
+    ]
+
+    if not any(is_deck_idling_list):
+        return False
+
+    async def _():
+        for deck, is_deck_idling in zip(deck_list, is_deck_idling_list):
+            if not is_deck_idling:
+                continue
+            print(f"第{deck.id}艦隊が待機中のため、遠征に送り出します。")
             await random_sleep()
-            await go_expedition()
+            await go_expedition(
+                fleet_num=deck.id,
+                destination=FLEET_NUM_TO_DESTINATION_MAP.get(deck.id),
+            )
+            await random_sleep()
 
-        Context.set_task(_)
-        return True
-    return False
+    Context.set_task(_)
+    return True
 
 
 def calc_expeditions_wait_seconds():
     """遠征帰還時刻までの待機時間を計算"""
-    return ResponseMemory.port.deck_list[1].mission[2] / 1000 - time() - 60
+    def calc(micro_seconds: int):
+        return micro_seconds / 1000 - time() - 60
+
+    calc_results: list[float] = []
+    for deck in ResponseMemory.port.deck_list[1:]:
+        if deck.mission_state == PortResponse.Deck.MissionState.OnAnExpedition:
+            calc_results.append(calc(deck.mission[2]))
+
+    return min(calc_results) if len(calc_results) > 0 else math.inf
 
 
 async def handle_response(res: Response):

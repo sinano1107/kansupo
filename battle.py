@@ -3,6 +3,7 @@ import math
 from playwright.async_api import async_playwright, Response
 
 from clean import calc_resource_ships
+from expedition import handle_expedition_returned
 from scan.targets.targets import (
     FORMATION_SELECT_SCAN_TARGET,
     HOME_PORT_SCAN_TARGET,
@@ -478,6 +479,9 @@ async def handle_sortie(resource_ships: list[PortResponse.Ship]):
 
     # 編成を実施
     await handle_organize(fleet)
+
+    # 遠征が帰ってきてる可能性があるので、チェック
+    await handle_expedition_returned()
 
     # 補給が必要かどうか
     should_supply = any([response.get_ship(id).need_supply for id in fleet])

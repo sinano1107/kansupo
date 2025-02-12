@@ -105,14 +105,30 @@ SORTIE_SELECT = Rectangle(x_range=(219, 464), y_range=(264, 466), name="出撃�
 # 遠征選択ボタン（出撃選択画面）
 EXPEDITION_SELECT = Rectangle(x_range=(893, 1138), y_range=(264, 466), name="遠征選択ボタン（出撃選択画面）")
 
-# 遠征先選択一番上
-EXPEDITION_DESTINATION_SELECT_TOP = Rectangle(x_range=(300, 700), y_range=(245, 275), name="遠征先選択一番上")
 
-# 遠征先選択5番目
-EXPEDITION_DESTINATION_SELECT_5 = Rectangle(x_range=(300, 700), y_range=(425, 455), name="遠征先選択5番目")
+# 遠征先のページ選択 上から何番目か(1~8)
+def expedition_destination_from_the_top(n: int):
+    y_start = 45 * n + 200
+    return Rectangle(
+        x_range=(300, 700),
+        y_range=(y_start, y_start + 30),
+        name=f"遠征先の選択 上から{n}番目",
+    )
+
 
 # 遠征先選択決定
 EXPEDITION_DESTINATION_SELECT_DECIDE = Rectangle(x_range=(915, 1145), y_range=(645, 695), name="征先選択決定ボタン")
+
+
+# 遠征艦隊選択(1~4)
+def expedition_fleet(n: int):
+    x_start = 490 + 45 * n
+    return Rectangle(
+        x_range=(x_start, x_start + 15),
+        y_range=(165, 180),
+        name=f"遠征艦隊{n}",
+    )
+
 
 # 遠征開始ボタン
 EXPEDITION_START = Rectangle(x_range=(800, 1040), y_range=(645, 690), name="遠征開始ボタン")
