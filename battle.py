@@ -327,7 +327,6 @@ def calc_fleet(resource_ships: list[PortResponse.Ship]) -> list[int]:
     destroyer_candidate: list[PortResponse.Ship] = []
     free_backup_destroyer: list[PortResponse.Ship] = []
     for ship in response.ship_list:
-        print(ship.name)
         # 資源艦、他の艦隊に所属している、損傷を受けている、疲労がある、同じ艦を編成済みの場合は編成しない
         if (
             ship in resource_ships
@@ -335,7 +334,7 @@ def calc_fleet(resource_ships: list[PortResponse.Ship]) -> list[int]:
             or ship.damage > 0
             or ship.cond < 49
             or ship.ship_id
-            in [s.id for s in destroyer_candidate + free_backup_destroyer]
+            in [s.ship_id for s in destroyer_candidate + free_backup_destroyer]
         ):
             continue
 
@@ -355,11 +354,11 @@ def calc_fleet(resource_ships: list[PortResponse.Ship]) -> list[int]:
 
     if len(destroyer_candidate) != 4:
         # 編成不可能なのでNoneを返す
-        print(destroyer_candidate, free_backup_destroyer)
         return None
 
     # 次に自由編成艦を揃える
     free_candidate: list[PortResponse.Ship] = []
+    free_backup_escorts: list[PortResponse.Ship] = []
     for ship in response.ship_list:
         # 駆逐艦はいらないので抜ける
         if ship.stype == SType.Destroyer:
@@ -371,7 +370,7 @@ def calc_fleet(resource_ships: list[PortResponse.Ship]) -> list[int]:
             or ship.id in other_fleet_ship_ids
             or ship.damage > 0
             or ship.cond < 49
-            or ship.ship_id in [free_candidate]
+            or ship.ship_id in [s.ship_id for s in free_candidate + free_backup_escorts]
         ):
             continue
 
@@ -379,21 +378,30 @@ def calc_fleet(resource_ships: list[PortResponse.Ship]) -> list[int]:
         if ship.stype == SType.RepairShip:
             continue
 
-        free_candidate.append(ship)
+        # 海防艦は修理が早く終わるので最後に編成する
+        if ship.stype == SType.Escort:
+            free_backup_escorts.append(ship)
+        else:
+            free_candidate.append(ship)
 
-        # 自由編成艦が2隻になったらループを抜ける
-        if len(free_candidate) == 2:
+        # 自由編成艦が2隻、バックアップ海防艦が2隻になったらループを抜ける
+        if len(free_candidate) == 2 and len(free_backup_escorts) == 2:
             break
 
-    if (len(free_candidate) + len(free_backup_destroyer)) < 2:
+    if (
+        len(free_candidate) + len(free_backup_destroyer) + len(free_backup_escorts)
+    ) < 2:
         # 編成不可能なのでNoneを返す
         return None
 
-    # 自由編成が2隻になっていない場合はバックアップ駆逐艦を追加する
+    # 自由編成が2隻になっていない場合はバックアップ駆逐艦、バックアップ海防艦を追加する
     if len(free_candidate) < 2:
-        free_candidate = (free_candidate + free_backup_destroyer)[:2]
+        free_candidate = (free_candidate + free_backup_destroyer + free_backup_escorts)[
+            :2
+        ]
 
     fleet = destroyer_candidate + free_candidate
+    # 入渠コストの高い艦を旗艦にする
     high_cost_ship = sorted(
         fleet, key=lambda ship: (ndock_rate(ship), ship.lv), reverse=True
     )[0]
