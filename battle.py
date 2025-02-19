@@ -73,14 +73,14 @@ def calc_remaining_hp():
         for i, damage in enumerate(response.kouku.stage3.fdam):
             damage, is_protected = calc_protected_damage(damage)
             print(
-                f"味方の{i+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}"
+                f"味方の{i+1}隻目に{damage}ダメージ{'(旗艦を庇った)' if is_protected else ''}"
             )
             total_friend_damage_list[i] += damage
 
         for i, damage in enumerate(response.kouku.stage3.edam):
             damage, is_protected = calc_protected_damage(damage)
             print(
-                f"敵の{i+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}"
+                f"敵の{i+1}隻目に{damage}ダメージ{'(旗艦を庇った)' if is_protected else ''}"
             )
             total_enemy_damage_list[i] += damage
 
@@ -112,10 +112,14 @@ def calc_remaining_hp():
 
                 # ダメージを記録
                 if at_eflag == 1:
-                    print(f"味方の{index + 1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
+                    print(
+                        f"味方の{index + 1}隻目に{damage}ダメージ{'(旗艦を庇った)' if is_protected else ''}"
+                    )
                     total_friend_damage_list[index] += damage
                 else:
-                    print(f"敵の{index + 1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
+                    print(
+                        f"敵の{index + 1}隻目に{damage}ダメージ{'(旗艦を庇った)' if is_protected else ''}"
+                    )
                     total_enemy_damage_list[index] += damage
 
     # 雷撃戦の情報を取得する
@@ -124,12 +128,16 @@ def calc_remaining_hp():
 
         for i, damage in enumerate(raigeki.fdam[:6]):
             damage, is_protected = calc_protected_damage(damage)
-            print(f"味方の{i+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
+            print(
+                f"味方の{i+1}隻目に{damage}ダメージ{'(旗艦を庇った)' if is_protected else ''}"
+            )
             total_friend_damage_list[i] += damage
 
         for i, damage in enumerate(raigeki.edam[:6]):
             damage, is_protected = calc_protected_damage(damage)
-            print(f"敵の{i+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
+            print(
+                f"敵の{i+1}隻目に{damage}ダメージ{'(旗艦を庇った)' if is_protected else ''}"
+            )
             total_enemy_damage_list[i] += damage
     else:
         print("<雷撃戦は発生しませんでした>")
@@ -253,7 +261,9 @@ async def sortie(fleet_size: int):
                             for index, damage in zip(hougeki.df_list[i], hougeki.damage_list[i]):
                                 damage, is_protected = calc_protected_damage(damage)
 
-                                print(f"味方の{index+1}隻目に{damage}ダメージ{"(旗艦を庇った)" if is_protected else ""}")
+                                print(
+                                    f"味方の{index+1}隻目に{damage}ダメージ{'(旗艦を庇った)' if is_protected else ''}"
+                                )
                                 total_friend_damage_list[index] += damage
 
                     friend_remaining_hp_list = [now - damage for now, damage in zip(midnight_battle_response.friend_now_hp_list, total_friend_damage_list)]
