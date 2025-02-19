@@ -41,6 +41,21 @@ async def go_expedition(fleet_num: int, destination: Rectangle):
     await supply(fleet_num=fleet_num)
     await random_sleep()
 
+    # ここで一旦母校に戻るので、他の艦隊の遠征が帰ってきていないか調べる
+    # NOTE handle_expedition_returnedと共通部分が多いので、関数にまとめた方がいいかも
+    deck_list = ResponseMemory.port.deck_list[1:]
+    is_deck_returned_list = [
+        deck.mission_state == PortResponse.Deck.MissionState.ExpeditionReturned
+        for deck in deck_list
+    ]
+    if any(is_deck_returned_list):
+        for deck, is_deck_returned in zip(deck_list, is_deck_returned_list):
+            if not is_deck_returned:
+                continue
+            print(f"第{deck.id}艦隊が遠征から帰投しているので回収します")
+            await collect_returned_expedition()
+            await random_sleep()
+
     print("遠征に送り出します")
     await click(SORTIE)
     await wait_until_find(SORTIE_SELECT_PAGE_SCAN_TARGET)
@@ -63,7 +78,6 @@ async def go_expedition(fleet_num: int, destination: Rectangle):
     await wait_until_find(HOME_PORT_SCAN_TARGET)
     await random_sleep()
     await click(HOME_PORT)
-    await wait_until_find(SETTING_SCAN_TARGET)
 
 
 async def collect_returned_expedition():
@@ -102,12 +116,14 @@ async def handle_expedition_returned():
             if not is_deck_returned:
                 continue
             print(f"第{deck.id}艦隊を遠征に送り出します")
+            # go_expeditionの後に設定ボタンを待つ形にすると、タスクが残留し次のタスクを追加できないため、このように前で待つ形としている
+            await random_sleep()
+            await wait_until_find(SETTING_SCAN_TARGET)
             await random_sleep()
             await go_expedition(
                 fleet_num=deck.id,
                 destination=FLEET_NUM_TO_DESTINATION_MAP.get(deck.id),
             )
-            await random_sleep()
 
     Context.set_task(_)
     return True
