@@ -15,15 +15,12 @@ async def login(page: Page):
     await page.goto("http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854")
     await page.get_by_role("textbox").nth(0).fill(email)
     await page.get_by_role("textbox").nth(1).fill(password)
-    await page.get_by_role("checkbox", name="ログインしたままにする").check()
     await page.get_by_role("button", name="ログイン").click()
 
     # ログイン後のページが表示されるまで待つ
     await ResponseReceiver.expect(
         "http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854"
     )()
-    # ログイン情報を保存する
-    await page.context.storage_state(path="login_account.json")
 
 
 if __name__ == "__main__":
