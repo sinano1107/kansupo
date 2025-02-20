@@ -4,6 +4,7 @@ from adress import Address
 from response_receiver import ResponseReceiver
 from .. import PageController, ScanTarget, Rectangle
 from ..mission_result import MissionResultPageController
+from ..sortie import SortiePageController
 from .response import PortResponse, MissionState
 
 
@@ -15,8 +16,15 @@ class PortPageController(PageController):
         image_path="page_controllers/port/setting_button.png",
     )
 
+    SORTIE_BUTTON = Rectangle(x_start=240, y_start=350, width=100, height=80)
+
     def __init__(self, response: dict):
         self.RESPONSE: PortResponse = PortResponse.from_dict(response)
+
+    async def sortie(self):
+        """出撃画面へ遷移する"""
+        await self.click(self.SORTIE_BUTTON)
+        return await SortiePageController.sync()
 
     @classmethod
     async def sync(cls, response) -> "PortPageController":

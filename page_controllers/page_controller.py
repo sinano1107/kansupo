@@ -1,4 +1,4 @@
-from abc import abstractmethod
+from abc import ABCMeta, abstractmethod
 from asyncio import sleep
 import json
 from random import uniform
@@ -36,7 +36,7 @@ class Rectangle:
 class ScanTarget:
     """スキャン領域と期待する画像のURLを保存するクラス"""
 
-    def __init__(self, rectangle: "PageController.Rectangle", image_path: str):
+    def __init__(self, rectangle: "Rectangle", image_path: str):
         self.RECTANGLE = rectangle
         self.IMAGE_PATH = image_path
         self._image: MatLike = None
@@ -54,20 +54,17 @@ class ScanTarget:
         ]
 
 
-class PageController:
+class PageController(metaclass=ABCMeta):
     """各種ページコントローラの基底クラス"""
 
     @staticmethod
-    async def scan(target: "PageController.ScanTarget"):
+    async def scan(target: "ScanTarget"):
         """画面内の指定されたターゲットとの類似度を比較する"""
         screenshot = await Context.canvas.screenshot()
         image = np.frombuffer(screenshot, dtype=np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
         # サイズは同じ前提なので、類似度は1x1の配列で返ってくる
-        similarity = cv2.matchTemplate(
-            target.crop(image), target.image, cv2.TM_CCOEFF_NORMED
-        )[0][0]
-        return similarity > 0.9
+        return np.array_equal(target.crop(image), target.image)
 
     @staticmethod
     async def wait_until_find(target: ScanTarget, delay=1, max_trial=30):
