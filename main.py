@@ -30,9 +30,13 @@ async def main(headless: bool):
         # ゲームスタートページに遷移するまで待つ(ゲームスタートボタンが表示されるまで)
         game_start_page_controller = await GameStartPageController.sync()
         port_page_controller = await game_start_page_controller.game_start()
+        supply_page_controller = await port_page_controller.supply()
+        await supply_page_controller.supply(3)
+        port_page_controller = await supply_page_controller.port()
         sortie_page_controller = await port_page_controller.sortie()
         mission_page_controller = await sortie_page_controller.mission()
-        await mission_page_controller.start(from_the_top=2, fleet_number=2)
+        await mission_page_controller.start(from_the_top=2, fleet_number=3)
+        await mission_page_controller.port()
 
         await asyncio.sleep(10)
 

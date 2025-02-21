@@ -1,4 +1,3 @@
-import asyncio
 from .. import PageController, Rectangle, ScanTarget
 from ..port import PortPageController
 from adress import Address

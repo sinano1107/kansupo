@@ -79,6 +79,18 @@ class PageController(metaclass=ABCMeta):
         raise ValueError("指定回数内にターゲットが見つかりませんでした")
 
     @staticmethod
+    async def wait_until_lost(target: ScanTarget, delay=1, max_trial=30):
+        """指定したターゲットが消えるまで待機する"""
+        count = 0
+        while count < max_trial:
+            await sleep(delay)
+            if not await PageController.scan(target):
+                await sleep(1)
+                return
+            count += 1
+        raise ValueError("指定回数内にターゲットが消えませんでした")
+
+    @staticmethod
     async def click(target=Rectangle(x_start=0, y_start=0, width=1200, height=720)):
         """指定された範囲のランダムな位置をクリックする"""
         x, y = target.random_point()

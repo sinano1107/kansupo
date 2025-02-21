@@ -1,17 +1,14 @@
 from asyncio import sleep
-from .. import PageController, ScanTarget, Rectangle
+from .. import ScanTarget, Rectangle
+from ..home import HomePageController
 
 
-class MissionPageController(PageController):
+class MissionPageController(HomePageController):
     """遠征画面を操作するクラス"""
 
     TEXT_SCAN_TARGET = ScanTarget(
         rectangle=Rectangle(x_start=180, y_start=110, width=85, height=25),
         image_path="page_controllers/mission/text.png",
-    )
-    HOME_PORT_SCAN_TARGET = ScanTarget(
-        rectangle=Rectangle(x_start=90, y_start=335, width=40, height=100),
-        image_path="page_controllers/mission/home_port.png",
     )
     DECIDE_BUTTON = Rectangle(x_start=915, y_start=645, width=230, height=50)
     START_BUTTON = Rectangle(x_start=800, y_start=645, width=240, height=45)
@@ -47,4 +44,4 @@ class MissionPageController(PageController):
 
         await self.click(self.START_BUTTON)
         await sleep(3)
-        await self.wait_until_find(self.HOME_PORT_SCAN_TARGET)
+        await self.wait_until_find(self.PORT_BUTTON_SCAN_TARGET)
