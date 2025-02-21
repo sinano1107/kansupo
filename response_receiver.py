@@ -2,7 +2,7 @@ import asyncio
 from playwright.async_api import Response
 
 from typing import Coroutine, Dict
-from adress import Address
+from address import Address
 
 
 class ResponseReceiver:

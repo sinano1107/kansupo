@@ -2,7 +2,7 @@ from asyncio import gather
 
 from .. import PageController, Rectangle, ScanTarget
 from ..port import PortPageController
-from adress import Address
+from address import Address
 from response_receiver import ResponseReceiver
 from ships import generate_ships
 

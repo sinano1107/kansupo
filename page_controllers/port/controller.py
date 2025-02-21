@@ -1,6 +1,6 @@
 from asyncio import sleep, gather
 
-from adress import Address
+from address import Address
 from response_receiver import ResponseReceiver
 from .. import PageController, ScanTarget, Rectangle
 from ..mission_result import MissionResultPageController

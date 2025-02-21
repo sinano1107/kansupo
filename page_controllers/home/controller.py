@@ -17,7 +17,7 @@ class HomePageController(PageController, metaclass=ABCMeta):
 
     async def port(self) -> "PortPageController":
         """母港画面へ遷移する"""
-        from adress import Address
+        from address import Address
         from response_receiver import ResponseReceiver
         from ..port import PortPageController
 
