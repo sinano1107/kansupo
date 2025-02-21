@@ -58,21 +58,28 @@ class PageController(metaclass=ABCMeta):
     """各種ページコントローラの基底クラス"""
 
     @staticmethod
-    async def scan(target: "ScanTarget"):
+    async def scan(target: "ScanTarget", threshold=0.9):
         """画面内の指定されたターゲットとの類似度を比較する"""
         screenshot = await Context.canvas.screenshot()
         image = np.frombuffer(screenshot, dtype=np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+        cropped = target.crop(image)
+        if np.std(cropped) == 0:
+            # 画面が単色の場合、比較できないのでFalseを返す
+            return False
         # サイズは同じ前提なので、類似度は1x1の配列で返ってくる
-        return np.array_equal(target.crop(image), target.image)
+        simirality = cv2.matchTemplate(cropped, target.image, cv2.TM_CCOEFF_NORMED)[0][
+            0
+        ]
+        return simirality > threshold
 
     @staticmethod
-    async def wait_until_find(target: ScanTarget, delay=1, max_trial=30):
+    async def wait_until_find(target: ScanTarget, delay=1, max_trial=30, threshold=0.9):
         """指定したターゲットを発見するまで待機する"""
         count = 0
         while count < max_trial:
             await sleep(delay)
-            if await PageController.scan(target):
+            if await PageController.scan(target, threshold=threshold):
                 await sleep(1)
                 return
             count += 1

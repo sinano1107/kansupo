@@ -38,5 +38,5 @@ class SupplyPageController(HomePageController):
 
     @classmethod
     async def sync(cls) -> "SupplyPageController":
-        await cls.wait_until_find(cls.TEXT_SCAN_TARGET)
+        await cls.wait_until_find(cls.TEXT_SCAN_TARGET, threshold=0.88)
         return cls()

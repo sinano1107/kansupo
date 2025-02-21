@@ -1,4 +1,4 @@
-import asyncio
+from asyncio import sleep, gather
 
 from adress import Address
 from response_receiver import ResponseReceiver
@@ -35,10 +35,11 @@ class PortPageController(PageController):
 
     @classmethod
     async def sync(cls, response) -> "PortPageController":
-        _, data = await asyncio.gather(
+        _, data = await gather(
             cls.wait_until_find(cls.SETTING_BUTTON_SCAN_TARGET),
             cls.extraction_data(response),
         )
+        await sleep(1)
         return await cls.handle_expedition_returned(cls(data))
 
     @classmethod
@@ -59,7 +60,7 @@ class PortPageController(PageController):
             )
             wait_port_response = ResponseReceiver.expect(Address.PORT)
             await cls.click()
-            mission_result_response, port_response = await asyncio.gather(
+            mission_result_response, port_response = await gather(
                 wait_mission_result_response(),
                 wait_port_response(),
             )
