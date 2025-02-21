@@ -1,5 +1,6 @@
 import asyncio
 from playwright.async_api import async_playwright
+from tenacity import AsyncRetrying, stop_after_attempt, wait_fixed
 
 from page_controllers.game_start import GameStartPageController
 from response_receiver import ResponseReceiver
@@ -46,6 +47,10 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--headless", action="store_true")
+    parser.add_argument("--retry_count", type=int, default=1)
     args = parser.parse_args()
 
-    asyncio.run(main(headless=args.headless))
+    retryer = AsyncRetrying(
+        stop=stop_after_attempt(args.retry_count), wait=wait_fixed(1), reraise=True
+    )
+    asyncio.run(retryer(main, args.headless))
