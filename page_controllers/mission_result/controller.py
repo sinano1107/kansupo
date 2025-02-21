@@ -7,7 +7,7 @@ class MissionResultPageController(PageController):
     """遠征結果画面を操作するクラス"""
 
     NEXT_SCAN_TARGET = ScanTarget(
-        rectangle=Rectangle(x_start=1125, y_start=643, width=45, height=45),
+        rectangle=Rectangle(x_start=1125, y_start=645, width=40, height=40),
         image_path="page_controllers/mission_result/next.png",
     )
 

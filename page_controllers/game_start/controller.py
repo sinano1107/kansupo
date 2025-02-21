@@ -1,7 +1,10 @@
+from asyncio import gather
+
 from .. import PageController, Rectangle, ScanTarget
 from ..port import PortPageController
 from adress import Address
 from response_receiver import ResponseReceiver
+from ships import generate_ships
 
 
 class GameStartPageController(PageController):
@@ -20,7 +23,10 @@ class GameStartPageController(PageController):
         return cls()
 
     async def game_start(self):
-        wait = ResponseReceiver.expect(Address.PORT)
+        """ゲームスタートボタンをクリックする"""
+        wait_getdata_res = ResponseReceiver.expect(Address.GET_DATA)
+        wait_port_res = ResponseReceiver.expect(Address.PORT)
         await self.click(target=self.GAME_START_RECTANGLE)
-        response = await wait()
-        return await PortPageController.sync(response)
+        get_data_res, port_res = await gather(wait_getdata_res(), wait_port_res())
+        await generate_ships(get_data_res)
+        return await PortPageController.sync(port_res)

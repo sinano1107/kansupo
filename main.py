@@ -2,6 +2,7 @@ import asyncio
 from playwright.async_api import async_playwright
 from tenacity import AsyncRetrying, stop_after_attempt, wait_fixed
 
+from automaton import Automaton
 from page_controllers.game_start import GameStartPageController
 from response_receiver import ResponseReceiver
 from context import Context
@@ -31,15 +32,8 @@ async def main(headless: bool):
         # ゲームスタートページに遷移するまで待つ(ゲームスタートボタンが表示されるまで)
         game_start_page_controller = await GameStartPageController.sync()
         port_page_controller = await game_start_page_controller.game_start()
-        supply_page_controller = await port_page_controller.supply()
-        await supply_page_controller.supply(3)
-        port_page_controller = await supply_page_controller.port()
-        sortie_page_controller = await port_page_controller.sortie()
-        mission_page_controller = await sortie_page_controller.mission()
-        await mission_page_controller.start(from_the_top=2, fleet_number=3)
-        await mission_page_controller.port()
 
-        await asyncio.sleep(10)
+        await Automaton(port_page_controller).run()
 
 
 if __name__ == "__main__":
