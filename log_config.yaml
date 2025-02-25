@@ -1,0 +1,18 @@
+version: 1
+disable_existing_loggers: false
+formatters:
+  default:
+    format: '%(asctime)s | %(levelname)s | %(name)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  access:
+    format: '%(asctime)s | %(levelname)s | %(client_addr)s | %(user_id)s | %(request_line)s | %(status_code)s | %(bytes)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: default
+loggers:
+  uvicorn:
+    handlers:
+    - console
+    level: INFO

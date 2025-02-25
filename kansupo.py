@@ -1,6 +1,5 @@
 from asyncio import Task, create_task, sleep
 from playwright.async_api import async_playwright
-import logging
 from logging import getLogger
 from fastapi import status
 from fastapi.responses import PlainTextResponse
@@ -14,7 +13,6 @@ class KanSupo:
     def __init__(self):
         # uvicornを起動するにあたり、loggerはuvicorn.*にしないと表示されない
         self.logger = getLogger("uvicorn.kansupo")
-        logging.basicConfig(level=logging.INFO)
         self.task: Task = None
         self.should_start = False
 
@@ -79,13 +77,18 @@ class KanSupo:
         while True:
             if self.should_start:
                 self.task = create_task(run())
-                # await run()
                 self.should_start = False
             await sleep(1)
 
 
 if __name__ == "__main__":
     from asyncio import run
+    import logging
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s,%(msecs)d | %(levelname)s | %(name)s - %(message)s",
+    )
 
     kansupo = KanSupo()
     kansupo.start()

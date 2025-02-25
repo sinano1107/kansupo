@@ -14,21 +14,13 @@ class MissionResultPageController(PageController):
     def __init__(self, response: dict):
         self.RESPONSE: MissionResultResponse = MissionResultResponse.from_dict(response)
 
-    async def collect(self):
+    async def collect(self) -> ClearResult:
         """回収を行う"""
-        clear_result = self.RESPONSE.clear_result
-        if clear_result == ClearResult.FAILED:
-            print("遠征:失敗")
-        elif clear_result == ClearResult.SUCCESS:
-            print("遠征:成功")
-        elif clear_result == ClearResult.GREAT_SUCCESS:
-            print("遠征:大成功")
-        else:
-            raise ValueError(f"不明なclear_result {clear_result}")
-
         await self.click()
         await asyncio.sleep(1)
         await self.click()
+
+        return self.RESPONSE.clear_result
 
     @classmethod
     async def sync(cls, response) -> "MissionResultPageController":

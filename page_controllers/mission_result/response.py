@@ -14,6 +14,15 @@ class ClearResult(IntEnum):
     # 大成功
     GREAT_SUCCESS = 2
 
+    def __str__(self):
+        if self == ClearResult.FAILED:
+            return "失敗"
+        if self == ClearResult.SUCCESS:
+            return "成功"
+        if self == ClearResult.GREAT_SUCCESS:
+            return "大成功"
+        raise ValueError(f"不明なclear_result {self}")
+
 
 @dataclass_json
 @dataclass(frozen=True)

@@ -2,6 +2,7 @@ import asyncio
 from fastapi import FastAPI
 import uvicorn
 from tenacity import AsyncRetrying, stop_after_attempt, wait_fixed
+import yaml
 
 from kansupo import KanSupo
 
@@ -20,7 +21,16 @@ def stop():
 
 
 async def run_server():
-    config = uvicorn.Config(app, host="0.0.0.0", port=8000)
+    with open("log_config.yaml") as f:
+        log_config = yaml.safe_load(f)
+
+    config = uvicorn.Config(
+        app,
+        host="0.0.0.0",
+        port=8000,
+        log_config=log_config,
+        use_colors=True,
+    )
     server = uvicorn.Server(config)
     await server.serve()
 
@@ -39,6 +49,7 @@ if __name__ == "__main__":
     parser.add_argument("--retry_count", type=int, default=1)
     args = parser.parse_args()
 
+    # TODO このretryer機能していないので、修正する
     retryer = AsyncRetrying(
         stop=stop_after_attempt(args.retry_count), wait=wait_fixed(1), reraise=True
     )

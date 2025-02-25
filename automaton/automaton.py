@@ -1,4 +1,5 @@
 from asyncio import sleep
+from logging import getLogger
 from page_controllers.port import PortPageController
 
 
@@ -9,6 +10,7 @@ class Automaton:
     """自動で艦これを操作するクラス"""
 
     def __init__(self, port_page_controller: PortPageController):
+        self.LOGGER = getLogger("uvicorn.automaton")
         self.port_page_controller = port_page_controller
 
     async def run(self):
@@ -36,6 +38,7 @@ class Automaton:
             else:
                 # 遠征終了まで待つ
                 seconds = response.seconds_until_mission_end
-                print(f"遠征終了まで{seconds}秒待機します")
+
+                self.LOGGER.info(f"遠征終了まで{int(seconds)}秒待機します")
                 await sleep(seconds)
                 self.port_page_controller = await self.port_page_controller.reload()

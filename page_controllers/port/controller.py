@@ -1,4 +1,5 @@
 from asyncio import sleep, gather
+from logging import getLogger
 
 from address import Address
 from response_receiver import ResponseReceiver
@@ -12,6 +13,8 @@ from .response import PortResponse, MissionState
 
 class PortPageController(PageController):
     """母港画面を操作するクラス"""
+
+    LOGGER = getLogger("uvicorn.port")
 
     SETTING_BUTTON_SCAN_TARGET = ScanTarget(
         rectangle=Rectangle(x_start=1143, y_start=655, width=33, height=30),
@@ -81,7 +84,8 @@ class PortPageController(PageController):
             mission_result_page_controller = await MissionResultPageController.sync(
                 mission_result_response
             )
-            await mission_result_page_controller.collect()
+            result = await mission_result_page_controller.collect()
+            cls.LOGGER.info(f"遠征:{result}")
 
             # 新しいportレスポンスを格納した、新しい母港画面のコントローラを生成し、返す
             return await cls.sync(port_response)
