@@ -45,7 +45,11 @@ class Automaton:
             else:
                 # 遠征/入渠終了まで待つ
                 seconds_until_mission_end = response.seconds_until_mission_end
-                seconds_until_repair_end = response.seconds_until_repair_end
+                seconds_until_repair_end = (
+                    response.seconds_until_repair_end
+                    if response.is_repair_needed
+                    else None
+                )
                 seconds_list = [
                     (
                         seconds_until_mission_end
