@@ -8,6 +8,7 @@ from ..mission_result import MissionResultPageController
 from ..sortie import SortiePageController
 from ..supply import SupplyPageController
 from ..arsenal import ArsenalPageController
+from ..repair import RepairPageController
 from .response import PortResponse, MissionState
 
 
@@ -24,6 +25,7 @@ class PortPageController(PageController):
     SORTIE_BUTTON = Rectangle(x_start=240, y_start=350, width=100, height=80)
     SUPPLY_BUTTON = Rectangle(x_start=75, y_start=295, width=80, height=80)
     ARSENAL_BUTTON = Rectangle(x_start=367, y_start=505, width=80, height=80)
+    REPAIR_BUTTON = Rectangle(x_start=145, y_start=505, width=80, height=80)
 
     def __init__(self, response: dict):
         self.RESPONSE: PortResponse = PortResponse.from_dict(response)
@@ -42,6 +44,11 @@ class PortPageController(PageController):
         """工廠画面へ遷移する"""
         await self.click(self.ARSENAL_BUTTON)
         return await ArsenalPageController.sync()
+
+    async def repair(self):
+        """入渠画面へ遷移する"""
+        await self.click(self.REPAIR_BUTTON)
+        return await RepairPageController.sync(self.RESPONSE)
 
     async def reload(self):
         """別の画面に移ってから母港画面に戻る"""

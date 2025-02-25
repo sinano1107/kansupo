@@ -1,6 +1,8 @@
+from logging import getLogger, Logger
 from time import time
 from dataclasses import dataclass, field
 from enum import IntEnum
+from typing import ClassVar
 from dataclasses_json import config, dataclass_json
 
 
@@ -17,7 +19,6 @@ class MissionState(IntEnum):
     FORCED_RETURN = 3
 
 
-@dataclass_json
 @dataclass(frozen=True)
 class Deck:
     id: int = field(metadata=config(field_name="api_id"))
@@ -68,6 +69,11 @@ class Ship:
         return self.maxhp - self.nowhp
 
     @property
+    def hp_ratio(self):
+        """HPの割合"""
+        return self.nowhp / self.maxhp
+
+    @property
     def name(self):
         """艦名"""
         return self.mst.name
@@ -87,12 +93,40 @@ class Ship:
         """艦種"""
         return self.mst.stype
 
+    def __str__(self):
+        return f"{self.name}(lv={self.lv},id={self.id})"
+
+
+class NDockState(IntEnum):
+    """入渠の状態を表す列挙型"""
+
+    # ロック(?)
+    LOCKED = -1
+    # 空き
+    EMPTY = 0
+    # 入渠中
+    IN_PROGRESS = 1
+
+
+@dataclass(frozen=True)
+class NDock:
+    id: int = field(metadata=config(field_name="api_id"))
+    state: NDockState = field(metadata=config(field_name="api_state"))
+    ship_id: int = field(metadata=config(field_name="api_ship_id"))
+    complete_time: int = field(metadata=config(field_name="api_complete_time"))
+
 
 @dataclass_json
-@dataclass(frozen=True)
+@dataclass
 class PortResponse:
+    logger: ClassVar[Logger] = getLogger("uvicorn.page_controllers.port.response")
+    _resource_ships: ClassVar[list[Ship]] = None
+    _ships_needing_repair: ClassVar[list[Ship]] = None
+    _ships_sorted_by_damage_ratio: ClassVar[list[Ship]] = None
+
     deck_list: list[Deck] = field(metadata=config(field_name="api_deck_port"))
     ship_list: list[Ship] = field(metadata=config(field_name="api_ship"))
+    ndock_list: list[NDock] = field(metadata=config(field_name="api_ndock"))
 
     @property
     def waiting_mission_deck(self) -> Deck:
@@ -128,3 +162,98 @@ class PortResponse:
         array = [deck.seconds_until_mission_end for deck in self.deck_list[1:]]
         array = [a for a in array if a is not None]
         return min(array) if array else None
+
+    @property
+    def seconds_until_repair_end(self):
+        """全ての入渠中の艦の中で最も早く入渠が終了する艦の入渠終了までの秒数"""
+        array = [
+            ndock.complete_time
+            for ndock in self.ndock_list
+            if ndock.state == NDockState.IN_PROGRESS
+        ]
+        return min(array) / 1000 - time() - 60 if array else None
+
+    @property
+    def ships_sorted_by_damage_ratio(self) -> list[Ship]:
+        """hp割合によりソートした艦のリスト"""
+        if self._ships_sorted_by_damage_ratio is None:
+            self._ships_sorted_by_damage_ratio = sorted(
+                self.ship_list, key=lambda ship: (ship.hp_ratio, ship.sort_id)
+            )
+        return self._ships_sorted_by_damage_ratio
+
+    @property
+    def repairing_ship_id_list(self):
+        """入渠中の艦のIDリスト"""
+        return [ndock.ship_id for ndock in self.ndock_list if ndock.state == 2]
+
+    @property
+    def ships_needing_repair(self) -> list[Ship]:
+        """入渠が必要な艦のリスト"""
+        if self._ships_needing_repair is None:
+            self._ships_needing_repair = [
+                ship
+                for ship in self.ship_list
+                if ship.damage > 0  # ダメージがある
+                and ship not in self.resource_ships  # 資源艦でない
+                and ship.id not in self.repairing_ship_id_list  # 入渠中でない
+            ]
+            self._ships_needing_repair = list(
+                sorted(self._ships_needing_repair, key=lambda ship: ship.ndock_time)
+            )
+        return self._ships_needing_repair
+
+    @property
+    def is_repair_needed(self):
+        """入渠が必要かどうか"""
+        return bool(self.ships_needing_repair)
+
+    @property
+    def can_repair(self):
+        """入渠可能かどうか"""
+        for ndock in self.ndock_list:
+            if ndock.state == NDockState.EMPTY:
+                return True
+        return False
+
+    @property
+    def resource_ships(self):
+        """不要な艦(資源艦)を算出する"""
+        if self._resource_ships is None:
+            from ships.needs_map import ship_needs_map
+
+            # 保有艦をidごとに分類する
+            shipid_to_ships_map: dict[int, list[Ship]] = {}
+            for ship in self.ship_list:
+                if ship.ship_id in shipid_to_ships_map:
+                    shipid_to_ships_map[ship.ship_id].append(ship)
+                else:
+                    shipid_to_ships_map[ship.ship_id] = [ship]
+
+            # 必要な艦のリストと照らし合わせて、不要な艦を算出する
+            resource_ships: list[Ship] = []
+            for ship_id, ships in shipid_to_ships_map.items():
+                ship = ships[0].mst
+                max_count = ship_needs_map.get(ship)
+                if max_count is None:
+                    self.logger.info(
+                        f"{ship.name}に対応する必要数が設定されていません。この艦は無限に保持します"
+                    )
+                    max_count = float("inf")
+
+                if len(ships) > max_count:
+                    sorted_ships = sorted(
+                        ships, key=lambda ship: (-ship.lv, -ship.exp[0])
+                    )
+                    resource_ships.extend(sorted_ships[max_count:])
+
+            # ロックされている艦を除外する
+            for resource_ship in resource_ships[:]:
+                if resource_ship.locked:
+                    self.logger.info(
+                        f"{resource_ship.name}(lv={resource_ship.lv},id={resource_ship.id})はロックされているため資源艦から外します"
+                    )
+                    resource_ships.remove(resource_ship)
+
+            self._resource_ships = resource_ships
+        return self._resource_ships

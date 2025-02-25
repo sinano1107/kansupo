@@ -71,7 +71,7 @@ class KanSupo:
 
                     await Automaton(port_page_controller).run()
             except Exception as e:
-                self.logger.error(e)
+                self.logger.error(e, exc_info=True)
                 self.stop()
 
         while True:
