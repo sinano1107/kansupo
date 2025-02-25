@@ -185,7 +185,11 @@ class PortResponse:
     @property
     def repairing_ship_id_list(self):
         """入渠中の艦のIDリスト"""
-        return [ndock.ship_id for ndock in self.ndock_list if ndock.state == 2]
+        return [
+            ndock.ship_id
+            for ndock in self.ndock_list
+            if ndock.state == NDockState.IN_PROGRESS
+        ]
 
     @property
     def ships_needing_repair(self) -> list[Ship]:
