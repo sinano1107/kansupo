@@ -35,10 +35,10 @@ async def run_server():
     await server.serve()
 
 
-async def main(headless: bool):
+async def main(headless: bool, number_of_retries: int):
     # 別タスクでFastAPIサーバーを起動する
     asyncio.create_task(run_server())
-    await kansupo.run(headless=headless)
+    await kansupo.run(headless=headless, number_of_retries=number_of_retries)
 
 
 if __name__ == "__main__":
@@ -46,11 +46,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--headless", action="store_true")
-    parser.add_argument("--retry_count", type=int, default=1)
+    parser.add_argument("--number_of_retries", type=int, default=3)
     args = parser.parse_args()
 
-    # TODO このretryer機能していないので、修正する
-    retryer = AsyncRetrying(
-        stop=stop_after_attempt(args.retry_count), wait=wait_fixed(1), reraise=True
-    )
-    asyncio.run(retryer(main, args.headless))
+    asyncio.run(main(headless=args.headless, number_of_retries=args.number_of_retries))

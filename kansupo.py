@@ -3,6 +3,7 @@ from playwright.async_api import async_playwright
 from logging import getLogger
 from fastapi import status
 from fastapi.responses import PlainTextResponse
+from tenacity import retry, stop_after_attempt, wait_fixed
 
 from context import Context
 from login import login
@@ -37,42 +38,58 @@ class KanSupo:
         self.task = None
         return PlainTextResponse("プロセスを停止しました")
 
-    async def run(self, headless: bool):
+    async def run(self, headless: bool, number_of_retries=3):
         from automaton import Automaton
 
         async def run():
             from page_controllers.game_start import GameStartPageController
 
+            @retry(
+                stop=stop_after_attempt(number_of_retries),
+                wait=wait_fixed(60),
+                reraise=True,
+            )
+            async def _():
+                try:
+                    async with async_playwright() as playwright:
+                        browser = await playwright.chromium.launch(headless=headless)
+                        context = await browser.new_context(
+                            # ボタンが画面外にあるとクリックできないので、canvas要素が全て表示されることを保証するために、viewportを指定する
+                            viewport={"width": 1300, "height": 900},
+                        )
+                        page = await context.new_page()
+                        page.on("response", ResponseReceiver.handle)
+                        await page.goto(
+                            "http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854"
+                        )
+
+                        # ログインする
+                        await login(page)
+
+                        Context.canvas = (
+                            page.locator('iframe[name="game_frame"]')
+                            .content_frame.locator("#htmlWrap")
+                            .content_frame.locator("canvas")
+                        )
+
+                        # ゲームスタートページに遷移するまで待つ(ゲームスタートボタンが表示されるまで)
+                        game_start_page_controller = (
+                            await GameStartPageController.sync()
+                        )
+                        port_page_controller = (
+                            await game_start_page_controller.game_start()
+                        )
+
+                        await Automaton(port_page_controller).run()
+                except Exception as e:
+                    self.logger.error(e, exc_info=True)
+                    raise e
+
             try:
-                async with async_playwright() as playwright:
-                    browser = await playwright.chromium.launch(headless=headless)
-                    context = await browser.new_context(
-                        # ボタンが画面外にあるとクリックできないので、canvas要素が全て表示されることを保証するために、viewportを指定する
-                        viewport={"width": 1300, "height": 900},
-                    )
-                    page = await context.new_page()
-                    page.on("response", ResponseReceiver.handle)
-                    await page.goto(
-                        "http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854"
-                    )
-
-                    # ログインする
-                    await login(page)
-
-                    Context.canvas = (
-                        page.locator('iframe[name="game_frame"]')
-                        .content_frame.locator("#htmlWrap")
-                        .content_frame.locator("canvas")
-                    )
-
-                    # ゲームスタートページに遷移するまで待つ(ゲームスタートボタンが表示されるまで)
-                    game_start_page_controller = await GameStartPageController.sync()
-                    port_page_controller = await game_start_page_controller.game_start()
-
-                    await Automaton(port_page_controller).run()
+                await _()
             except Exception as e:
-                self.logger.error(e, exc_info=True)
-                self.stop()
+                self.logger.info("指定リトライ回数失敗したためプロセスを停止します")
+            self.stop()
 
         while True:
             if self.should_start:

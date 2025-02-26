@@ -72,7 +72,7 @@ class Automaton:
                 elif min_index == 1:
                     self.LOGGER.info(f"入渠終了まで{int_seconds}秒待機します")
                 else:
-                    self.LOGGER.warn(f"不明の理由で{int_seconds}秒待機します")
+                    self.LOGGER.warning(f"不明の理由で{int_seconds}秒待機します")
 
                 await sleep(seconds)
                 self.port_page_controller = await self.port_page_controller.reload()

@@ -29,10 +29,15 @@ class ResponseReceiver:
         # レスポンスを待機するためのフラグを立てる
         cls.expecting_url_to_response_map[url] = None
 
-        async def wait_for_response():
+        async def wait_for_response(max_seconds=120, delay=0.1):
             """レスポンスを受け取るまで待機する"""
-            while cls.expecting_url_to_response_map[url] is None:
-                await asyncio.sleep(0.1)
+            count = 0
+            max_count = max_seconds / delay
+            while cls.expecting_url_to_response_map[url] is None and count < max_count:
+                await asyncio.sleep(delay)
+                count += 1
+            if cls.expecting_url_to_response_map[url] is None:
+                raise TimeoutError(f"{url=}からのレスポンスを受け取れませんでした")
             return cls.expecting_url_to_response_map.pop(url)
 
         # コルーチンを返す
