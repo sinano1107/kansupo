@@ -1,5 +1,5 @@
 from .. import PageController, ScanTarget, Rectangle
-from ..mission import MissionPageController
+from mission import MissionPageController
 
 
 class SortiePageController(PageController):
