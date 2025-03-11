@@ -38,6 +38,9 @@ async def run_server():
 async def main(headless: bool, number_of_retries: int):
     # 別タスクでFastAPIサーバーを起動する
     asyncio.create_task(run_server())
+
+    # 艦サポを実行する
+    kansupo.start()
     await kansupo.run(headless=headless, number_of_retries=number_of_retries)
 
 

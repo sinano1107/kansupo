@@ -1,5 +1,4 @@
 from .. import PageController, ScanTarget, Rectangle
-from mission import MissionPageController
 
 
 class SortiePageController(PageController):
@@ -10,10 +9,20 @@ class SortiePageController(PageController):
         image_path="page_controllers/sortie/text.png",
     )
 
+    BATTLE_BUTTON = Rectangle(x_start=219, y_start=264, width=245, height=202)
     MISSION_BUTTON = Rectangle(x_start=893, y_start=264, width=245, height=202)
+
+    async def battle(self):
+        """出撃海域選択画面へ遷移する"""
+        from .battle.start import BattleStartPageController
+
+        await self.click(self.BATTLE_BUTTON)
+        return await BattleStartPageController.sync()
 
     async def mission(self):
         """遠征画面へ遷移する"""
+        from .mission import MissionPageController
+
         await self.click(self.MISSION_BUTTON)
         return await MissionPageController.sync()
 

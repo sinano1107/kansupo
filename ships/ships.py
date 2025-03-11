@@ -294,7 +294,7 @@ Z3_zwei = Ship(id=180, name='Z3 zwei', fuel_max=20, bull_max=25, sort_id=30526, 
 衣笠改 = Ship(id=295, name='衣笠改', fuel_max=35, bull_max=60, sort_id=8042, stype=5)
 千歳航改二 = Ship(id=296, name='千歳航改二', fuel_max=45, bull_max=40, sort_id=4086, stype=7)
 千代田航改二 = Ship(id=297, name='千代田航改二', fuel_max=45, bull_max=40, sort_id=4096, stype=7)
-Scamp = Ship(id=299, name='Scamp', fuel_max=10, bull_max=20, sort_id=32731, stype=13)
+Scamp = Ship(id=299, name='Scamp', fuel_max=10, bull_max=20, sort_id=32741, stype=13)
 初風改 = Ship(id=300, name='初風改', fuel_max=15, bull_max=20, sort_id=16072, stype=2)
 秋雲改 = Ship(id=301, name='秋雲改', fuel_max=15, bull_max=20, sort_id=16192, stype=2)
 夕雲改 = Ship(id=302, name='夕雲改', fuel_max=15, bull_max=20, sort_id=16202, stype=2)
@@ -684,7 +684,7 @@ Honolulu改 = Ship(id=711, name='Honolulu改', fuel_max=35, bull_max=60, sort_id
 第三〇号海防艦改 = Ship(id=712, name='第三〇号海防艦改', fuel_max=10, bull_max=10, sort_id=21342, stype=1)
 Victorious改 = Ship(id=713, name='Victorious改', fuel_max=75, bull_max=65, sort_id=33172, stype=18)
 昭南改 = Ship(id=714, name='昭南改', fuel_max=10, bull_max=10, sort_id=21112, stype=1)
-Scamp改 = Ship(id=715, name='Scamp改', fuel_max=10, bull_max=20, sort_id=32732, stype=13)
+Scamp改 = Ship(id=715, name='Scamp改', fuel_max=10, bull_max=20, sort_id=32742, stype=13)
 梅改 = Ship(id=716, name='梅改', fuel_max=15, bull_max=15, sort_id=19032, stype=2)
 山汐丸改 = Ship(id=717, name='山汐丸改', fuel_max=35, bull_max=15, sort_id=25052, stype=22)
 玉波改 = Ship(id=718, name='玉波改', fuel_max=15, bull_max=20, sort_id=16282, stype=2)
@@ -705,6 +705,7 @@ Drum改 = Ship(id=732, name='Drum改', fuel_max=10, bull_max=20, sort_id=32722, 
 Valiant改 = Ship(id=733, name='Valiant改', fuel_max=90, bull_max=110, sort_id=33022, stype=9)
 Phoenix改 = Ship(id=734, name='Phoenix改', fuel_max=35, bull_max=60, sort_id=32412, stype=3)
 Lexington改 = Ship(id=735, name='Lexington改', fuel_max=85, bull_max=90, sort_id=32102, stype=11)
+榧改 = Ship(id=736, name='榧改', fuel_max=15, bull_max=15, sort_id=19092, stype=2)
 Conte_di_Cavour = Ship(id=877, name='Conte di Cavour', fuel_max=70, bull_max=105, sort_id=31011, stype=9)
 Conte_di_Cavour改 = Ship(id=878, name='Conte di Cavour改', fuel_max=75, bull_max=110, sort_id=31012, stype=8)
 Conte_di_Cavour_nuovo = Ship(id=879, name='Conte di Cavour nuovo', fuel_max=85, bull_max=115, sort_id=31013, stype=8)
@@ -791,7 +792,14 @@ Gloire改 = Ship(id=970, name='Gloire改', fuel_max=35, bull_max=50, sort_id=344
 伊41改 = Ship(id=977, name='伊41改', fuel_max=10, bull_max=25, sort_id=22262, stype=14)
 稲木改二 = Ship(id=979, name='稲木改二', fuel_max=10, bull_max=15, sort_id=21226, stype=1)
 藤波改二 = Ship(id=981, name='藤波改二', fuel_max=15, bull_max=20, sort_id=16306, stype=2)
+Wahoo = Ship(id=984, name='Wahoo', fuel_max=10, bull_max=20, sort_id=32731, stype=13)
 白雪改二 = Ship(id=986, name='白雪改二', fuel_max=15, bull_max=20, sort_id=14026, stype=2)
+Wahoo改 = Ship(id=989, name='Wahoo改', fuel_max=10, bull_max=20, sort_id=32732, stype=13)
+榧 = Ship(id=994, name='榧', fuel_max=15, bull_max=15, sort_id=19091, stype=2)
+大泊 = Ship(id=995, name='大泊', fuel_max=15, bull_max=5, sort_id=7601, stype=22)
+大泊改 = Ship(id=1000, name='大泊改', fuel_max=15, bull_max=10, sort_id=7602, stype=22)
+Киров = Ship(id=1001, name='Киров', fuel_max=30, bull_max=45, sort_id=35441, stype=3)
+Киров改 = Ship(id=1006, name='Киров改', fuel_max=30, bull_max=60, sort_id=35442, stype=3)
 Colorado改 = Ship(id=1496, name='Colorado改', fuel_max=95, bull_max=165, sort_id=32012, stype=9)
 
 
@@ -1500,6 +1508,7 @@ ships_map = {
 	733: Valiant改,
 	734: Phoenix改,
 	735: Lexington改,
+	736: 榧改,
 	877: Conte_di_Cavour,
 	878: Conte_di_Cavour改,
 	879: Conte_di_Cavour_nuovo,
@@ -1586,6 +1595,13 @@ ships_map = {
 	977: 伊41改,
 	979: 稲木改二,
 	981: 藤波改二,
+	984: Wahoo,
 	986: 白雪改二,
+	989: Wahoo改,
+	994: 榧,
+	995: 大泊,
+	1000: 大泊改,
+	1001: Киров,
+	1006: Киров改,
 	1496: Colorado改,
 }

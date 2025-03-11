@@ -104,7 +104,7 @@ class PageController(metaclass=ABCMeta):
         await Context.canvas.click(position={"x": x, "y": y})
 
     @classmethod
-    async def extraction_data(cls, response: Response):
+    async def extraction_data(cls, response: Response) -> dict:
         """レスポンスからapi_dataを抽出する"""
         body = await response.body()
         json_data = json.loads(body[7:])

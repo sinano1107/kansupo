@@ -1,7 +1,7 @@
 from logging import getLogger, Logger
 from time import time
 from dataclasses import dataclass, field
-from enum import IntEnum
+from enum import IntEnum, Enum
 from typing import ClassVar
 from dataclasses_json import config, dataclass_json
 
@@ -19,10 +19,19 @@ class MissionState(IntEnum):
     FORCED_RETURN = 3
 
 
+class DamageClass(Enum):
+    """ダメージのクラスを表す列挙型"""
+
+    NONE = "無傷"
+    SLIGHT_DAMAGE = "小破"
+    MODERATE_DAMAGE = "中破"
+    HEAVY_DAMAGE = "大破"
+
+
 @dataclass(frozen=True)
 class Deck:
     id: int = field(metadata=config(field_name="api_id"))
-    ship_id_list: list[int] = field(metadata=config(field_name="api_ship"))
+    _ship_id_list: list[int] = field(metadata=config(field_name="api_ship"))
     mission: list[int] = field(metadata=config(field_name="api_mission"))
 
     @property
@@ -38,6 +47,16 @@ class Deck:
         ):
             return None
         return self.mission[2] / 1000 - time() - 60
+
+    @property
+    def ship_id_list(self):
+        """艦隊に所属する艦のリスト"""
+        return [ship_id for ship_id in self._ship_id_list if ship_id != -1]
+
+    @property
+    def size(self):
+        """艦隊のサイズ"""
+        return len([ship_id for ship_id in self.ship_id_list])
 
 
 @dataclass(frozen=True)
@@ -67,6 +86,21 @@ class Ship:
     def damage(self):
         """ダメージ"""
         return self.maxhp - self.nowhp
+
+    @property
+    def damage_class(self) -> DamageClass:
+        """ダメージのクラス"""
+        maxhp = self.maxhp
+        nowhp = self.nowhp
+        unit = maxhp // 4
+        if nowhp <= unit:
+            return DamageClass.HEAVY_DAMAGE
+        elif nowhp <= unit * 2:
+            return DamageClass.MODERATE_DAMAGE
+        elif nowhp <= unit * 3:
+            return DamageClass.SLIGHT_DAMAGE
+        else:
+            return DamageClass.NONE
 
     @property
     def hp_ratio(self):
@@ -148,13 +182,35 @@ class PortResponse:
             raise ValueError(f"{fleet_number=} に対応する艦隊が存在しません")
 
         for ship_id in self.deck_list[fleet_number - 1].ship_id_list:
-            if ship_id == -1:
-                # スロットを開けて艦を編成することはできないので、-1の場合はブレイクする
-                break
             ship = self.get_ship(ship_id)
             if ship.need_supply:
                 return True
         return False
+
+    def is_fleet_repair_needed(self, fleet_number: int) -> bool:
+        """入渠が必要かどうか"""
+        assert fleet_number > 0 and fleet_number < len(
+            self.deck_list
+        ), f"{fleet_number=} に対応する艦隊が存在しません"
+
+        for ship_id in self.deck_list[fleet_number - 1].ship_id_list:
+            ship = self.get_ship(ship_id)
+            if ship.damage > 0:
+                return True
+        return False
+
+    def min_cond(self, fleet_number: int) -> int:
+        """艦隊の中で最も少ないcond値"""
+        assert fleet_number > 0 and fleet_number < len(
+            self.deck_list
+        ), f"{fleet_number=} に対応する艦隊が存在しません"
+
+        min_cond = 100
+        for ship_id in self.deck_list[fleet_number - 1].ship_id_list:
+            ship = self.get_ship(ship_id)
+            if ship.cond < min_cond:
+                min_cond = ship.cond
+        return min_cond
 
     @property
     def seconds_until_mission_end(self):
