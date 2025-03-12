@@ -1,10 +1,11 @@
 from math import inf
 from asyncio import sleep
 from logging import getLogger
-from page_controllers.port import PortPageController, PortResponse
+from page_controllers.port import PortPageController
 
 
 fleet_number_to_from_the_top = {2: 5, 3: 2}
+map_area = (2, 2)
 
 
 class Automaton:
@@ -57,18 +58,20 @@ class Automaton:
 
                 sortie_page_controller = await self.port_page_controller.sortie()
                 battle_start_page_controller = await sortie_page_controller.battle()
-                self.port_page_controller = await battle_start_page_controller.battle(
-                    maparea_id=1,
-                    mapinfo_no=1,
-                    fleet_size=self.port_page_controller.RESPONSE.deck_list[0].size,
+                battle_page_controller = await battle_start_page_controller.battle(
+                    maparea_id=map_area[0], mapinfo_no=map_area[1]
+                )
+                port_response = await battle_page_controller.battle(
+                    fleet_size=self.port_page_controller.RESPONSE.deck_list[0].size
+                )
+                self.port_page_controller = await PortPageController.sync(
+                    response=port_response
                 )
                 continue
 
             # 遠征/入渠/cond値の回復終了まで待つ
             seconds_until_mission_end = response.seconds_until_mission_end
-            seconds_until_repair_end = (
-                response.seconds_until_repair_end if response.is_repair_needed else None
-            )
+            seconds_until_repair_end = response.seconds_until_repair_end
             seconds_until_cond_recovery = (49 - min_cond) * 60
             seconds_list = [
                 (

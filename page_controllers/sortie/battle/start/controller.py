@@ -1,7 +1,6 @@
 from asyncio import sleep
 from address import Address
 from page_controllers.port.controller import PortPageController
-from page_controllers.port.response import PortResponse
 from response_receiver import ResponseReceiver
 from ....home import HomePageController, Rectangle, ScanTarget
 
@@ -55,17 +54,13 @@ class BattleStartPageController(HomePageController):
             height=145,
         )
 
-    async def battle(
-        self,
-        maparea_id: int,
-        mapinfo_no: int,
-        fleet_size: int,
-    ):
+    async def battle(self, maparea_id: int, mapinfo_no: int):
         """指定された海域への出撃を開始する"""
         from .. import BattlePageController
 
-        await self.click(self.area_rectangle(maparea_id))
-        await sleep(1)
+        if maparea_id != 1:
+            await self.click(self.area_rectangle(maparea_id))
+            await sleep(1)
         await self.click(self.no_rectangle(mapinfo_no))
         await sleep(1)
         await self.click(self.DECIDE_BUTTON)
@@ -74,6 +69,4 @@ class BattleStartPageController(HomePageController):
         wait = ResponseReceiver.expect(address=Address.BATTLE_START)
         await self.click(self.START_BUTTON)
         response = await wait()
-        battle_page_controller = await BattlePageController.sync(response)
-        response = await battle_page_controller.battle(fleet_size=fleet_size)
-        return await PortPageController.sync(response=response)
+        return await BattlePageController.sync(response)

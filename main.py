@@ -1,7 +1,6 @@
 import asyncio
 from fastapi import FastAPI
 import uvicorn
-from tenacity import AsyncRetrying, stop_after_attempt, wait_fixed
 import yaml
 
 from kansupo import KanSupo

@@ -1,4 +1,3 @@
-from typing import TYPE_CHECKING
 from asyncio import sleep
 from datetime import datetime
 from logging import getLogger
@@ -16,10 +15,6 @@ from .response import (
     MidnightBattleResponse,
     BattleResultResponse,
 )
-
-
-if TYPE_CHECKING:
-    from page_controllers.port.response import PortResponse
 
 
 class BattlePageController(PageController):
@@ -45,6 +40,10 @@ class BattlePageController(PageController):
         rectangle=Rectangle(x_start=1120, y_start=637, width=40, height=45),
         image_path="page_controllers/sortie/battle/back.png",
     )
+    BACK_2 = ScanTarget(
+        rectangle=Rectangle(x_start=1107, y_start=630, width=40, height=45),
+        image_path="page_controllers/sortie/battle/back.png",
+    )
     WITHDRAWAL_CIRCLE = ScanTarget(
         rectangle=Rectangle(x_start=1110, y_start=600, width=30, height=35),
         image_path="page_controllers/sortie/battle/withdrawal_circle.png",
@@ -65,6 +64,8 @@ class BattlePageController(PageController):
     async def battle(self, fleet_size: int):
         from response_receiver import ResponseReceiver
 
+        wait_port_response = ResponseReceiver.expect(Address.PORT)
+
         while True:
             # 羅針盤が表示されるか確認する
             if self.response.rashin_flag:
@@ -79,8 +80,16 @@ class BattlePageController(PageController):
 
             # イベントなし、資源獲得、渦潮、気のせいだった、の時はスキップする
             if event_id == 1 or event_id == 2 or event_id == 3 or event_id == 6:
-                await self.wait_until_going_next_cell()
-                continue
+                if self.response.next == 0:
+                    self.logger.info("スキップイベントかつ行き止まりなので終了")
+                    await self.wait_until_find(self.BACK_2)
+                    await sleep(1)
+                    await self.click()
+                    return await wait_port_response()
+                else:
+                    self.logger.info("スキップイベントなので次のセルへ進みます")
+                    await self.wait_until_going_next_cell()
+                    continue
 
             # 戦闘、ボス戦以外の場合は対応していない
             if event_id != 4 and event_id != 5:
@@ -187,9 +196,6 @@ class BattlePageController(PageController):
 
             await self.wait_until_find(self.NEXT)
             await sleep(1)
-
-            # 行き止まりの場合でもPortResponseを受け取るために、ここでexpectを実行
-            wait_port_response = ResponseReceiver.expect(Address.PORT)
 
             await self.click()
             await sleep(1)
