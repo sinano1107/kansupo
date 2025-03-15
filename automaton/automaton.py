@@ -104,7 +104,8 @@ class Automaton:
             else:
                 self.LOGGER.warning(f"不明の理由で{int_seconds}秒待機します")
 
-            assert seconds >= 0, f"待ち秒数が負になりました {seconds=}"
+            if seconds < 0:
+                self.LOGGER.warning(f"待ち秒数が負になりました {seconds=}")
 
             await sleep(seconds)
             self.port_page_controller = await self.port_page_controller.reload()
