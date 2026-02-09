@@ -1,8 +1,9 @@
 from asyncio import Task, create_task, sleep
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, Route
 from logging import getLogger
 from fastapi import status
 from fastapi.responses import PlainTextResponse
+import requests
 from tenacity import retry, stop_after_attempt, wait_fixed
 
 from context import Context
@@ -59,6 +60,40 @@ class KanSupo:
                         )
                         page = await context.new_page()
                         page.on("response", ResponseReceiver.handle)
+
+                        # def handle_request(request: Request):
+                        #     if (
+                        #         request.url
+                        #         == "http://w14h.kancolle-server.com/kcs2/resources/ship/full/0245_4285_wpsyznjwvlmd.png?version=84"
+                        #     ):
+                        #         print("リクエストを変更します")
+                        #         request.url = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrL7_UZgYNteo8K2Q5xBnkt6Mr4qpiWrnkqw&s"
+                        #         request.continue_()
+                        #     else:
+                        #         print("リクエストをそのまま続行します")
+                        #         request.continue_()
+
+                        # page.on(
+                        #     "request",
+                        #     handle_request,
+                        # )
+
+                        async def handle_route(route: Route):
+                            alternative_url = (
+                                "http://localhost:8000/abe-top-20190328-2.png"
+                            )
+                            response = requests.get(alternative_url)
+
+                            await route.fulfill(
+                                status=response.status_code,
+                                headers=response.headers,
+                                body=response.content,
+                            )
+
+                        await page.route(
+                            "http://w14h.kancolle-server.com/kcs2/resources/ship/full/0245_4285_wpsyznjwvlmd.png?version=84",
+                            handle_route,
+                        )
                         await page.goto(
                             "http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854"
                         )
@@ -73,14 +108,16 @@ class KanSupo:
                         )
 
                         # ゲームスタートページに遷移するまで待つ(ゲームスタートボタンが表示されるまで)
-                        game_start_page_controller = (
-                            await GameStartPageController.sync()
-                        )
-                        port_page_controller = (
-                            await game_start_page_controller.game_start()
-                        )
+                        # game_start_page_controller = (
+                        #     await GameStartPageController.sync()
+                        # )
+                        # port_page_controller = (
+                        #     await game_start_page_controller.game_start()
+                        # )
 
-                        await Automaton(port_page_controller).run()
+                        while True:
+                            await sleep(100)
+                        # await Automaton(port_page_controller).run()
                 except Exception as e:
                     self.logger.error(e, exc_info=True)
                     raise

@@ -794,12 +794,19 @@ Gloire改 = Ship(id=970, name='Gloire改', fuel_max=35, bull_max=50, sort_id=344
 藤波改二 = Ship(id=981, name='藤波改二', fuel_max=15, bull_max=20, sort_id=16306, stype=2)
 Wahoo = Ship(id=984, name='Wahoo', fuel_max=10, bull_max=20, sort_id=32731, stype=13)
 白雪改二 = Ship(id=986, name='白雪改二', fuel_max=15, bull_max=20, sort_id=14026, stype=2)
+初雪改二 = Ship(id=987, name='初雪改二', fuel_max=15, bull_max=20, sort_id=14036, stype=2)
 Wahoo改 = Ship(id=989, name='Wahoo改', fuel_max=10, bull_max=20, sort_id=32732, stype=13)
+杉 = Ship(id=992, name='杉', fuel_max=15, bull_max=15, sort_id=19071, stype=2)
 榧 = Ship(id=994, name='榧', fuel_max=15, bull_max=15, sort_id=19091, stype=2)
 大泊 = Ship(id=995, name='大泊', fuel_max=15, bull_max=5, sort_id=7601, stype=22)
+杉改 = Ship(id=997, name='杉改', fuel_max=15, bull_max=15, sort_id=19072, stype=2)
 大泊改 = Ship(id=1000, name='大泊改', fuel_max=15, bull_max=10, sort_id=7602, stype=22)
 Киров = Ship(id=1001, name='Киров', fuel_max=30, bull_max=45, sort_id=35441, stype=3)
+しまね丸 = Ship(id=1003, name='しまね丸', fuel_max=40, bull_max=20, sort_id=25081, stype=22)
+Minneapolis = Ship(id=1005, name='Minneapolis', fuel_max=40, bull_max=60, sort_id=32351, stype=5)
 Киров改 = Ship(id=1006, name='Киров改', fuel_max=30, bull_max=60, sort_id=35442, stype=3)
+しまね丸改 = Ship(id=1008, name='しまね丸改', fuel_max=40, bull_max=20, sort_id=25082, stype=22)
+Minneapolis改 = Ship(id=1010, name='Minneapolis改', fuel_max=40, bull_max=65, sort_id=32352, stype=5)
 Colorado改 = Ship(id=1496, name='Colorado改', fuel_max=95, bull_max=165, sort_id=32012, stype=9)
 
 
@@ -1597,11 +1604,18 @@ ships_map = {
 	981: 藤波改二,
 	984: Wahoo,
 	986: 白雪改二,
+	987: 初雪改二,
 	989: Wahoo改,
+	992: 杉,
 	994: 榧,
 	995: 大泊,
+	997: 杉改,
 	1000: 大泊改,
 	1001: Киров,
+	1003: しまね丸,
+	1005: Minneapolis,
 	1006: Киров改,
+	1008: しまね丸改,
+	1010: Minneapolis改,
 	1496: Colorado改,
 }
